@@ -1,0 +1,47 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "cross-env NODE_ENV=production node src/server.js",
+    "test:db-push": "dotenv -e .env.test -- sh -c \"npx prisma db push && node prisma/seed.js\"",
+    "test": "npm run test:db-push && cross-env DOTENV_CONFIG_PATH=.env.test NODE_OPTIONS=--experimental-vm-modules jest --runInBand --forceExit",
+    "test:studio": "dotenv -e .env.test -- npx prisma studio",
+    "build": "npx prisma generate",
+    "seed": "node prisma/seed.js",
+    "db:migrate": "npx prisma migrate dev",
+    "db:deploy": "npx prisma migrate deploy",
+    "db:studio": "npx prisma studio"
+  },
+  "keywords": [],
+  "author": "GGihan",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "@quixo3/prisma-session-store": "^3.1.21",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "express-validator": "^7.3.2",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "cross-env": "^10.1.0",
+    "dotenv-cli": "^11.0.0",
+    "eslint": "^10.9.1",
+    "eslint-plugin-jest": "^29.16.5",
+    "globals": "^17.11.0",
+    "jest": "^30.5.0",
+    "prisma": "^7.10.0",
+    "supertest": "^7.2.2"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "messaging-app",
+  "version": "1.0.0",
+  "description": "A web app that allows users to send messages to each other. It allows sending images, adding friends to a list to see who is online and creating group chats.",
+  "main": "index.js",
+  "workspaces":[
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GGihan/messaging-app.git"
+  },
+  "keywords": [],
+  "author": "GGihan",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/GGihan/messaging-app/issues"
+  },
+  "homepage": "https://github.com/GGihan/messaging-app#readme"
+}
