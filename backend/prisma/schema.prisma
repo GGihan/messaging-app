@@ -13,3 +13,100 @@ model Session {
   data      String
   expiresAt DateTime
 }
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique @db.VarChar(30)
+  password     String   @db.VarChar(255)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lastActiveAt DateTime @default(now())
+
+  profile                Profile?
+  sentFriendRequests     Friendship[] @relation("SentFriendRequests")
+  receivedFriendRequests Friendship[] @relation("ReceivedFriendRequests")
+  messages               Message[]
+  chatMemberships        ChatMember[]
+}
+
+model Profile {
+  id          String  @id @default(uuid())
+  displayName String? @db.VarChar(30)
+  avatarUrl   String? @db.Text
+  bio         String? @db.VarChar(100)
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Friendship {
+  id        String        @id @default(uuid())
+  status    RequestStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  senderId   String
+  sender     User   @relation("SentFriendRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User   @relation("ReceivedFriendRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@index([senderId, status])
+  @@index([receiverId, status])
+}
+
+model Chat {
+  id        String   @id @default(uuid())
+  isGroup   Boolean  @default(false)
+  name      String?  @db.VarChar(50)
+  avatarUrl String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members  ChatMember[]
+  messages Message[]
+
+  @@index([updatedAt])
+}
+
+model ChatMember {
+  id         String     @id @default(uuid())
+  role       MemberRole @default(MEMBER)
+  joinedAt   DateTime   @default(now())
+  lastReadAt DateTime   @default(now())
+  deletedAt  DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatId String
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chatId])
+  @@index([userId, deletedAt])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  text      String?  @db.VarChar(1000)
+  imageUrl  String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  senderId String?
+  sender   User?   @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  chatId   String
+  chat     Chat    @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, createdAt])
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  BLOCKED
+}
+
+enum MemberRole {
+  ADMIN
+  MEMBER
+}
