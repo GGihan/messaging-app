@@ -8,6 +8,7 @@ passport.use(
     try {
       const user = await prisma.user.findUnique({
         where: { username: username },
+        include: { profile: true },
       });
       if (!user) {
         return done(null, false, { message: 'Incorrect credentials' });
@@ -41,9 +42,9 @@ passport.deserializeUser(async (id, done) => {
       where: { id: id },
       select: {
         id: true,
-        displayName: true,
         username: true,
-        role: true,
+        createdAt: true,
+        profile: true,
       },
     });
     if (!user) {

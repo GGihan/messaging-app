@@ -6,6 +6,7 @@ import { prisma } from '../lib/prisma.js';
 import { corsOptionsMiddleware } from './config/cors.js';
 import configuredPassport from './config/passport.js';
 import { isProduction } from './config/env.js';
+import authRouter from './routes/authRouter.js';
 
 const app = express();
 
@@ -47,7 +48,7 @@ app.use(configuredPassport.initialize());
 app.use(configuredPassport.session());
 
 // Routers
-// app.use('/api/auth', authRouter);
+app.use('/api/auth', authRouter);
 
 // All none existing paths here
 app.get('*path', (req, res) => {
