@@ -35,7 +35,6 @@ passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-// Adapt to user table later on
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await prisma.user.findUnique({
