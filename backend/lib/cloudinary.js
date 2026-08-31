@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { v2 as cloudinary } from 'cloudinary';
+import { isDevelopment, isTest } from "../src/config/env.js";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -7,7 +8,11 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const BASE_FOLDER = 'messaging-app';
+const BASE_FOLDER = isTest
+  ? 'messaging-app/test'
+  : isDevelopment
+  ? 'messaging-app/dev'
+  : 'messaging-app';
 
 // Streams a buffer to Cloudinary with given options.
 function uploadBuffer(fileBuffer, options = {}) {
