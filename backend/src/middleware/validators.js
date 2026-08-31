@@ -1,4 +1,4 @@
-import { body, param } from "express-validator";
+import { body, param, query } from "express-validator";
 import { prisma } from "../../lib/prisma.js";
 
 // Error messages
@@ -6,6 +6,7 @@ const emptyErr = 'can\'t be empty.';
 const usernameLengthErr = 'must be between 3 and 30 characters.';
 const passwordLengthErr = 'must be between 8 and 72 characters.';
 const symbolErr = 'can only contain letters, numbers, underscores, and hyphens.';
+const stringErr = 'must be a string.'
 
 // Validations
 export const validateRegister = [
@@ -38,6 +39,14 @@ export const validateLogIn = [
     .notEmpty().withMessage(`Username ${emptyErr}`),
   body('password')
     .notEmpty().withMessage(`Password ${emptyErr}`),
+];
+
+export const validateUserSearchQuery = [
+  query('search')
+    .optional()
+    .trim()
+    .isString().withMessage(`Search query ${stringErr}`)
+    .isLength({ max: 30 }).withMessage('Search query cannot exceed 30 characters'),
 ];
 
 export const validateUuidParam = (paramName = "id") => [
