@@ -87,5 +87,14 @@ describe("User Routes Integration Tests", () => {
       });
       expect(dbProfile.displayName).toBe(currentUser.profile.displayName);
     });
+
+    it('should not allow profile update without displayName', async () => {
+      const res = await agent
+        .patch('/api/profile')
+        .field('bio', 'New Bio');
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+    });
   });
 });
