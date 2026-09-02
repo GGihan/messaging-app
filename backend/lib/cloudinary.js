@@ -84,3 +84,12 @@ export function getPublicIdFromUrl(url) {
 
   return match ? match[1] : null;
 };
+
+// For mocking in jest ESM
+export const cloudinaryService = {
+  uploadUserAvatar,
+  uploadChatAvatar,
+  uploadMessageAttachment,
+  deleteFromCloud,
+  getPublicIdFromUrl,
+};

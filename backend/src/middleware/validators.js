@@ -46,7 +46,21 @@ export const validateUserSearchQuery = [
     .optional()
     .trim()
     .isString().withMessage(`Search query ${stringErr}`)
-    .isLength({ max: 30 }).withMessage('Search query cannot exceed 30 characters'),
+    .isLength({ max: 30 }).withMessage('Search query cannot exceed 30 characters.'),
+];
+
+export const validateUpdateProfile = [
+  body('displayName')
+    .trim()
+    .notEmpty().withMessage(`Display name ${emptyErr}`)
+    .bail()
+    .isLength({ min: 3, max: 30 }).withMessage(`Display name ${usernameLengthErr}`)
+    .matches(/^[a-zA-Z0-9_ -]+$/).withMessage(`Display name ${symbolErr}`),
+  body('bio')
+    .optional()
+    .trim()
+    .notEmpty().withMessage(`Bio ${emptyErr}`)
+    .isLength({ max: 100 }).withMessage(`Bio cannot exceed 100 characters.`),
 ];
 
 export const validateUuidParam = (paramName = "id") => [

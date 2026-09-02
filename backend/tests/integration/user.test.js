@@ -1,5 +1,3 @@
-import request from 'supertest';
-import app from '../../src/app.js';
 import { prisma } from "../../lib/prisma.js";
 import { createAuthenticatedAgent, createTestUser } from '../helpers/authHelper.js';
 
@@ -8,12 +6,11 @@ describe("User Routes Integration Tests", () => {
     await prisma.$disconnect();
   });
 
-  describe("Get /api/users", () => {
+  describe("GET /api/users", () => {
     let agent;
     let currentUser;
     let userAlice;
     let userBob;
-    let userCelin;
 
     beforeEach(async () => {
       const setup = await createAuthenticatedAgent({}, { displayName: 'Test User' });
@@ -25,9 +22,6 @@ describe("User Routes Integration Tests", () => {
 
       const bob = await createTestUser({}, { displayName: 'Bob Dylan' });
       userBob = bob.testUser;
-
-      const celin = await createTestUser({}, { displayName: 'Celin Dyker' });
-      userCelin = celin.testUser;
     });
 
     it('should return matching users for a partial search', async () => {

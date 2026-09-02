@@ -8,6 +8,7 @@ import configuredPassport from './config/passport.js';
 import { isProduction } from './config/env.js';
 import authRouter from './routes/authRouter.js';
 import userRouter from './routes/userRouter.js';
+import profileRouter from './routes/profileRouter.js';
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use(configuredPassport.session());
 // Routers
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
+app.use('/api/profile', profileRouter);
 
 // All none existing paths here
 app.get('*path', (req, res) => {
