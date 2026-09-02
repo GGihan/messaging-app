@@ -47,3 +47,43 @@ export const updateProfile = async (req, res) => {
     },
   })
 };
+
+export const deleteAvatar = async (req, res) => {
+  const userId = req.user?.id;
+
+  const profile = await prisma.profile.findUnique({
+    where: { userId },
+    select: { avatarUrl: true },
+  });
+
+  if (!profile?.avatarUrl) {
+    return res.json({
+      success: true,
+      message: 'Avatar is already removed.',
+    });
+  }
+
+  const publicId = cloudinaryService.getPublicIdFromUrl(profile.avatarUrl);
+
+  if (publicId) {
+    try {
+      await cloudinaryService.deleteFromCloud(publicId);
+    } catch (cloudErr) {
+      logger.error({ 
+        err: cloudErr, 
+        userId, publicId 
+      }, 'Failed to delete asset from Cloudinary');
+    }
+  }
+
+  const updatedProfile = await prisma.profile.update({
+    where: { userId },
+    data: { avatarUrl: null },
+  });
+
+  return res.json({
+    success: true,
+    message: 'Avatar has been removed.',
+    data: { profile: updatedProfile },
+  });
+};
