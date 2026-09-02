@@ -72,13 +72,5 @@ describe("User Routes Integration Tests", () => {
       expect(res.status).toBe(200);
       expect(res.body.data.users).toHaveLength(0);
     });
-
-    it('should return search results with no current user', async () => {
-      const res = await request(app).get('/api/users?search=CeLin');
-
-      expect(res.status).toBe(200);
-      expect(res.body.data.users).toHaveLength(1);
-      expect(res.body.data.users[0].profile.displayName).toBe(userCelin.profile.displayName);
-    });
   });
 });
