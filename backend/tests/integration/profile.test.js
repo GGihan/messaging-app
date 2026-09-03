@@ -5,7 +5,7 @@ import { cloudinaryService } from '../../lib/cloudinary.js';
 import request from 'supertest';
 import app from '../../src/app.js';
 
-describe("User Routes Integration Tests", () => {
+describe("Profile Routes Integration Tests", () => {
   let agent;
   let currentUser;
 
@@ -87,7 +87,6 @@ describe("User Routes Integration Tests", () => {
       expect(res.status).toBe(502);
       expect(res.body.message).toMatch(/upload failed/i);
 
-      // Verify DB was untouched
       const dbProfile = await prisma.profile.findUnique({
         where: { userId: currentUser.id },
       });

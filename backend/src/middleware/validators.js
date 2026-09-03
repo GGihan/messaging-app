@@ -63,6 +63,48 @@ export const validateUpdateProfile = [
     .isLength({ max: 100 }).withMessage(`Bio cannot exceed 100 characters.`),
 ];
 
+export const validateReceiverBody = [
+  body('receiverId')
+    .custom((value, { req }) => {
+      if (value === req.user?.id) {
+        throw new Error('Receiver cannot be yourself.');
+      }
+      return true;
+    })
+    .custom(async (value) => {
+      const receiver = await prisma.user.findUnique({
+        where: { id: value },
+        select: { id: true },
+      });
+
+      if (!receiver) {
+        throw new Error('User not found.');
+      }
+      return true;
+    }),
+];
+
+export const validateReceiverParam = [
+  param('receiverId')
+    .custom((value, { req }) => {
+      if (value === req.user?.id) {
+        throw new Error('Receiver cannot be yourself.');
+      }
+      return true;
+    })
+    .custom(async (value) => {
+      const receiver = await prisma.user.findUnique({
+        where: { id: value },
+        select: { id: true },
+      });
+
+      if (!receiver) {
+        throw new Error('User not found.');
+      }
+      return true;
+    }),
+];
+
 export const validateUuidParam = (paramName = "id") => [
   param(paramName)
     .isUUID().withMessage(`Invalid ${paramName} format. Must be a valid UUID.`),

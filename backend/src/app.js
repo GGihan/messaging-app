@@ -9,6 +9,7 @@ import { isProduction } from './config/env.js';
 import authRouter from './routes/authRouter.js';
 import userRouter from './routes/userRouter.js';
 import profileRouter from './routes/profileRouter.js';
+import friendshipRouter from './routes/friendshipRouter.js';
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.use(configuredPassport.session());
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/profile', profileRouter);
+app.use('/api/friendships', friendshipRouter)
 
 // All none existing paths here
 app.get('*path', (req, res) => {

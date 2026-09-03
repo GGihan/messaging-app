@@ -1,0 +1,141 @@
+import { matchedData } from "express-validator";
+import { findExistingRelationship } from "../helpers/friendshipHelper.js";
+import { prisma } from "../../lib/prisma.js";
+
+
+export const sendFriendRequest = async (req, res) => {
+  const senderId = req.user?.id;
+  const { receiverId } = matchedData(req);
+
+  const existingFriendship = await findExistingRelationship(senderId, receiverId);
+  
+  if (existingFriendship) {
+    switch (existingFriendship.status) {
+      case 'BLOCKED':
+        return res.status(400).json({
+          success: false,
+          message: 'Unable to send request.'
+        });
+
+      case 'ACCEPTED':
+        return res.status(400).json({
+          success: false,
+          message: 'You are already friends.'
+        });
+
+      case 'PENDING':
+        return res.status(400).json({
+          success: false,
+          message: 'A friend request is already pending.'
+        });
+
+      case 'DECLINED': {
+        const refreshedFriendship = await prisma.friendship.update({
+          where: { id: existingFriendship.id },
+          data: {
+            senderId,
+            receiverId,
+            status: 'PENDING',
+          },
+        });
+
+        return res.json({
+          success: true,
+          message: 'Friend request sent.',
+          data: { friendship: refreshedFriendship },
+        });
+      }
+
+      default:
+        break;
+    }
+  }
+
+  const friendship = await prisma.friendship.create({
+    data: {
+      senderId,
+      receiverId,
+      status: 'PENDING',
+    },
+  });
+
+  return res.status(201).json({
+    success: true,
+    message: 'Friend request sent.',
+    data: { friendship },
+  });
+};
+
+export const blockUser = async (req, res) => {
+  const senderId = req.user?.id;
+  const { receiverId } = matchedData(req);
+
+  const existingFriendship = await findExistingRelationship(senderId, receiverId);
+
+  let friendship;
+  let statusCode;
+
+  if (existingFriendship?.status === 'BLOCKED') {
+    return res.status(400).json({
+      success: false,
+      message: 'User is already blocked.'
+    });
+  }
+
+  if (existingFriendship) {
+    friendship = await prisma.friendship.update({
+      where: { id: existingFriendship.id },
+      data: {
+        senderId,
+        receiverId,
+        status: 'BLOCKED',
+      },
+    });
+    statusCode = 200;
+  } else {
+    friendship = await prisma.friendship.create({
+      data: {
+        senderId,
+        receiverId,
+        status: 'BLOCKED',
+      },
+    });
+    statusCode = 201;
+  }
+
+  return res.status(statusCode).json({
+    success: true,
+    message: 'User has been blocked.',
+    data: { friendship },
+  });
+};
+
+export const unblockUser = async (req, res) => {
+  const senderId = req.user?.id;
+  const { receiverId } = matchedData(req);
+
+  const existingFriendship = await findExistingRelationship(senderId, receiverId);
+
+  if (!existingFriendship || existingFriendship?.status !== 'BLOCKED') {
+    return res.status(404).json({
+      success: false,
+      message: 'Blocked relationship not found.',
+    });
+  }
+
+  if (existingFriendship.senderId !== senderId) {
+    return res.status(400).json({
+      success: false,
+      message: 'Unnable to unblock.'
+    });
+  }
+
+  await prisma.friendship.delete({
+    where: { id: existingFriendship.id },
+  });
+
+  return res.json({
+    success: true,
+    message: 'User unblocked successfully.',
+  });
+};
