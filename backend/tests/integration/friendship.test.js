@@ -170,6 +170,118 @@ describe("Friendship Routes Integration Tests", () => {
       expect(res.status).toBe(401);
     });
   });
+
+  describe("PATCH /api/friendships/:friendshipId", () => {
+
+    it('should accept a PENDING friendship', async () => {
+      const { friendship: existingFriendship } = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userBob.id,
+        status: 'PENDING',
+      });
+
+      const res = await agentB
+        .patch(`/api/friendships/${existingFriendship.id}`)
+        .send({
+          status: 'ACCEPTED',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.friendship).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          status: 'ACCEPTED',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          senderId: currentUser.id,
+          receiverId: userBob.id,
+        }),
+      );
+    });
+
+    it('should decline a PENDING friendship', async () => {
+      const { friendship: existingFriendship } = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userBob.id,
+        status: 'PENDING',
+      });
+
+      const res = await agentB
+        .patch(`/api/friendships/${existingFriendship.id}`)
+        .send({
+          status: 'DECLINED',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.friendship.status).toBe('DECLINED');
+    });
+
+    it('should reject if a friendship request does not exist', async () => {
+      const nonExistingId = '00000000-0000-0000-0000-000000000000';
+
+      const res = await agentB
+        .patch(`/api/friendships/${nonExistingId}`)
+        .send({
+          status: 'ACCEPTED',
+        });
+      
+      expect(res.status).toBe(404);
+      expect(res.body.message).toMatch(/not found/i);
+    });
+
+    it('should reject if receiverId does not match', async () => {
+      const { friendship: existingFriendship } = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userBob.id,
+        status: 'PENDING',
+      });
+      
+      const res = await agentA
+        .patch(`/api/friendships/${existingFriendship.id}`)
+        .send({
+          status: 'ACCEPTED',
+        });
+      
+      expect(res.status).toBe(403);
+      expect(res.body.message).toMatch(/forbidden/i);
+    });
+
+    it('should reject if friendship status is not PENDING', async () => {
+      const { friendship: existingFriendship } = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userBob.id,
+        status: 'DECLINED',
+      });
+      
+      const res = await agentB
+        .patch(`/api/friendships/${existingFriendship.id}`)
+        .send({
+          status: 'ACCEPTED',
+        });
+      
+      expect(res.status).toBe(400);
+      expect(res.body.message).toMatch(/pending/i);
+    });
+
+    it('should reject if send status is not valid', async () => {
+      const { friendship: existingFriendship } = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userBob.id,
+        status: 'PENDING',
+      });
+      
+      const res = await agentB
+        .patch(`/api/friendships/${existingFriendship.id}`)
+        .send({
+          status: 'BLOCKED',
+        });
+      
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+    });
+  });
   
   describe("POST /api/friendships/block", () => {
 

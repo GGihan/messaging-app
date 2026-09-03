@@ -66,6 +66,49 @@ export const sendFriendRequest = async (req, res) => {
   });
 };
 
+export const updateFriendship = async (req, res) => {
+  const currentUserId = req.user?.id;
+  const { friendshipId, status } = matchedData(req);
+
+  const friendship = await prisma.friendship.findUnique({
+    where: { id: friendshipId },
+  });
+
+  if (!friendship) {
+    return res.status(404).json({
+      success: false,
+      message: 'Request not found.',
+    });
+  }
+
+  if (friendship.receiverId !== currentUserId) {
+    return res.status(403).json({
+      success: false,
+      message: 'Forbidden.',
+    });
+  }
+
+  if (friendship.status !== 'PENDING') {
+    return res.status(400).json({
+      success: false,
+      message: 'Request is no longer pending.',
+    });
+  }
+
+  const updatedFriendship = await prisma.friendship.update({
+    where: { id: friendshipId },
+    data: { status },
+  });
+
+  return res.json({
+    success: true,
+    message: `Request ${status}.`,
+    data: {
+      friendship: updatedFriendship,
+    },
+  });
+};
+
 export const blockUser = async (req, res) => {
   const senderId = req.user?.id;
   const { receiverId } = matchedData(req);
@@ -78,7 +121,7 @@ export const blockUser = async (req, res) => {
   if (existingFriendship?.status === 'BLOCKED') {
     return res.status(400).json({
       success: false,
-      message: 'User is already blocked.'
+      message: 'User is already blocked.',
     });
   }
 
@@ -126,7 +169,7 @@ export const unblockUser = async (req, res) => {
   if (existingFriendship.senderId !== senderId) {
     return res.status(400).json({
       success: false,
-      message: 'Unnable to unblock.'
+      message: 'Unnable to unblock.',
     });
   }
 

@@ -105,6 +105,13 @@ export const validateReceiverParam = [
     }),
 ];
 
+export const validateStatus = [
+  body('status')
+    .notEmpty().withMessage(`Status ${emptyErr}`)
+    .bail()
+    .isIn(['ACCEPTED', 'DECLINED']),
+];
+
 export const validateUuidParam = (paramName = "id") => [
   param(paramName)
     .isUUID().withMessage(`Invalid ${paramName} format. Must be a valid UUID.`),
