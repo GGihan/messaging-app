@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../middleware/authMiddleware.js";
 import {
   blockUser,
+  deleteFriendship,
   sendFriendRequest,
   unblockUser,
   updateFriendship
@@ -31,6 +32,12 @@ friendshipRouter.patch('/:friendshipId',
   validateStatus,
   handleValidation,
   updateFriendship
+);
+
+friendshipRouter.delete('/:friendshipId',
+  validateUuidParam('friendshipId'),
+  handleValidation,
+  deleteFriendship
 );
 
 friendshipRouter.post('/block',

@@ -7,8 +7,10 @@ import { createFriendship } from "../helpers/friendshipHelper.js";
 describe("Friendship Routes Integration Tests", () => {
   let agentA;
   let agentB;
+  let agentC;
   let currentUser;
   let userBob;
+  let userCelin;
 
   beforeEach(async () => {
     const setupA = await createAuthenticatedAgent();
@@ -18,6 +20,10 @@ describe("Friendship Routes Integration Tests", () => {
     const setupB = await createAuthenticatedAgent();
     agentB = setupB.agent;
     userBob = setupB.user;
+
+    const setupC = await createAuthenticatedAgent();
+    agentC = setupC.agent;
+    userCelin = setupC.user;
   });
 
   afterAll(async () => {
@@ -280,6 +286,151 @@ describe("Friendship Routes Integration Tests", () => {
       
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
+    });
+  });
+
+  describe('DELETE /api/friendships/:friendshipId', () => {
+
+    it('should allow the original sender to unfriend an ACCEPTED friendship', async () => {
+      const { friendship } = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userBob.id,
+        status: 'ACCEPTED',
+      });
+
+      const res = await agentA.delete(`/api/friendships/${friendship.id}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toMatch(/removed/i);
+
+      const dbFriendship = await prisma.friendship.findUnique({
+        where: { id: friendship.id },
+      });
+      expect(dbFriendship).toBeNull();
+    });
+
+    it('should allow the original receiver to unfriend an ACCEPTED friendship', async () => {
+      const { friendship } = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userBob.id,
+        status: 'ACCEPTED',
+      });
+
+      const res = await agentB.delete(`/api/friendships/${friendship.id}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toMatch(/removed/i);
+
+      const dbFriendship = await prisma.friendship.findUnique({
+        where: { id: friendship.id },
+      });
+      expect(dbFriendship).toBeNull();
+    });
+
+    it('should allow the sender to cancel a PENDING friend request', async () => {
+      const { friendship } = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userBob.id,
+        status: 'PENDING',
+      });
+
+      const res = await agentA.delete(`/api/friendships/${friendship.id}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toMatch(/cancelled/i);
+
+      const dbFriendship = await prisma.friendship.findUnique({
+        where: { id: friendship.id },
+      });
+      expect(dbFriendship).toBeNull();
+    });
+
+    it('should forbid the receiver from cancelling a PENDING friend request', async () => {
+      const { friendship } = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userBob.id,
+        status: 'PENDING',
+      });
+
+      const res = await agentB.delete(`/api/friendships/${friendship.id}`);
+
+      expect(res.status).toBe(403);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/only the sender/i);
+
+      const dbFriendship = await prisma.friendship.findUnique({
+        where: { id: friendship.id },
+      });
+      expect(dbFriendship).not.toBeNull();
+    });
+
+    it('should return 403 if a third party attempts to delete the friendship', async () => {
+      const { friendship } = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userBob.id,
+        status: 'ACCEPTED',
+      });
+
+      const res = await agentC.delete(`/api/friendships/${friendship.id}`);
+
+      expect(res.status).toBe(403);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/forbidden/i);
+
+      const dbFriendship = await prisma.friendship.findUnique({
+        where: { id: friendship.id },
+      });
+      expect(dbFriendship).not.toBeNull();
+    });
+
+    it('should return 403 if friendship status is BLOCKED', async () => {
+      const { friendship } = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userBob.id,
+        status: 'BLOCKED',
+      });
+
+      const res = await agentA.delete(`/api/friendships/${friendship.id}`);
+
+      expect(res.status).toBe(403);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/forbidden/i);
+
+      const dbFriendship = await prisma.friendship.findUnique({
+        where: { id: friendship.id },
+      });
+      expect(dbFriendship).not.toBeNull();
+    });
+
+    it('should return 404 if the friendship does not exist', async () => {
+      const nonExistentId = '00000000-0000-0000-0000-000000000000';
+
+      const res = await agentA.delete(`/api/friendships/${nonExistentId}`);
+
+      expect(res.status).toBe(404);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/not found/i);
+    });
+
+    it('should allow deletion if friendship status is DECLINED', async () => {
+      const { friendship } = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userBob.id,
+        status: 'DECLINED',
+      });
+
+      const res = await agentA.delete(`/api/friendships/${friendship.id}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+
+      const dbFriendship = await prisma.friendship.findUnique({
+        where: { id: friendship.id },
+      });
+      expect(dbFriendship).toBeNull();
     });
   });
   

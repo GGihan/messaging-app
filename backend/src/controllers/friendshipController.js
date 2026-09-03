@@ -77,7 +77,7 @@ export const updateFriendship = async (req, res) => {
   if (!friendship) {
     return res.status(404).json({
       success: false,
-      message: 'Request not found.',
+      message: 'Friendship not found.',
     });
   }
 
@@ -106,6 +106,50 @@ export const updateFriendship = async (req, res) => {
     data: {
       friendship: updatedFriendship,
     },
+  });
+};
+
+export const deleteFriendship = async (req, res) => {
+  const currentUserId = req.user?.id;
+  const { friendshipId } = matchedData(req);
+
+  const friendship = await prisma.friendship.findUnique({
+    where: { id: friendshipId },
+  });
+
+  if (!friendship) {
+    return res.status(404).json({
+      success: false,
+      message: 'Friendship not found.',
+    });
+  }
+
+  const isSender = currentUserId === friendship.senderId;
+  const isReceiver = currentUserId === friendship.receiverId;
+
+  if (friendship.status === 'BLOCKED' || (!isSender && !isReceiver)) {
+    return res.status(403).json({
+      success: false,
+      message: 'Forbidden.',
+    });
+  }
+
+  if (friendship.status === 'PENDING' && !isSender) {
+    return res.status(403).json({
+      success: false,
+      message: 'Only the sender can cancel a pending friend request.',
+    });
+  }
+
+  await prisma.friendship.delete({
+    where: { id: friendshipId },
+  });
+
+  return res.json({
+    success: true,
+    message: friendship.status === 'PENDING' 
+      ? 'Friend request cancelled.' 
+      : 'Friend removed successfully.',
   });
 };
 
