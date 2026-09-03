@@ -3,11 +3,13 @@ import { requireAuth } from "../middleware/authMiddleware.js";
 import {
   blockUser,
   deleteFriendship,
+  getFriendships,
   sendFriendRequest,
   unblockUser,
   updateFriendship
 } from "../controllers/friendshipController.js";
 import {
+  validateFriendshipQuery,
   validateReceiverBody,
   validateReceiverParam,
   validateStatus,
@@ -19,6 +21,12 @@ import { handleValidation } from "../middleware/handleValidation.js";
 const friendshipRouter = Router();
 
 friendshipRouter.use(requireAuth);
+
+friendshipRouter.get('/',
+  validateFriendshipQuery,
+  handleValidation,
+  getFriendships
+);
 
 friendshipRouter.post('/requests',
   validateUuidBody('receiverId'),

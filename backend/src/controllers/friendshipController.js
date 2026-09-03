@@ -1,7 +1,20 @@
 import { matchedData } from "express-validator";
-import { findExistingRelationship } from "../helpers/friendshipHelper.js";
+import { findAllRelationships, findExistingRelationship } from "../helpers/friendshipHelper.js";
 import { prisma } from "../../lib/prisma.js";
 
+export const getFriendships = async (req, res) => {
+  const currentUserId = req.user?.id;
+  const { status, type } = matchedData(req);
+
+  const friendships = await findAllRelationships(currentUserId, status, type);
+
+  return res.json({
+    success: true,
+    data: { 
+      friendships 
+    },
+  });
+};
 
 export const sendFriendRequest = async (req, res) => {
   const senderId = req.user?.id;

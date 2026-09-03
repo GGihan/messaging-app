@@ -49,6 +49,18 @@ export const validateUserSearchQuery = [
     .isLength({ max: 30 }).withMessage('Search query cannot exceed 30 characters.'),
 ];
 
+export const validateFriendshipQuery = [
+  query('status')
+    .optional()
+    .trim()
+    .isIn(['PENDING', 'ACCEPTED', 'DECLINED', 'BLOCKED'])
+    .withMessage('Status must be one of: PENDING, ACCEPTED, DECLINED, BLOCKED.'),
+  query('type')
+    .optional()
+    .isIn(['incoming', 'outgoing'])
+    .withMessage('Type must be either "incoming" or "outgoing".'),
+];
+
 export const validateUpdateProfile = [
   body('displayName')
     .trim()

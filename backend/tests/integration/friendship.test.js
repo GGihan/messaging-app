@@ -30,6 +30,185 @@ describe("Friendship Routes Integration Tests", () => {
     await prisma.$disconnect();
   });
 
+  describe('GET /api/friendships', () => {
+    let userDave;
+    let userEve;
+
+    let pendingOutgoing;
+    let pendingIncoming;
+    let acceptedFriendship;
+    let blockedRelationship;
+
+    beforeEach(async () => {
+      const setupD = await createAuthenticatedAgent();
+      userDave = setupD.user;
+
+      const setupE = await createAuthenticatedAgent();
+      userEve = setupE.user;
+
+      const outReq = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userBob.id,
+        status: 'PENDING',
+      });
+      pendingOutgoing = outReq.friendship;
+
+      const inReq = await createFriendship({
+        senderId: userCelin.id,
+        receiverId: currentUser.id,
+        status: 'PENDING',
+      });
+      pendingIncoming = inReq.friendship;
+
+      const accFriend = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userDave.id,
+        status: 'ACCEPTED',
+      });
+      acceptedFriendship = accFriend.friendship;
+
+      const blocked = await createFriendship({
+        senderId: currentUser.id,
+        receiverId: userEve.id,
+        status: 'BLOCKED',
+      });
+      blockedRelationship = blocked.friendship;
+
+      await createFriendship({
+        senderId: userBob.id,
+        receiverId: userCelin.id,
+        status: 'ACCEPTED',
+      });
+    });
+
+    describe('Unfiltered Query', () => {
+      it('should return all relationships involving the current user', async () => {
+        const res = await agentA.get('/api/friendships');
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(Array.isArray(res.body.data.friendships)).toBe(true);
+        expect(res.body.data.friendships).toHaveLength(4);
+
+        const returnedIds = res.body.data.friendships.map((f) => f.id);
+        expect(returnedIds).toEqual(
+          expect.arrayContaining([
+            pendingOutgoing.id,
+            pendingIncoming.id,
+            acceptedFriendship.id,
+            blockedRelationship.id,
+          ]),
+        );
+      });
+    });
+
+    describe('Filter by Status', () => {
+      it('should return only ACCEPTED friendships', async () => {
+        const res = await agentA.get('/api/friendships?status=ACCEPTED');
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.data.friendships).toHaveLength(1);
+        expect(res.body.data.friendships[0].id).toBe(acceptedFriendship.id);
+        expect(res.body.data.friendships[0].status).toBe('ACCEPTED');
+      });
+
+      it('should return both incoming and outgoing PENDING requests', async () => {
+        const res = await agentA.get('/api/friendships?status=PENDING');
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.data.friendships).toHaveLength(2);
+
+        const returnedIds = res.body.data.friendships.map((f) => f.id);
+        expect(returnedIds).toContain(pendingOutgoing.id);
+        expect(returnedIds).toContain(pendingIncoming.id);
+      });
+    });
+
+    describe('Filter by Direction / Type', () => {
+      it('should return only outgoing relationships when type=outgoing', async () => {
+        const res = await agentA.get('/api/friendships?type=outgoing');
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+
+        const friendships = res.body.data.friendships;
+        expect(friendships.length).toBeGreaterThan(0);
+        friendships.forEach((f) => {
+          expect(f.senderId).toBe(currentUser.id);
+        });
+
+        const returnedIds = friendships.map((f) => f.id);
+        expect(returnedIds).not.toContain(pendingIncoming.id);
+      });
+
+      it('should return only incoming relationships when type=incoming', async () => {
+        const res = await agentA.get('/api/friendships?type=incoming');
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+
+        const friendships = res.body.data.friendships;
+        expect(friendships).toHaveLength(1);
+        expect(friendships[0].id).toBe(pendingIncoming.id);
+        expect(friendships[0].receiverId).toBe(currentUser.id);
+      });
+    });
+
+    describe('Combined Filters', () => {
+      it('should correctly combine status=PENDING and type=incoming', async () => {
+        const res = await agentA.get('/api/friendships?status=PENDING&type=incoming');
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.data.friendships).toHaveLength(1);
+        expect(res.body.data.friendships[0].id).toBe(pendingIncoming.id);
+        expect(res.body.data.friendships[0].senderId).toBe(userCelin.id);
+      });
+
+      it('should return an empty array if no records match the criteria', async () => {
+        const res = await agentA.get('/api/friendships?status=DECLINED');
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.data.friendships).toEqual([]);
+      });
+    });
+
+    describe('Validation Guardrails', () => {
+      it('should return 400 if an invalid status is provided', async () => {
+        const res = await agentA.get('/api/friendships?status=INVALID_STATUS');
+
+        expect(res.status).toBe(400);
+        expect(res.body.success).toBe(false);
+        expect(res.body.errors).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              field: 'status',
+              message: expect.stringMatching(/status/i),
+            }),
+          ])
+        );
+      });
+
+      it('should return 400 if an invalid type is provided', async () => {
+        const res = await agentA.get('/api/friendships?type=sideways');
+
+        expect(res.status).toBe(400);
+        expect(res.body.success).toBe(false);
+        expect(res.body.errors).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              field: 'type',
+              message: expect.stringMatching(/type/i),
+            }),
+          ])
+        );
+      });
+    });
+  });
+  
   describe("POST /api/friendships/requests", () => {
     
     it('should return a new friendship if no friendship exists yet', async () => {
