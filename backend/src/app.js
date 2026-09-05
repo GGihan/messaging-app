@@ -7,6 +7,7 @@ import userRouter from './routes/userRouter.js';
 import profileRouter from './routes/profileRouter.js';
 import friendshipRouter from './routes/friendshipRouter.js';
 import { sessionMiddleware } from './config/session.js';
+import chatRouter from './routes/chatRouter.js';
 
 const app = express();
 
@@ -32,7 +33,8 @@ app.use(configuredPassport.session());
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/profile', profileRouter);
-app.use('/api/friendships', friendshipRouter)
+app.use('/api/friendships', friendshipRouter);
+app.use('/api/chats', chatRouter);
 
 // All none existing paths here
 app.get('*path', (req, res) => {
