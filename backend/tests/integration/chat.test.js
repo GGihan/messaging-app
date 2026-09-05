@@ -38,6 +38,7 @@ describe("Chat Routes Integration Tests", () => {
           isGroup: false,
           name: null,
           avatarUrl: null,
+          lastMessageAt: expect.any(String),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
           messages: [],
