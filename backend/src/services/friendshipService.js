@@ -58,3 +58,20 @@ export const findAllRelationships = async (userId, status, type) => {
     },
   });
 };
+
+export const findAllAcceptedFriendIds =  async (userId) => {
+  const friendships = await prisma.friendship.findMany({
+    where: {
+      status: 'ACCEPTED',
+      OR: [{ senderId: userId }, { receiverId: userId }],
+    },
+    select: { senderId: true, receiverId: true },
+  });
+  
+  const friendIds = friendships.map((f) =>
+    f.senderId === userId ? f.receiverId : f.senderId
+  );
+
+  return friendIds;
+};
+      

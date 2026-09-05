@@ -1,5 +1,5 @@
 import { matchedData } from "express-validator";
-import { findAllRelationships, findExistingRelationship } from "../helpers/friendshipHelper.js";
+import { findAllRelationships, findExistingRelationship } from "../services/friendshipService.js";
 import { prisma } from "../../lib/prisma.js";
 
 export const getFriendships = async (req, res) => {

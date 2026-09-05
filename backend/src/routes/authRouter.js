@@ -6,8 +6,11 @@ import { getMe, loginUser, logoutUser, registerUser } from '../controllers/authC
 const authRouter = Router();
 
 authRouter.post('/register', validateRegister, handleValidation, registerUser);
+
 authRouter.post('/login', validateLogIn, handleValidation, loginUser);
+
 authRouter.post('/logout', logoutUser);
+
 authRouter.get('/me', getMe);
 
 export default authRouter;

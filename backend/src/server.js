@@ -1,9 +1,18 @@
 import 'dotenv/config';
 import app from "./app.js";
+import { createServer } from 'node:http';
+import { initSocketServer } from './sockets/index.js';
 
 const PORT = process.env.PORT || 8080;
 
-app.listen(PORT, (error) => {
+const server = createServer(app);
+
+// Initialize Socket.IO
+const io = initSocketServer(server);
+// Attach `io` to Express so your REST controllers can use req.app.get('io')
+app.set('io', io);
+
+server.listen(PORT, (error) => {
   if (error) {
     throw error;
   }

@@ -7,7 +7,7 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
-const corsOptions = {
+export const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps, curl requests, or Postman)
     if (!origin) return callback(null, true);
