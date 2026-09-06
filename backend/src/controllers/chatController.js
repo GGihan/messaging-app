@@ -23,3 +23,16 @@ export const createOrGetDirectChat = async (req, res) => {
     },
   });
 };
+
+export const getAllChats = async (req, res) => {
+  const currentUserId = req.user?.id;
+
+  const chats = await chatService.getAllChats(currentUserId);
+
+  return res.json({
+    success: true,
+    data: {
+      chats,
+    },
+  });
+};

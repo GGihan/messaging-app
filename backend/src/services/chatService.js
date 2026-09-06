@@ -1,4 +1,5 @@
 import { prisma } from "../../lib/prisma.js";
+import { formatChatSummary, formatMessageStatus } from "../helpers/chatStatusHelper.js";
 
 export const chatService = {
   async getDirectChat(userIdA, userIdB) {
@@ -29,11 +30,19 @@ export const chatService = {
       },
     });
 
-    if (chat?.messages) {
-      chat.messages.reverse(); // Order chronologically (oldest -> newest) for the UI
-    }
+    if (!chat) return null;
 
-    return chat;
+    // Reverse message order
+    const chronologicalMessages = [...chat.messages].reverse();
+
+    const enrichedMessages = chronologicalMessages.map((msg) =>
+      formatMessageStatus(msg, userIdA, chat.members)
+    );
+
+    return {
+      ...chat,
+      messages: enrichedMessages,
+    };
   },
 
   async createDirectChat(userIdA, userIdB) {
@@ -63,5 +72,50 @@ export const chatService = {
     });
 
     return { ...newChat, messages: [] };
+  },
+
+  async getAllChats(userId) {
+    const chats = await prisma.chat.findMany({
+      where: {
+        members: { some: { userId } }
+      },
+      include: {
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                lastActiveAt: true,
+                profile: true,
+              },
+            },
+          },
+        },
+        messages: {
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                profile: {
+                  select: {
+                    displayName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            messages: true,
+          },
+        },
+      },
+      orderBy: { lastMessageAt: 'desc' }
+    });
+
+    return chats.map((chat) => formatChatSummary(chat, userId));
   },
 };
