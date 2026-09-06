@@ -118,4 +118,43 @@ export const chatService = {
 
     return chats.map((chat) => formatChatSummary(chat, userId));
   },
+
+  async createGroupChat(currentUserId, { id, name, avatarUrl = null, memberIds = [] }) {
+    const distinctMemberIds = [
+      ...new Set(memberIds.filter((id) => id !== currentUserId)),
+    ];
+
+    const memberData = [
+      { userId: currentUserId, role: 'ADMIN' },
+      ...distinctMemberIds.map((userId) => ({
+        userId,
+        role: 'MEMBER',
+      })),
+    ];
+
+    return await prisma.chat.create({
+      data: {
+        ...(id && { id }),
+        isGroup: true,
+        name,
+        avatarUrl,
+        members: {
+          create: memberData,
+        },
+      },
+      include: {
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                lastActiveAt: true,
+                profile: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  },
 };

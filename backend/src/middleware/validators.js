@@ -4,9 +4,11 @@ import { prisma } from "../../lib/prisma.js";
 // Error messages
 const emptyErr = 'can\'t be empty.';
 const usernameLengthErr = 'must be between 3 and 30 characters.';
+const groupNameLengthErr = 'must be between 3 and 50 characters.';
 const passwordLengthErr = 'must be between 8 and 72 characters.';
 const symbolErr = 'can only contain letters, numbers, underscores, and hyphens.';
-const stringErr = 'must be a string.'
+const stringErr = 'must be a string.';
+const arrayErr = 'must be an array.';
 
 // Validations
 export const validateRegister = [
@@ -122,6 +124,34 @@ export const validateStatus = [
     .notEmpty().withMessage(`Status ${emptyErr}`)
     .bail()
     .isIn(['ACCEPTED', 'DECLINED']),
+];
+
+export const validateCreateGroupChat = [
+  body('name')
+    .trim()
+    .notEmpty().withMessage(`Name ${emptyErr}`)
+    .bail()
+    .isLength({ min: 3, max: 50 }).withMessage(`Name ${groupNameLengthErr}`),
+  body('memberIds')
+    .optional()
+    .isArray().withMessage(`memberIds ${arrayErr}`)
+    .bail()
+    .custom((memberIds, { req }) => {
+      // Prevent duplicate entries
+      const uniqueIds = new Set(memberIds);
+      if (uniqueIds.size !== memberIds.length) {
+        throw new Error('Duplicate member IDs are not allowed');
+      }
+      // Prevent the creator from adding themselves in the memberIds array
+      if (req.user && memberIds.includes(req.user.id)) {
+        throw new Error('You cannot add yourself to memberIds');
+      }
+
+      return true;
+    }),
+  body('memberIds.*')
+    .optional()
+    .isUUID().withMessage('Invalid member ID must be a valid UUID'),
 ];
 
 export const validateUuidParam = (paramName = "id") => [

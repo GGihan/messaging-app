@@ -1,3 +1,5 @@
+import { cloudinaryService } from "../../lib/cloudinary.js";
+import { jest } from '@jest/globals';
 import { prisma } from "../../lib/prisma.js";
 import { createAuthenticatedAgent } from "../helpers/authHelper.js";
 
@@ -21,6 +23,10 @@ describe("Chat Routes Integration Tests", () => {
     const setupC = await createAuthenticatedAgent();
     agentC = setupC.agent;
     userCharlie = setupC.user;
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   afterAll(async () => {
@@ -262,6 +268,129 @@ describe("Chat Routes Integration Tests", () => {
       const res = await agentA.get('/api/chats');
       expect(res.status).toBe(200);
       expect(res.body.data.chats[0].isUnread).toBe(false);
+    });
+  });
+
+  describe('Group Chat Integration Tests', () => {
+
+    describe('POST /api/chats/groups', () => {
+
+      it('should create a group chat without an avatar and set correct member roles', async () => {
+        const uploadSpy = jest.spyOn(cloudinaryService, 'uploadChatAvatar');
+
+        const res = await agentA
+          .post('/api/chats/groups')
+          .send({
+            name: 'Engineering Team',
+            memberIds: [userBob.id, userCharlie.id],
+          });
+
+        expect(res.status).toBe(201);
+        expect(res.body.success).toBe(true);
+        expect(uploadSpy).not.toHaveBeenCalled();
+
+        const { groupChat } = res.body.data;
+        expect(groupChat.name).toBe('Engineering Team');
+        expect(groupChat.isGroup).toBe(true);
+        expect(groupChat.avatarUrl).toBeNull();
+        expect(groupChat.members).toHaveLength(3);
+
+        // Verify creator is ADMIN and invitees are MEMBER
+        const creator = groupChat.members.find((m) => m.userId === currentUser.id);
+        const bob = groupChat.members.find((m) => m.userId === userBob.id);
+        const charlie = groupChat.members.find((m) => m.userId === userCharlie.id);
+
+        expect(creator.role).toBe('ADMIN');
+        expect(bob.role).toBe('MEMBER');
+        expect(charlie.role).toBe('MEMBER');
+
+        // Verify persisted state in the database
+        const dbChat = await prisma.chat.findUnique({
+          where: { id: groupChat.id },
+          include: { members: true },
+        });
+        expect(dbChat).not.toBeNull();
+        expect(dbChat.name).toBe('Engineering Team');
+        expect(dbChat.members).toHaveLength(3);
+      });
+
+      it('should upload a group avatar to Cloudinary and link it to the chat in DB', async () => {
+        const fakeSecureUrl = 'https://res.cloudinary.com/demo/image/upload/v1/group-avatar.jpg';
+
+        const uploadSpy = jest
+          .spyOn(cloudinaryService, 'uploadChatAvatar')
+          .mockResolvedValueOnce({ secure_url: fakeSecureUrl });
+
+        const dummyImageBuffer = Buffer.from('fake-group-avatar-bytes');
+
+        const res = await agentA
+          .post('/api/chats/groups')
+          .field('name', 'Design Sprint')
+          .field('memberIds[0]', userBob.id)
+          .field('memberIds[1]', userCharlie.id)
+          .attach('avatar', dummyImageBuffer, 'group-avatar.png');
+
+        expect(res.status).toBe(201);
+        expect(res.body.success).toBe(true);
+
+        const { groupChat } = res.body.data;
+        expect(groupChat.avatarUrl).toBe(fakeSecureUrl);
+
+        expect(uploadSpy).toHaveBeenCalledTimes(1);
+        expect(uploadSpy).toHaveBeenCalledWith(expect.any(Buffer), groupChat.id);
+
+        const dbChat = await prisma.chat.findUnique({
+          where: { id: groupChat.id },
+        });
+        expect(dbChat.avatarUrl).toBe(fakeSecureUrl);
+      });
+
+      it('should return 502 if Cloudinary upload fails and not persist the chat', async () => {
+        const uploadSpy = jest
+          .spyOn(cloudinaryService, 'uploadChatAvatar')
+          .mockRejectedValueOnce(new Error('Cloudinary server unavailable'));
+
+        const dummyImageBuffer = Buffer.from('fake-group-avatar-bytes');
+
+        const res = await agentA
+          .post('/api/chats/groups')
+          .field('name', 'Failed Upload Team')
+          .field('memberIds[0]', userBob.id)
+          .attach('avatar', dummyImageBuffer, 'group-avatar.png');
+
+        expect(res.status).toBe(502);
+        expect(res.body.success).toBe(false);
+        expect(res.body.message).toMatch(/upload failed/i);
+        expect(uploadSpy).toHaveBeenCalledTimes(1);
+
+        const dbChat = await prisma.chat.findFirst({
+          where: { name: 'Failed Upload Team' },
+        });
+        expect(dbChat).toBeNull();
+      });
+
+      it('should reject when group name is missing', async () => {
+        const res = await agentA
+          .post('/api/chats/groups')
+          .send({
+            memberIds: [userBob.id],
+          });
+
+        expect(res.status).toBe(400);
+        expect(res.body.success).toBe(false);
+      });
+
+      it('should reject when memberIds contains an invalid UUID', async () => {
+        const res = await agentA
+          .post('/api/chats/groups')
+          .send({
+            name: 'Invalid Members Group',
+            memberIds: ['not-a-valid-uuid'],
+          });
+
+        expect(res.status).toBe(400);
+        expect(res.body.success).toBe(false);
+      });
     });
   });
 });
