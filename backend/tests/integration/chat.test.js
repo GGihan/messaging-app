@@ -157,8 +157,16 @@ describe("Chat Routes Integration Tests", () => {
 
       await prisma.message.createMany({
         data: [
-          { chatId, senderId: currentUser.id, text: 'First!' },
-          { chatId, senderId: userBob.id, text: 'Second!' },
+          { chatId, 
+            senderId: currentUser.id,
+            text: 'First!',
+            createdAt: new Date(Date.now() - 5000),
+          },
+          { chatId,
+            senderId: userBob.id,
+            text: 'Second!',
+            createdAt: new Date(),
+          },
         ],
       });
 
@@ -391,6 +399,66 @@ describe("Chat Routes Integration Tests", () => {
         expect(res.status).toBe(400);
         expect(res.body.success).toBe(false);
       });
+    });
+  });
+
+  describe('GET /api/chats/:chatId Integration Tests', () => {
+    let sharedChat;
+
+    beforeEach(async () => {
+      sharedChat = await prisma.chat.create({
+        data: {
+          isGroup: false,
+          lastMessageAt: new Date(),
+          members: {
+            create: [
+              { userId: currentUser.id, role: 'MEMBER' },
+              { userId: userBob.id, role: 'MEMBER' },
+            ],
+          },
+          messages: {
+            create: [
+              {
+                senderId: userBob.id,
+                text: 'First message (older)',
+                createdAt: new Date(Date.now() - 60000),
+              },
+              {
+                senderId: currentUser.id,
+                text: 'Second message (newer)',
+                createdAt: new Date(),
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('should return chat with chronological enriched messages for a valid member', async () => {
+      const res = await agentA.get(`/api/chats/${sharedChat.id}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+
+      const { chat } = res.body.data;
+      expect(chat.id).toBe(sharedChat.id);
+      expect(chat.members).toHaveLength(2);
+
+      expect(chat.messages).toHaveLength(2);
+
+      expect(chat.messages[0].text).toBe('First message (older)');
+      expect(chat.messages[1].text).toBe('Second message (newer)');
+
+      expect(chat.messages[0]).toHaveProperty('isReadByMe');
+      expect(chat.messages[0]).toHaveProperty('isReadByAll');
+    });
+
+    it('should return 404 when a user tries to access a chat they are not a member', async () => {
+      const res = await agentC.get(`/api/chats/${sharedChat.id}`);
+
+      expect(res.status).toBe(404);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/not found/i);
     });
   });
 });

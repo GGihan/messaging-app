@@ -76,3 +76,24 @@ export const createGroupChat = async (req, res) => {
     },
   });
 };
+
+export const getChatById = async (req, res) => {
+  const currentUserId = req.user?.id;
+  const { chatId } = matchedData(req);
+
+  const chat = await chatService.getChatById(chatId, currentUserId);
+
+  if (!chat) {
+    return res.status(404).json({
+      success: false,
+      message: 'Chat not found.',
+    });
+  }
+
+  return res.json({
+    success: true,
+    data: {
+      chat,
+    },
+  });
+};

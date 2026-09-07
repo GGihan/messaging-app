@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/authMiddleware.js";
-import { validateCreateGroupChat, validateReceiverBody, validateUuidBody } from "../middleware/validators.js";
-import { createGroupChat, createOrGetDirectChat, getAllChats } from "../controllers/chatController.js";
+import { validateCreateGroupChat, validateReceiverBody, validateUuidBody, validateUuidParam } from "../middleware/validators.js";
+import { createGroupChat, createOrGetDirectChat, getAllChats, getChatById } from "../controllers/chatController.js";
 import { handleValidation } from "../middleware/handleValidation.js";
 import { uploadImage } from "../middleware/multerUpload.js";
 
@@ -18,6 +18,12 @@ chatRouter.post('/',
 
 chatRouter.get('/',
   getAllChats
+);
+
+chatRouter.get('/:chatId',
+  validateUuidParam('chatId'),
+  handleValidation,
+  getChatById
 );
 
 chatRouter.post('/groups',

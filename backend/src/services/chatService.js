@@ -157,4 +157,46 @@ export const chatService = {
       },
     });
   },
+
+  async getChatById(chatId, currentUserId) {
+    const chat = await prisma.chat.findFirst({
+      where: {
+        id: chatId,
+        members: {
+          some: { userId: currentUserId },
+        },
+      },
+      include: {
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                lastActiveAt: true,
+                profile: true,
+              },
+            },
+          },
+        },
+        messages: {
+          take: 30,
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    if (!chat) return null;
+
+    // Reverse message order
+    const chronologicalMessages = [...chat.messages].reverse();
+
+    const enrichedMessages = chronologicalMessages.map((msg) =>
+      formatMessageStatus(msg, currentUserId, chat.members)
+    );
+
+    return {
+      ...chat,
+      messages: enrichedMessages,
+    };
+  },
 };
