@@ -72,7 +72,42 @@ export const createGroupChat = async (req, res) => {
     success: true,
     message: 'Group chat created.',
     data: {
-      groupChat,
+      chat: groupChat,
+    },
+  });
+};
+
+export const updateGroupChat = async (req, res) => {
+  const currentUserId = req.user?.id;
+  const { name, chatId } = matchedData(req);
+
+  let avatarUrl;
+
+  if (req.file) {
+    let uploadResult;
+    try {
+      uploadResult = await cloudinaryService.uploadChatAvatar(req.file.buffer, chatId);
+      avatarUrl = uploadResult.secure_url;
+    } catch (uploadError) {
+      logger.error({
+        err: uploadError,
+        currentUserId,
+        context: 'chat_avatar_upload',
+      }, 'Failed to upload avatar to Cloudinary');
+      return res.status(502).json({
+        success: false,
+        message: 'Image upload failed. Please try again later.',
+      });
+    }
+  }
+
+  const updatedChat = await chatService.updateGroupChat({ id: chatId, name, avatarUrl});
+
+  return res.json({
+    success: true,
+    message: 'Group chat updated.',
+    data: {
+      chat: updatedChat,
     },
   });
 };

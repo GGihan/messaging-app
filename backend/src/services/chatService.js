@@ -158,6 +158,16 @@ export const chatService = {
     });
   },
 
+  async updateGroupChat({ id, name, avatarUrl }) {
+    return prisma.chat.update({
+      where: { id },
+      data: {
+        name,
+        avatarUrl,
+      },
+    });
+  },
+
   async getChatById(chatId, currentUserId) {
     const chat = await prisma.chat.findFirst({
       where: {

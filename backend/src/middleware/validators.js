@@ -154,6 +154,14 @@ export const validateCreateGroupChat = [
     .isUUID().withMessage('Invalid member ID must be a valid UUID'),
 ];
 
+export const validateUpdateGroupChat = [
+  body('name')
+    .trim()
+    .notEmpty().withMessage(`Name ${emptyErr}`)
+    .bail()
+    .isLength({ min: 3, max: 50 }).withMessage(`Name ${groupNameLengthErr}`),
+];
+
 export const validateUuidParam = (paramName = "id") => [
   param(paramName)
     .isUUID().withMessage(`Invalid ${paramName} format. Must be a valid UUID.`),

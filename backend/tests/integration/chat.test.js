@@ -1,5 +1,5 @@
 import { cloudinaryService } from "../../lib/cloudinary.js";
-import { jest } from '@jest/globals';
+import { beforeEach, jest } from '@jest/globals';
 import { prisma } from "../../lib/prisma.js";
 import { createAuthenticatedAgent } from "../helpers/authHelper.js";
 
@@ -297,16 +297,16 @@ describe("Chat Routes Integration Tests", () => {
         expect(res.body.success).toBe(true);
         expect(uploadSpy).not.toHaveBeenCalled();
 
-        const { groupChat } = res.body.data;
-        expect(groupChat.name).toBe('Engineering Team');
-        expect(groupChat.isGroup).toBe(true);
-        expect(groupChat.avatarUrl).toBeNull();
-        expect(groupChat.members).toHaveLength(3);
+        const { chat } = res.body.data;
+        expect(chat.name).toBe('Engineering Team');
+        expect(chat.isGroup).toBe(true);
+        expect(chat.avatarUrl).toBeNull();
+        expect(chat.members).toHaveLength(3);
 
         // Verify creator is ADMIN and invitees are MEMBER
-        const creator = groupChat.members.find((m) => m.userId === currentUser.id);
-        const bob = groupChat.members.find((m) => m.userId === userBob.id);
-        const charlie = groupChat.members.find((m) => m.userId === userCharlie.id);
+        const creator = chat.members.find((m) => m.userId === currentUser.id);
+        const bob = chat.members.find((m) => m.userId === userBob.id);
+        const charlie = chat.members.find((m) => m.userId === userCharlie.id);
 
         expect(creator.role).toBe('ADMIN');
         expect(bob.role).toBe('MEMBER');
@@ -314,7 +314,7 @@ describe("Chat Routes Integration Tests", () => {
 
         // Verify persisted state in the database
         const dbChat = await prisma.chat.findUnique({
-          where: { id: groupChat.id },
+          where: { id: chat.id },
           include: { members: true },
         });
         expect(dbChat).not.toBeNull();
@@ -341,14 +341,14 @@ describe("Chat Routes Integration Tests", () => {
         expect(res.status).toBe(201);
         expect(res.body.success).toBe(true);
 
-        const { groupChat } = res.body.data;
-        expect(groupChat.avatarUrl).toBe(fakeSecureUrl);
+        const { chat } = res.body.data;
+        expect(chat.avatarUrl).toBe(fakeSecureUrl);
 
         expect(uploadSpy).toHaveBeenCalledTimes(1);
-        expect(uploadSpy).toHaveBeenCalledWith(expect.any(Buffer), groupChat.id);
+        expect(uploadSpy).toHaveBeenCalledWith(expect.any(Buffer), chat.id);
 
         const dbChat = await prisma.chat.findUnique({
-          where: { id: groupChat.id },
+          where: { id: chat.id },
         });
         expect(dbChat.avatarUrl).toBe(fakeSecureUrl);
       });
@@ -398,6 +398,94 @@ describe("Chat Routes Integration Tests", () => {
 
         expect(res.status).toBe(400);
         expect(res.body.success).toBe(false);
+      });
+    });
+
+    describe('PATCH /api/chats/:chatId', () => {
+      let testChat
+
+      beforeEach(async () => {
+        testChat = await prisma.chat.create({
+          data: {
+            isGroup: true,
+            name: 'old name',
+            avatarUrl: 'old url',
+            members: {
+              create: [
+                { userId: currentUser.id, role: 'ADMIN' },
+                { userId: userBob.id, role: 'MEMBER' },
+                { userId: userCharlie.id, role: 'MEMBER' },
+              ],
+            },
+          },
+        });
+      });
+
+      it('should update a group chat as ADMIN', async () => {
+        const uploadSpy = jest
+          .spyOn(cloudinaryService, 'uploadChatAvatar')
+          .mockResolvedValueOnce({ secure_url: 'new url' });
+
+        const dummyImageBuffer = Buffer.from('fake-group-avatar-bytes');
+
+        const res = await agentA
+          .patch(`/api/chats/${testChat.id}`)
+          .field('name', 'new name')
+          .attach('avatar', dummyImageBuffer, 'group-avatar.png');
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(uploadSpy).toHaveBeenCalled();
+
+        const { chat } = res.body.data;
+        expect(chat.name).toBe('new name');
+        expect(chat.isGroup).toBe(true);
+        expect(chat.avatarUrl).toBe('new url');
+      });
+
+      it('should update a group chat without avatarUrl', async () => {
+        const uploadSpy = jest
+          .spyOn(cloudinaryService, 'uploadChatAvatar')
+
+        const res = await agentA
+          .patch(`/api/chats/${testChat.id}`)
+          .field('name', 'new name')
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(uploadSpy).not.toHaveBeenCalled();
+
+        const { chat } = res.body.data;
+        expect(chat.name).toBe('new name');
+        expect(chat.isGroup).toBe(true);
+        expect(chat.avatarUrl).toBe('old url');
+      });
+
+      it('shouldnt update a group chat without ADMIN role', async () => {
+        const res = await agentB
+          .patch(`/api/chats/${testChat.id}`)
+          .field('name', 'new name')
+
+        expect(res.status).toBe(403);
+        expect(res.body.success).toBe(false);
+        expect(res.body.message).toMatch(/admin/i)
+      });
+
+      it('shouldnt update a group chat without a name', async () => {
+
+        const res = await agentA
+          .patch(`/api/chats/${testChat.id}`)
+
+        expect(res.status).toBe(400);
+        expect(res.body.success).toBe(false);
+        expect(res.body.errors).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              field: 'name',
+              message: expect.stringMatching(/empty/i),
+            }),
+          ])
+        );
       });
     });
   });
