@@ -112,6 +112,18 @@ export const updateGroupChat = async (req, res) => {
   });
 };
 
+export const deleteGroupChat = async (req, res) => {
+  const currentUserId = req.user?.id;
+  const { chatId } = matchedData(req);
+
+  await chatService.deleteGroupChat(chatId, currentUserId);
+  
+  return res.json({
+    success: true,
+    message: 'Chat has been deleted.',
+  });
+};
+
 export const getChatById = async (req, res) => {
   const currentUserId = req.user?.id;
   const { chatId } = matchedData(req);

@@ -10,6 +10,7 @@ import {
 import {
   createGroupChat,
   createOrGetDirectChat,
+  deleteGroupChat,
   getAllChats,
   getChatById,
   updateGroupChat
@@ -52,6 +53,13 @@ chatRouter.patch('/:chatId',
   validateUpdateGroupChat,
   handleValidation,
   updateGroupChat
+);
+
+chatRouter.delete('/:chatId',
+  isChatAdmin,
+  validateUuidParam('chatId'),
+  handleValidation,
+  deleteGroupChat
 );
 
 export default chatRouter;

@@ -1,5 +1,5 @@
 import { cloudinaryService } from "../../lib/cloudinary.js";
-import { beforeEach, jest } from '@jest/globals';
+import { beforeEach, expect, jest } from '@jest/globals';
 import { prisma } from "../../lib/prisma.js";
 import { createAuthenticatedAgent } from "../helpers/authHelper.js";
 
@@ -402,7 +402,7 @@ describe("Chat Routes Integration Tests", () => {
     });
 
     describe('PATCH /api/chats/:chatId', () => {
-      let testChat
+      let testChat;
 
       beforeEach(async () => {
         testChat = await prisma.chat.create({
@@ -484,8 +484,79 @@ describe("Chat Routes Integration Tests", () => {
               field: 'name',
               message: expect.stringMatching(/empty/i),
             }),
-          ])
+          ]),
         );
+      });
+    });
+
+    describe('DELETE /api/chats/:chatId', () => {
+      let testChat;
+      let deleteSpy;
+      let getPublicIdSpy;
+      const publicIdMock = 'avatars/chat-123';
+
+      beforeEach(async () => {
+        testChat = await prisma.chat.create({
+          data: {
+            isGroup: true,
+            name: 'old name',
+            avatarUrl: 'old url',
+            members: {
+              create: [
+                { userId: currentUser.id, role: 'ADMIN' },
+                { userId: userBob.id, role: 'MEMBER' },
+                { userId: userCharlie.id, role: 'MEMBER' },
+              ],
+            },
+          },
+        });
+
+        
+        getPublicIdSpy = jest
+          .spyOn(cloudinaryService, 'getPublicIdFromUrl')
+          .mockReturnValue(publicIdMock);
+
+        deleteSpy = jest
+          .spyOn(cloudinaryService, 'deleteFromCloud')
+          .mockResolvedValue({ result: 'ok' });
+      });
+
+      it('should delete a group chat and trigger Cloudinary cleanup', async () => {
+        const res = await agentA
+          .delete(`/api/chats/${testChat.id}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.message).toMatch(/delete/i);
+        expect(deleteSpy).toHaveBeenCalled();
+        expect(getPublicIdSpy).toHaveBeenCalled();
+
+        const chatInDb = await prisma.chat.findUnique({ where: { id: testChat.id } });
+        expect(chatInDb).toBeNull();
+      });
+
+      it('should not call Cloudinary if the group chat has no avatarUrl', async () => {
+        await prisma.chat.update({
+          where: { id: testChat.id },
+          data: { avatarUrl: null },
+        });
+
+        const res = await agentA
+          .delete(`/api/chats/${testChat.id}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.message).toMatch(/delete/i);
+        expect(deleteSpy).not.toHaveBeenCalled();
+        expect(getPublicIdSpy).not.toHaveBeenCalled();
+      });
+
+      it('should return 403 if a non-admin member attempts to delete the chat', async () => {
+        const res = await agentB
+          .delete(`/api/chats/${testChat.id}`);
+
+        expect(res.status).toBe(403);
+        expect(res.body.success).toBe(false);
       });
     });
   });

@@ -1,3 +1,5 @@
+import { cloudinaryService } from "../../lib/cloudinary.js";
+import { logger } from "../../lib/logger.js";
 import { prisma } from "../../lib/prisma.js";
 import { formatChatSummary, formatMessageStatus } from "../helpers/chatStatusHelper.js";
 
@@ -166,6 +168,29 @@ export const chatService = {
         avatarUrl,
       },
     });
+  },
+
+  async deleteGroupChat(chatId, currentUserId) {
+    const deletedChat = await prisma.chat.delete({
+      where: { id: chatId },
+    });
+
+    if (deletedChat.avatarUrl) {
+      const publicId = cloudinaryService.getPublicIdFromUrl(deletedChat.avatarUrl);
+
+      if (publicId) {
+        try {
+          await cloudinaryService.deleteFromCloud(publicId);
+        } catch (cloudErr) {
+          logger.error(
+            { err: cloudErr, userId: currentUserId, publicId },
+            'Failed to delete asset from Cloudinary'
+          );
+        }
+      }
+    }
+
+    return deletedChat;
   },
 
   async getChatById(chatId, currentUserId) {
