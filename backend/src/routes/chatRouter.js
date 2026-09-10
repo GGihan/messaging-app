@@ -10,6 +10,7 @@ import {
 import {
   createGroupChat,
   createOrGetDirectChat,
+  deleteChatHistory,
   deleteGroupChat,
   getAllChats,
   getChatById,
@@ -60,6 +61,12 @@ chatRouter.delete('/:chatId',
   validateUuidParam('chatId'),
   handleValidation,
   deleteGroupChat
+);
+
+chatRouter.delete('/:chatId/history',
+  validateUuidParam('chatId'),
+  handleValidation,
+  deleteChatHistory
 );
 
 export default chatRouter;

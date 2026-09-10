@@ -698,4 +698,57 @@ describe("Chat Routes Integration Tests", () => {
       expect(returnedMessages[0].text).toBe('Second message (newer)',);
     });
   });
+
+  describe('DELETE /api/chats/:chatId/history', () => {
+    let sharedChat;
+
+    beforeEach(async () => {
+      sharedChat = await prisma.chat.create({
+        data: {
+          isGroup: true,
+          name: 'test chat',
+          members: {
+            create: [
+              { userId: currentUser.id, role: 'MEMBER' },
+              { userId: userBob.id, role: 'MEMBER' },
+            ],
+          },
+        },
+      });
+    });
+
+    it('should successfully update deletedAt for the requesting member', async () => {
+      const res = await agentA.delete(`/api/chats/${sharedChat.id}/history`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.chat).toBeDefined();
+
+      const currentMember = await prisma.chatMember.findUnique({
+        where: {
+          userId_chatId: {
+            userId: currentUser.id,
+            chatId: sharedChat.id,
+          },
+        },
+      });
+
+      expect(currentMember.deletedAt).not.toBeNull();
+    });
+
+    it('should not mutate deletedAt for other members in the chat', async () => {
+      await agentA.delete(`/api/chats/${sharedChat.id}/history`);
+
+      const bobMember = await prisma.chatMember.findUnique({
+        where: {
+          userId_chatId: {
+            userId: userBob.id,
+            chatId: sharedChat.id,
+          },
+        },
+      });
+
+      expect(bobMember.deletedAt).toBeNull();
+    });
+  });
 });

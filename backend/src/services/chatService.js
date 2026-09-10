@@ -273,4 +273,18 @@ export const chatService = {
       messages: enrichedMessages,
     };
   },
+
+  async deleteChatHistory(chatId, currentUserId) {
+    return prisma.chatMember.update({
+      where: {
+        userId_chatId: {
+          userId: currentUserId,
+          chatId,
+        },
+      },
+      data: {
+        deletedAt: new Date(Date.now()),
+      },
+    });
+  },
 };

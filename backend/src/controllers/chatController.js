@@ -144,3 +144,17 @@ export const getChatById = async (req, res) => {
     },
   });
 };
+
+export const deleteChatHistory = async (req, res) => {
+  const currentUserId = req.user?.id;
+  const { chatId } = matchedData(req);
+
+  const deletedChatHistory = await chatService.deleteChatHistory(chatId, currentUserId);
+
+  return res.json({
+    success: true,
+    data: {
+      chat: deletedChatHistory,
+    },
+  });
+};
