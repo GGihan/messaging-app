@@ -74,6 +74,7 @@ model ChatMember {
   role       MemberRole @default(MEMBER)
   joinedAt   DateTime   @default(now())
   lastReadAt DateTime   @default(now())
+  leftAt     DateTime?
   deletedAt  DateTime?
 
   userId String

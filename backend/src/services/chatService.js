@@ -79,10 +79,18 @@ export const chatService = {
   async getAllChats(userId) {
     const chats = await prisma.chat.findMany({
       where: {
-        members: { some: { userId } }
+        members: {
+          some: {
+            userId,
+            deletedAt: null,
+          },
+        },
       },
       include: {
         members: {
+          where: {
+            leftAt: null,
+          },
           include: {
             user: {
               select: {
@@ -194,6 +202,19 @@ export const chatService = {
   },
 
   async getChatById(chatId, currentUserId) {
+    const currentMember = await prisma.chatMember.findUnique({
+      where: {
+        userId_chatId: {
+          userId: currentUserId,
+          chatId,
+        },
+      },
+    });
+
+    if (!currentMember || currentMember.leftAt !== null) {
+      return null;
+    }
+
     const chat = await prisma.chat.findFirst({
       where: {
         id: chatId,
@@ -203,6 +224,9 @@ export const chatService = {
       },
       include: {
         members: {
+          where: {
+            leftAt: null,
+          },
           include: {
             user: {
               select: {
@@ -214,8 +238,23 @@ export const chatService = {
           },
         },
         messages: {
+          where: {
+            ...(currentMember.deletedAt && { createdAt: { gt: currentMember.deletedAt } }),
+          },
           take: 30,
           orderBy: { createdAt: 'desc' },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                profile: {
+                  select: {
+                    displayName: true,
+                  },
+                },
+              },
+            },
+          },
         },
       },
     });

@@ -277,6 +277,44 @@ describe("Chat Routes Integration Tests", () => {
       expect(res.status).toBe(200);
       expect(res.body.data.chats[0].isUnread).toBe(false);
     });
+
+    it('should not return chats with member deletedAt not null', async () => {
+      const chatRes = await agentA.post('/api/chats').send({ receiverId: userBob.id });
+      const chatId = chatRes.body.data.chat.id;
+
+      await prisma.chatMember.update({
+        where: {
+          userId_chatId: {
+            userId: currentUser.id,
+            chatId,
+          },
+        },
+        data: { deletedAt: new Date('2026-09-06T11:00:00Z') },
+      });
+
+      const res = await agentA.get('/api/chats');
+      expect(res.status).toBe(200);
+      expect(res.body.data.chats.length).toBe(0);
+    });
+
+    it('should not include members with leftAt not null', async () => {
+      const chatRes = await agentA.post('/api/chats').send({ receiverId: userBob.id });
+      const chatId = chatRes.body.data.chat.id;
+
+      await prisma.chatMember.update({
+        where: {
+          userId_chatId: {
+            userId: currentUser.id,
+            chatId,
+          },
+        },
+        data: { leftAt: new Date('2026-09-06T11:00:00Z') },
+      });
+
+      const res = await agentA.get('/api/chats');
+      expect(res.status).toBe(200);
+      expect(res.body.data.chats[0].members.length).toBe(1);
+    });
   });
 
   describe('Group Chat Integration Tests', () => {
@@ -618,6 +656,46 @@ describe("Chat Routes Integration Tests", () => {
       expect(res.status).toBe(404);
       expect(res.body.success).toBe(false);
       expect(res.body.message).toMatch(/not found/i);
+    });
+
+    it('should not return chat members with member leftAt not null', async () => {
+      await prisma.chatMember.update({
+        where: {
+          userId_chatId: {
+            userId: userBob.id,
+            chatId: sharedChat.id,
+          },
+        },
+        data: { leftAt: new Date('2026-09-06T11:00:00Z') },
+      });
+
+      const res = await agentA.get(`/api/chats/${sharedChat.id}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.chat.members.length).toBe(1);
+    });
+
+    it('should only return messages created after member deletedAt timestamp', async () => {
+      const deletedAtTimestamp = new Date(Date.now() - 30000);
+
+      await prisma.chatMember.update({
+        where: {
+          userId_chatId: {
+            userId: currentUser.id,
+            chatId: sharedChat.id,
+          },
+        },
+        data: { deletedAt: deletedAtTimestamp },
+      });
+
+      const res = await agentA.get(`/api/chats/${sharedChat.id}`);
+
+      expect(res.status).toBe(200);
+
+      const chat = res.body.data.chat ?? res.body.data;
+      const returnedMessages = chat.messages;
+
+      expect(returnedMessages).toHaveLength(1);
+      expect(returnedMessages[0].text).toBe('Second message (newer)',);
     });
   });
 });
