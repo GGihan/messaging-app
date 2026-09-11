@@ -1,6 +1,7 @@
 import { cloudinaryService } from "../../lib/cloudinary.js";
 import { logger } from "../../lib/logger.js";
 import { prisma } from "../../lib/prisma.js";
+import { BadRequestError, NotFoundError } from "../errors/AppError.js";
 import { formatChatSummary, formatMessageStatus } from "../helpers/chatStatusHelper.js";
 
 const buildChatSearchFilter = (userId, search) => {
@@ -25,6 +26,40 @@ const buildChatSearchFilter = (userId, search) => {
       },
     ],
   };
+};
+
+async function handleAdminSuccession(tx, chatId, leavingUserId) {
+  const remainingAdminsCount = await tx.chatMember.count({
+    where: {
+      chatId,
+      role: 'ADMIN',
+      leftAt: null,
+      userId: { not: leavingUserId },
+    },
+  });
+
+  if (remainingAdminsCount > 0) return;
+
+  const oldestMember = await tx.chatMember.findFirst({
+    where: {
+      chatId,
+      leftAt: null,
+      userId: { not: leavingUserId },
+    },
+    orderBy: { joinedAt: 'asc' },
+  });
+
+  if (!oldestMember) return;
+
+  await tx.chatMember.update({
+    where: {
+      userId_chatId: {
+        userId: oldestMember.userId,
+        chatId,
+      },
+    },
+    data: { role: 'ADMIN' },
+  });
 };
 
 export const chatService = {
@@ -308,7 +343,7 @@ export const chatService = {
         },
       },
       data: {
-        deletedAt: new Date(Date.now()),
+        deletedAt: new Date(),
       },
     });
   },
@@ -385,6 +420,53 @@ export const chatService = {
           },
         },
       });
+    });
+  },
+
+  async leaveGroupChat(chatId, currentUserId) {
+    const now = new Date();
+
+    return prisma.$transaction(async (tx) => {
+      const member = await tx.chatMember.findUnique({
+        where: {
+          userId_chatId: {
+            userId: currentUserId,
+            chatId,
+          },
+        },
+      });
+
+      if (!member) {
+        throw new NotFoundError('You are not a member of this chat');
+      }
+
+      if (member.leftAt !== null) {
+        throw new BadRequestError('You have already left this chat');
+      }
+
+      if (member.role === 'ADMIN') {
+        await handleAdminSuccession(tx, chatId, currentUserId);
+      }
+
+      // Mark the user as left and touch parent chat updatedAt
+      const updatedMember = await tx.chatMember.update({
+        where: {
+          userId_chatId: {
+            userId: currentUserId,
+            chatId,
+          },
+        },
+        data: {
+          leftAt: now,
+        },
+      });
+
+      await tx.chat.update({
+        where: { id: chatId },
+        data: { updatedAt: now },
+      });
+
+      return updatedMember;
     });
   },
 };

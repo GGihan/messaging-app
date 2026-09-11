@@ -42,7 +42,7 @@ describe("ChatMember Routes Integration Tests", () => {
         members: {
           create: [
             { userId: currentUser.id, role: 'ADMIN' },
-            { userId: userBob.id, role: 'MEMBER' },
+            { userId: userBob.id, role: 'MEMBER', joinedAt: new Date(Date.now() - 60000) },
             { userId: userCharlie.id, role: 'MEMBER'},
           ],
         },
@@ -190,6 +190,179 @@ describe("ChatMember Routes Integration Tests", () => {
         },
       });
       expect(memberCount).toBe(3);
+    });
+  });
+
+  describe("DELETE /api/chats/:chatId/members/me", () => {
+    it("should allow an active regular member to leave the group chat", async () => {
+      const res = await agentB.delete(`/api/chats/${groupChat.id}/members/me`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toMatch(/left/i);
+      expect(res.body.data.member).toEqual(
+        expect.objectContaining({
+          userId: userBob.id,
+          chatId: groupChat.id,
+          leftAt: expect.any(String),
+        })
+      );
+
+      const memberInDb = await prisma.chatMember.findUnique({
+        where: {
+          userId_chatId: {
+            userId: userBob.id,
+            chatId: groupChat.id,
+          },
+        },
+      });
+      expect(memberInDb.leftAt).not.toBeNull();
+
+      const activeMemberCount = await prisma.chatMember.count({
+        where: {
+          chatId: groupChat.id,
+          leftAt: null,
+        },
+      });
+      expect(activeMemberCount).toBe(2);
+    });
+
+    it("should return 400 if user tries to leave a chat they already left", async () => {
+      await agentB.delete(`/api/chats/${groupChat.id}/members/me`);
+
+      const res = await agentB.delete(`/api/chats/${groupChat.id}/members/me`);
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/already left/i);
+    });
+
+    it("should return 404 if user was never a member of the chat", async () => {
+      const res = await agentD.delete(`/api/chats/${groupChat.id}/members/me`);
+
+      expect(res.status).toBe(404);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/not a member/i);
+    });
+
+    it("should promote the oldest active member to ADMIN when the sole ADMIN leaves", async () => {
+      const res = await agentA.delete(`/api/chats/${groupChat.id}/members/me`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.member).toEqual(
+        expect.objectContaining({
+          userId: currentUser.id,
+          leftAt: expect.any(String),
+        })
+      );
+
+      const promotedMember = await prisma.chatMember.findUnique({
+        where: {
+          userId_chatId: {
+            userId: userBob.id,
+            chatId: groupChat.id,
+          },
+        },
+      });
+      expect(promotedMember.role).toBe("ADMIN");
+
+      const regularMember = await prisma.chatMember.findUnique({
+        where: {
+          userId_chatId: {
+            userId: userCharlie.id,
+            chatId: groupChat.id,
+          },
+        },
+      });
+      expect(regularMember.role).toBe("MEMBER");
+
+      const adminCount = await prisma.chatMember.count({
+        where: {
+          chatId: groupChat.id,
+          role: "ADMIN",
+          leftAt: null,
+        },
+      });
+      expect(adminCount).toBe(1);
+    });
+
+    it("should allow an ADMIN to leave without promoting anyone if another ADMIN exists", async () => {
+      await prisma.chatMember.update({
+        where: {
+          userId_chatId: {
+            userId: userBob.id,
+            chatId: groupChat.id,
+          },
+        },
+        data: { role: "ADMIN" },
+      });
+
+      const res = await agentA.delete(`/api/chats/${groupChat.id}/members/me`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+
+      const charlieMember = await prisma.chatMember.findUnique({
+        where: {
+          userId_chatId: {
+            userId: userCharlie.id,
+            chatId: groupChat.id,
+          },
+        },
+      });
+      expect(charlieMember.role).toBe("MEMBER");
+
+      const remainingAdmins = await prisma.chatMember.findMany({
+        where: {
+          chatId: groupChat.id,
+          role: "ADMIN",
+          leftAt: null,
+        },
+      });
+      expect(remainingAdmins).toHaveLength(1);
+      expect(remainingAdmins[0].userId).toBe(userBob.id);
+    });
+
+    it("should allow the sole ADMIN to leave if they are the only person left in the chat", async () => {
+      await prisma.chatMember.updateMany({
+        where: {
+          chatId: groupChat.id,
+          userId: { in: [userBob.id, userCharlie.id] },
+        },
+        data: { leftAt: new Date() },
+      });
+
+      const res = await agentA.delete(`/api/chats/${groupChat.id}/members/me`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+
+      const activeMemberCount = await prisma.chatMember.count({
+        where: {
+          chatId: groupChat.id,
+          leftAt: null,
+        },
+      });
+      expect(activeMemberCount).toBe(0);
+    });
+
+    it("should update the parent chat updatedAt timestamp when a member leaves", async () => {
+      const originalChat = await prisma.chat.findUnique({
+        where: { id: groupChat.id },
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      await agentB.delete(`/api/chats/${groupChat.id}/members/me`);
+
+      const updatedChat = await prisma.chat.findUnique({
+        where: { id: groupChat.id },
+      });
+
+      expect(new Date(updatedChat.updatedAt).getTime()).toBeGreaterThan(
+        new Date(originalChat.updatedAt).getTime()
+      );
     });
   });
 });

@@ -8,8 +8,24 @@ export const addChatMember = async (req, res) => {
 
   return res.status(201).json({
     success: true,
+    message: 'Members successfully added',
     data: {
       addedMembers: newMembers,
+    },
+  });
+};
+
+export const leaveGroupChat = async (req, res) => {
+  const currentUserId = req.user?.id;
+  const { chatId } = matchedData(req);
+
+  const member = await chatService.leaveGroupChat(chatId, currentUserId);
+
+  return res.json({
+    success: true,
+    message: 'Member successfully left',
+    data: {
+      member,
     },
   });
 };
