@@ -28,8 +28,9 @@ export const createOrGetDirectChat = async (req, res) => {
 
 export const getAllChats = async (req, res) => {
   const currentUserId = req.user?.id;
+  const { search } = matchedData(req);
 
-  const chats = await chatService.getAllChats(currentUserId);
+  const chats = await chatService.getAllChats(currentUserId, search);
 
   return res.json({
     success: true,

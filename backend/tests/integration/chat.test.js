@@ -16,11 +16,11 @@ describe("Chat Routes Integration Tests", () => {
     agentA = setupA.agent;
     currentUser = setupA.user;
 
-    const setupB = await createAuthenticatedAgent();
+    const setupB = await createAuthenticatedAgent({}, { displayName: 'Bob Test' });
     agentB = setupB.agent;
     userBob = setupB.user;
 
-    const setupC = await createAuthenticatedAgent();
+    const setupC = await createAuthenticatedAgent({}, { displayName: 'Charlie Test' });
     agentC = setupC.agent;
     userCharlie = setupC.user;
   });
@@ -314,6 +314,50 @@ describe("Chat Routes Integration Tests", () => {
       const res = await agentA.get('/api/chats');
       expect(res.status).toBe(200);
       expect(res.body.data.chats[0].members.length).toBe(1);
+    });
+
+    it('should search by optional query and return matched direct chat', async () => {
+      await agentA.post('/api/chats').send({ receiverId: userCharlie.id });
+
+      const chatRes = await agentA.post('/api/chats').send({ receiverId: userBob.id });
+      const chat = chatRes.body.data.chat;
+
+      const bobMember = chat.members.find((m) => m.userId === userBob.id);
+      const bobDisplayName = bobMember.user.profile.displayName;
+
+      const res = await agentA.get(`/api/chats?search=${encodeURIComponent(bobDisplayName)}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.chats).toHaveLength(1);
+      expect(res.body.data.chats[0].id).toBe(chat.id);
+    });
+
+    it('should search by optional query and return matched group chat', async () => {
+      const firstRes = await agentA
+        .post('/api/chats/groups')
+        .send({
+          name: 'First Group',
+          memberIds: [userBob.id, userCharlie.id],
+        });
+
+      const secondRes = await agentB
+        .post('/api/chats/groups')
+        .send({
+          name: 'Second Group',
+          memberIds: [currentUser.id, userCharlie.id],
+        });
+
+      const firstChat = firstRes.body.data.chat;
+      const secondChat = secondRes.body.data.chat;
+
+      const firstSearch = await agentA.get(`/api/chats?search=${encodeURIComponent(firstChat.name)}`);
+      expect(firstSearch.status).toBe(200);
+      expect(firstSearch.body.data.chats).toHaveLength(1);
+      expect(firstSearch.body.data.chats[0].id).toBe(firstChat.id);
+
+      const secondSearch = await agentA.get(`/api/chats?search=${encodeURIComponent(secondChat.name)}`);
+      expect(secondSearch.status).toBe(200);
+      expect(secondSearch.body.data.chats).toHaveLength(1);
+      expect(secondSearch.body.data.chats[0].id).toBe(secondChat.id);
     });
   });
 

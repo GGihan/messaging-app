@@ -51,6 +51,14 @@ export const validateUserSearchQuery = [
     .isLength({ max: 30 }).withMessage('Search query cannot exceed 30 characters.'),
 ];
 
+export const validateChatSearchQuery = [
+  query('search')
+    .optional()
+    .trim()
+    .isString().withMessage(`Chat query ${stringErr}`)
+    .isLength({ max: 50 }).withMessage('Search query cannot exceed 50 characters.'),
+];
+
 export const validateFriendshipQuery = [
   query('status')
     .optional()

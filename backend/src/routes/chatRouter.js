@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { isChatAdmin, requireAuth } from "../middleware/authMiddleware.js";
 import {
+  validateChatSearchQuery,
   validateCreateGroupChat,
   validateReceiverBody,
   validateUpdateGroupChat,
@@ -31,6 +32,8 @@ chatRouter.post('/',
 );
 
 chatRouter.get('/',
+  validateChatSearchQuery,
+  handleValidation,
   getAllChats
 );
 

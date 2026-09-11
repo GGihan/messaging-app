@@ -3,6 +3,30 @@ import { logger } from "../../lib/logger.js";
 import { prisma } from "../../lib/prisma.js";
 import { formatChatSummary, formatMessageStatus } from "../helpers/chatStatusHelper.js";
 
+const buildChatSearchFilter = (userId, search) => {
+  if (!search) return {};
+
+  return {
+    OR: [
+      {
+        isGroup: true,
+        name: { contains: search, mode: 'insensitive' },
+      },
+      {
+        isGroup: false,
+        members: {
+          some: {
+            userId: { not: userId },
+            user: {
+              profile: { displayName: { contains: search, mode: 'insensitive' } } ,
+            },
+          },
+        },
+      },
+    ],
+  };
+};
+
 export const chatService = {
   async getDirectChat(userIdA, userIdB) {
     const chat = await prisma.chat.findFirst({
@@ -76,7 +100,7 @@ export const chatService = {
     return { ...newChat, messages: [] };
   },
 
-  async getAllChats(userId) {
+  async getAllChats(userId, search) {
     const chats = await prisma.chat.findMany({
       where: {
         members: {
@@ -85,6 +109,7 @@ export const chatService = {
             deletedAt: null,
           },
         },
+        ...buildChatSearchFilter(userId, search),
       },
       include: {
         members: {
