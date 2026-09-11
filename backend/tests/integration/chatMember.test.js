@@ -245,6 +245,38 @@ describe("ChatMember Routes Integration Tests", () => {
       expect(res.body.message).toMatch(/not a member/i);
     });
 
+    it("should return 400 when attempting to leave a 1-on-1 direct message", async () => {
+      const directMessageChat = await prisma.chat.create({
+        data: {
+          isGroup: false,
+          members: {
+            create: [
+              { userId: currentUser.id, role: 'MEMBER' },
+              { userId: userBob.id, role: 'MEMBER' },
+            ],
+          },
+        },
+      });
+
+      const res = await agentA.delete(
+        `/api/chats/${directMessageChat.id}/members/me`
+      );
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/direct chat/i);
+
+      const memberInDb = await prisma.chatMember.findUnique({
+        where: {
+          userId_chatId: {
+            userId: currentUser.id,
+            chatId: directMessageChat.id,
+          },
+        },
+      });
+      expect(memberInDb.leftAt).toBeNull();
+    });
+
     it("should promote the oldest active member to ADMIN when the sole ADMIN leaves", async () => {
       const res = await agentA.delete(`/api/chats/${groupChat.id}/members/me`);
 
@@ -496,6 +528,31 @@ describe("ChatMember Routes Integration Tests", () => {
       expect(res.status).toBe(404);
       expect(res.body.success).toBe(false);
       expect(res.body.message).toMatch(/member not found/i);
+    });
+
+    it("should return 400 when attempting to remove a member from a direct chat", async () => {
+      const dmChat = await prisma.chat.create({
+        data: {
+          isGroup: false,
+          members: {
+            create: [
+              { userId: currentUser.id, role: 'ADMIN' },
+              { userId: userBob.id, role: 'MEMBER' },
+            ],
+          },
+        },
+        include: { members: true },
+      });
+
+      const bobMember = dmChat.members.find((m) => m.userId === userBob.id);
+
+      const res = await agentA.delete(
+        `/api/chats/${dmChat.id}/members/${bobMember.id}`
+      );
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/direct chat/i);
     });
 
     it("should update the parent chat updatedAt timestamp on removal", async () => {

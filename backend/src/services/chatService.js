@@ -434,10 +434,21 @@ export const chatService = {
             chatId,
           },
         },
+        include: {
+          chat: {
+            select: {
+              isGroup: true,
+            },
+          },
+        },
       });
 
       if (!member) {
         throw new NotFoundError('You are not a member of this chat');
+      }
+
+      if (!member.chat.isGroup) {
+        throw new BadRequestError('Cannot leave a direct chat');
       }
 
       if (member.leftAt !== null) {
@@ -478,10 +489,21 @@ export const chatService = {
         where: {
           id: memberId
         },
+        include: {
+          chat: {
+            select: {
+              isGroup: true
+            },
+          },
+        },
       });
 
       if (!targetMember || targetMember.chatId !== chatId) {
         throw new NotFoundError('Member not found')
+      }
+
+      if (!targetMember.chat.isGroup) {
+        throw new BadRequestError('Cannot remove members from a direct chat');
       }
 
       if (targetMember.userId === currentUserId) {
