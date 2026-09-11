@@ -365,4 +365,158 @@ describe("ChatMember Routes Integration Tests", () => {
       );
     });
   });
+
+  describe("DELETE /api/chats/:chatId/members/:memberId", () => {
+    let bobMembership;
+    let charlieMembership;
+    let adminMembership;
+
+    beforeEach(async () => {
+      const members = await prisma.chatMember.findMany({
+        where: { chatId: groupChat.id },
+      });
+
+      adminMembership = members.find((m) => m.userId === currentUser.id);
+      bobMembership = members.find((m) => m.userId === userBob.id);
+      charlieMembership = members.find((m) => m.userId === userCharlie.id);
+    });
+
+    it("should allow an active ADMIN to remove a MEMBER from the chat", async () => {
+      const res = await agentA.delete(
+        `/api/chats/${groupChat.id}/members/${bobMembership.id}`
+      );
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toMatch(/removed/i);
+      expect(res.body.data.member).toEqual(
+        expect.objectContaining({
+          id: bobMembership.id,
+          userId: userBob.id,
+          chatId: groupChat.id,
+          leftAt: expect.any(String),
+        })
+      );
+
+      const updatedBob = await prisma.chatMember.findUnique({
+        where: { id: bobMembership.id },
+      });
+      expect(updatedBob.leftAt).not.toBeNull();
+
+      const activeMemberCount = await prisma.chatMember.count({
+        where: {
+          chatId: groupChat.id,
+          leftAt: null,
+        },
+      });
+      expect(activeMemberCount).toBe(2);
+    });
+
+    it("should not allow a regular MEMBER to remove another member (403)", async () => {
+      const res = await agentB.delete(
+        `/api/chats/${groupChat.id}/members/${charlieMembership.id}`
+      );
+
+      expect(res.status).toBe(403);
+      expect(res.body.success).toBe(false);
+
+      const charlieInDb = await prisma.chatMember.findUnique({
+        where: { id: charlieMembership.id },
+      });
+      expect(charlieInDb.leftAt).toBeNull();
+    });
+
+    it("should not allow an admin who already left to remove members (403)", async () => {
+      await prisma.chatMember.update({
+        where: { id: adminMembership.id },
+        data: { leftAt: new Date() },
+      });
+
+      const res = await agentA.delete(
+        `/api/chats/${groupChat.id}/members/${bobMembership.id}`
+      );
+
+      expect(res.status).toBe(403);
+      expect(res.body.success).toBe(false);
+    });
+
+    it("should return 400 if an ADMIN attempts to remove themselves via this endpoint", async () => {
+      const res = await agentA.delete(
+        `/api/chats/${groupChat.id}/members/${adminMembership.id}`
+      );
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/cannot remove yourself/i);
+    });
+
+    it("should return 400 if attempting to remove a member who has already left", async () => {
+      await prisma.chatMember.update({
+        where: { id: bobMembership.id },
+        data: { leftAt: new Date() },
+      });
+
+      const res = await agentA.delete(
+        `/api/chats/${groupChat.id}/members/${bobMembership.id}`
+      );
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/already left/i);
+    });
+
+    it("should return 404 if memberId does not exist", async () => {
+      const nonExistentId = "00000000-0000-0000-0000-000000000000";
+
+      const res = await agentA.delete(
+        `/api/chats/${groupChat.id}/members/${nonExistentId}`
+      );
+
+      expect(res.status).toBe(404);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/member not found/i);
+    });
+
+    it("should return 404 if member belongs to a different chat", async () => {
+      const otherChat = await prisma.chat.create({
+        data: {
+          isGroup: true,
+          members: {
+            create: [{ userId: userDavid.id, role: "MEMBER" }],
+          },
+        },
+        include: { members: true },
+      });
+      const davidOtherChatMember = otherChat.members[0];
+
+      const res = await agentA.delete(
+        `/api/chats/${groupChat.id}/members/${davidOtherChatMember.id}`
+      );
+
+      expect(res.status).toBe(404);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/member not found/i);
+    });
+
+    it("should update the parent chat updatedAt timestamp on removal", async () => {
+      const originalChat = await prisma.chat.findUnique({
+        where: { id: groupChat.id },
+      });
+
+      // Brief pause to ensure timestamp advances
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      await agentA.delete(
+        `/api/chats/${groupChat.id}/members/${bobMembership.id}`
+      );
+
+      const updatedChat = await prisma.chat.findUnique({
+        where: { id: groupChat.id },
+      });
+
+      expect(new Date(updatedChat.updatedAt).getTime()).toBeGreaterThan(
+        new Date(originalChat.updatedAt).getTime()
+      );
+    });
+  });
 });

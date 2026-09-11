@@ -29,3 +29,18 @@ export const leaveGroupChat = async (req, res) => {
     },
   });
 };
+
+export const removeChatMember = async (req, res) => {
+  const currentUserId = req.user?.id;
+  const { chatId, memberId } = matchedData(req);
+
+  const member = await chatService.removeChatMember(chatId, memberId, currentUserId);
+
+  return res.json({
+    success: true,
+    message: 'Member successfully removed',
+    data: {
+      member,
+    },
+  });
+};

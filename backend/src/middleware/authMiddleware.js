@@ -1,4 +1,5 @@
 import { prisma } from "../../lib/prisma.js";
+import { ForbiddenError } from "../errors/AppError.js";
 
 export const requireAuth = (req, res, next) => {
   if (!req.isAuthenticated() || !req.user) {
@@ -19,11 +20,8 @@ export const isChatAdmin = async (req, res, next) => {
     },
   });
 
-  if (!membership || membership.role !== 'ADMIN') {
-    return res.status(403).json({
-      success: false,
-      message: "Not an admin of this chat.",
-    });
+  if (!membership || membership.leftAt !== null || membership.role !== 'ADMIN') {
+    throw new ForbiddenError('You must be an active admin of this chat to perform this action');
   }
 
   next();

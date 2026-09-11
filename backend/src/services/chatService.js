@@ -1,7 +1,7 @@
 import { cloudinaryService } from "../../lib/cloudinary.js";
 import { logger } from "../../lib/logger.js";
 import { prisma } from "../../lib/prisma.js";
-import { BadRequestError, NotFoundError } from "../errors/AppError.js";
+import { BadRequestError, ForbiddenError, NotFoundError } from "../errors/AppError.js";
 import { formatChatSummary, formatMessageStatus } from "../helpers/chatStatusHelper.js";
 
 const buildChatSearchFilter = (userId, search) => {
@@ -455,6 +455,46 @@ export const chatService = {
             userId: currentUserId,
             chatId,
           },
+        },
+        data: {
+          leftAt: now,
+        },
+      });
+
+      await tx.chat.update({
+        where: { id: chatId },
+        data: { updatedAt: now },
+      });
+
+      return updatedMember;
+    });
+  },
+
+  async removeChatMember(chatId, memberId, currentUserId) {
+    const now = new Date();
+
+    return prisma.$transaction(async (tx) => {
+      const targetMember = await tx.chatMember.findUnique({
+        where: {
+          id: memberId
+        },
+      });
+
+      if (!targetMember || targetMember.chatId !== chatId) {
+        throw new NotFoundError('Member not found')
+      }
+
+      if (targetMember.userId === currentUserId) {
+        throw new BadRequestError('You cannot remove yourself from this chat');
+      }
+
+      if (targetMember.leftAt !== null) {
+        throw new BadRequestError('Member has already left this chat');
+      }
+
+      const updatedMember = await tx.chatMember.update({
+        where: {
+          id: memberId,
         },
         data: {
           leftAt: now,
