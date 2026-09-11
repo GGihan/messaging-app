@@ -170,6 +170,27 @@ export const validateUpdateGroupChat = [
     .isLength({ min: 3, max: 50 }).withMessage(`Name ${groupNameLengthErr}`),
 ];
 
+export const validateAddChatMember = [
+  body('userIds')
+    .isArray().withMessage(`userIds ${arrayErr}`)
+    .bail()
+    .custom((userIds, { req }) => {
+      // Prevent duplicate entries
+      const uniqueIds = new Set(userIds);
+      if (uniqueIds.size !== userIds.length) {
+        throw new Error('Duplicate member IDs are not allowed');
+      }
+      // Prevent the creator from adding themselves in the userIds array
+      if (req.user && userIds.includes(req.user.id)) {
+        throw new Error('You cannot add yourself to userIds');
+      }
+
+      return true;
+    }),
+  body('userIds.*')
+    .isUUID().withMessage('Invalid user ID must be a valid UUID'),
+];
+
 export const validateUuidParam = (paramName = "id") => [
   param(paramName)
     .isUUID().withMessage(`Invalid ${paramName} format. Must be a valid UUID.`),

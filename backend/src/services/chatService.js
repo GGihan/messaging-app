@@ -312,4 +312,79 @@ export const chatService = {
       },
     });
   },
+
+  async addChatMember(chatId, userIds) {
+    const now = new Date();
+
+    return prisma.$transaction(async (tx) => {
+      const existingActiveMembers = await tx.chatMember.findMany({
+        where: {
+          chatId,
+          userId: { in: userIds },
+          leftAt: null,
+        },
+        select: { userId: true },
+      });
+
+      const existingActiveUserIds = new Set(
+        existingActiveMembers.map((m) => m.userId)
+      );
+
+      // Determine who needs to be added or re-activated
+      const targetUserIds = userIds.filter((id) => !existingActiveUserIds.has(id));
+
+      if (targetUserIds.length === 0) {
+        return [];
+      }
+
+      // Reset membership for users who had previously left
+      await tx.chatMember.updateMany({
+        where: {
+          chatId,
+          userId: { in: targetUserIds },
+          leftAt: { not: null },
+        },
+        data: {
+          leftAt: null,
+          joinedAt: now,
+          role: 'MEMBER',
+        },
+      });
+
+      // Insert any completely new members 
+      const memberData = userIds.map((userId) => ({
+        chatId,
+        userId,
+        role: 'MEMBER',
+      }));
+
+      await tx.chatMember.createMany({
+        data: memberData,
+        skipDuplicates: true,
+      });
+
+      await tx.chat.update({
+        where: { id: chatId },
+        data: { updatedAt: now },
+      });
+
+      // Return new members
+      return tx.chatMember.findMany({
+        where: {
+          chatId,
+          userId: { in: targetUserIds },
+          leftAt: null,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              lastActiveAt: true,
+              profile: true,
+            },
+          },
+        },
+      });
+    });
+  },
 };
