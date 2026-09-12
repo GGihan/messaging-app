@@ -227,6 +227,7 @@ describe("Chat Routes Integration Tests", () => {
       const chatRes = await agentA.post('/api/chats').send({ receiverId: userBob.id });
       const chatId = chatRes.body.data.chat.id;
 
+      const joinTime = new Date('2026-09-06T11:00:00Z');
       const messageTime = new Date('2026-09-06T12:00:00Z');
 
       await prisma.message.create({
@@ -240,7 +241,10 @@ describe("Chat Routes Integration Tests", () => {
 
       await prisma.chatMember.updateMany({
         where: { chatId, userId: currentUser.id },
-        data: { lastReadAt: new Date('2026-09-06T11:59:00Z') },
+        data: {
+          joinedAt: joinTime,
+          lastReadAt: new Date('2026-09-06T11:59:00Z'),
+        },
       });
 
       let res = await agentA.get('/api/chats');
