@@ -134,6 +134,13 @@ export const validateStatus = [
     .isIn(['ACCEPTED', 'DECLINED']),
 ];
 
+export const validateRole = [
+  body('role')
+    .notEmpty().withMessage(`Role ${emptyErr}`)
+    .bail()
+    .isIn(['ADMIN', 'MEMBER']),
+];
+
 export const validateCreateGroupChat = [
   body('name')
     .trim()

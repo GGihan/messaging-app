@@ -14,6 +14,9 @@ describe("ChatMember Routes Integration Tests", () => {
   let userDavid;
   let userEve;
   let groupChat;
+  let adminMembership;
+  let bobMembership;
+  let charlieMembership;
   
   beforeEach(async () => {
     const setupA = await createAuthenticatedAgent();
@@ -66,6 +69,14 @@ describe("ChatMember Routes Integration Tests", () => {
         messages: true,
       }
     });
+
+    const members = await prisma.chatMember.findMany({
+      where: { chatId: groupChat.id },
+    });
+
+    adminMembership = members.find((m) => m.userId === currentUser.id);
+    bobMembership = members.find((m) => m.userId === userBob.id);
+    charlieMembership = members.find((m) => m.userId === userCharlie.id);
   });
 
   afterEach(() => {
@@ -399,19 +410,6 @@ describe("ChatMember Routes Integration Tests", () => {
   });
 
   describe("DELETE /api/chats/:chatId/members/:memberId", () => {
-    let bobMembership;
-    let charlieMembership;
-    let adminMembership;
-
-    beforeEach(async () => {
-      const members = await prisma.chatMember.findMany({
-        where: { chatId: groupChat.id },
-      });
-
-      adminMembership = members.find((m) => m.userId === currentUser.id);
-      bobMembership = members.find((m) => m.userId === userBob.id);
-      charlieMembership = members.find((m) => m.userId === userCharlie.id);
-    });
 
     it("should allow an active ADMIN to remove a MEMBER from the chat", async () => {
       const res = await agentA.delete(
@@ -566,6 +564,181 @@ describe("ChatMember Routes Integration Tests", () => {
       await agentA.delete(
         `/api/chats/${groupChat.id}/members/${bobMembership.id}`
       );
+
+      const updatedChat = await prisma.chat.findUnique({
+        where: { id: groupChat.id },
+      });
+
+      expect(new Date(updatedChat.updatedAt).getTime()).toBeGreaterThan(
+        new Date(originalChat.updatedAt).getTime()
+      );
+    });
+  });
+
+  describe("PATCH /api/chats/:chatId/members/:memberId/role", () => {
+
+    it("should allow an ADMIN to promote a regular MEMBER to ADMIN", async () => {
+      const res = await agentA
+        .patch(`/api/chats/${groupChat.id}/members/${bobMembership.id}/role`)
+        .send({ role: "ADMIN" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.member).toEqual(
+        expect.objectContaining({
+          id: bobMembership.id,
+          role: "ADMIN",
+        })
+      );
+
+      const updatedBob = await prisma.chatMember.findUnique({
+        where: { id: bobMembership.id },
+      });
+      expect(updatedBob.role).toBe("ADMIN");
+    });
+
+    it("should allow an ADMIN to demote another ADMIN to MEMBER", async () => {
+      await prisma.chatMember.update({
+        where: { id: bobMembership.id },
+        data: { role: "ADMIN" },
+      });
+
+      const res = await agentA
+        .patch(`/api/chats/${groupChat.id}/members/${bobMembership.id}/role`)
+        .send({ role: "MEMBER" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.member).toEqual(
+        expect.objectContaining({
+          id: bobMembership.id,
+          role: "MEMBER",
+        })
+      );
+
+      const updatedBob = await prisma.chatMember.findUnique({
+        where: { id: bobMembership.id },
+      });
+      expect(updatedBob.role).toBe("MEMBER");
+    });
+
+    it("should not allow a regular MEMBER to update roles (403)", async () => {
+      const res = await agentB
+        .patch(`/api/chats/${groupChat.id}/members/${charlieMembership.id}/role`)
+        .send({ role: "ADMIN" });
+
+      expect(res.status).toBe(403);
+      expect(res.body.success).toBe(false);
+
+      const charlieInDb = await prisma.chatMember.findUnique({
+        where: { id: charlieMembership.id },
+      });
+      expect(charlieInDb.role).toBe("MEMBER");
+    });
+
+    it("should return 400 if an ADMIN tries to update their own role", async () => {
+      const res = await agentA
+        .patch(`/api/chats/${groupChat.id}/members/${adminMembership.id}/role`)
+        .send({ role: "MEMBER" });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/cannot update/i);
+    });
+
+    it("should return 400 if target member already has the requested role", async () => {
+      const res = await agentA
+        .patch(`/api/chats/${groupChat.id}/members/${bobMembership.id}/role`)
+        .send({ role: "MEMBER" });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/already/i);
+    });
+
+    it("should return 400 if target member has already left the chat", async () => {
+      await prisma.chatMember.update({
+        where: { id: bobMembership.id },
+        data: { leftAt: new Date() },
+      });
+
+      const res = await agentA
+        .patch(`/api/chats/${groupChat.id}/members/${bobMembership.id}/role`)
+        .send({ role: "ADMIN" });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/left/i);
+    });
+
+    it("should return 400 if attempting to update roles in a direct chat", async () => {
+      const directChat = await prisma.chat.create({
+        data: {
+          isGroup: false,
+          members: {
+            create: [
+              { userId: currentUser.id, role: "ADMIN" },
+              { userId: userBob.id, role: "MEMBER" },
+            ],
+          },
+        },
+        include: { members: true },
+      });
+
+      const dmBob = directChat.members.find((m) => m.userId === userBob.id);
+
+      const res = await agentA
+        .patch(`/api/chats/${directChat.id}/members/${dmBob.id}/role`)
+        .send({ role: "ADMIN" });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/direct chat/i);
+    });
+
+    it("should return 404 if member belongs to another chat", async () => {
+      const otherChat = await prisma.chat.create({
+        data: {
+          isGroup: true,
+          members: {
+            create: [{ userId: userDavid.id, role: "MEMBER" }],
+          },
+        },
+        include: { members: true },
+      });
+      const davidOtherMember = otherChat.members[0];
+
+      const res = await agentA
+        .patch(`/api/chats/${groupChat.id}/members/${davidOtherMember.id}/role`)
+        .send({ role: "ADMIN" });
+
+      expect(res.status).toBe(404);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/not found/i);
+    });
+
+    it("should return 404 if memberId does not exist", async () => {
+      const nonExistentId = "00000000-0000-0000-0000-000000000000";
+
+      const res = await agentA
+        .patch(`/api/chats/${groupChat.id}/members/${nonExistentId}/role`)
+        .send({ role: "ADMIN" });
+
+      expect(res.status).toBe(404);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/not found/i);
+    });
+
+    it("should update the parent chat updatedAt timestamp on role change", async () => {
+      const originalChat = await prisma.chat.findUnique({
+        where: { id: groupChat.id },
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      await agentA
+        .patch(`/api/chats/${groupChat.id}/members/${bobMembership.id}/role`)
+        .send({ role: "ADMIN" });
 
       const updatedChat = await prisma.chat.findUnique({
         where: { id: groupChat.id },

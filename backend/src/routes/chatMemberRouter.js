@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { isChatAdmin } from "../middleware/authMiddleware.js";
-import { validateAddChatMember, validateUuidParam } from "../middleware/validators.js";
+import { validateAddChatMember, validateRole, validateUuidParam } from "../middleware/validators.js";
 import { handleValidation } from "../middleware/handleValidation.js";
 import {
   addChatMember,
   leaveGroupChat,
-  removeChatMember
+  removeChatMember,
+  updateChatMemberRole
 } from "../controllers/chatMemberController.js";
 
 // mergeParams: true allows access to req.params.chatId from parent router
@@ -30,6 +31,14 @@ chatMemberRouter.delete('/:memberId',
   validateUuidParam('memberId'),
   handleValidation,
   removeChatMember
+);
+
+chatMemberRouter.patch('/:memberId/role',
+  isChatAdmin,
+  validateUuidParam('memberId'),
+  validateRole,
+  handleValidation,
+  updateChatMemberRole
 );
 
 export default chatMemberRouter;

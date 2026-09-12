@@ -531,4 +531,59 @@ export const chatService = {
       return updatedMember;
     });
   },
+
+  async updateChatMemberRole(chatId, memberId, role, currentUserId) {
+    const now = new Date();
+
+    return prisma.$transaction(async (tx) => {
+      const targetMember = await tx.chatMember.findUnique({
+        where: {
+          id: memberId,
+        },
+        include: {
+          chat: {
+            select: {
+              isGroup: true
+            },
+          },
+        },
+      });
+
+      if (!targetMember || targetMember.chatId !== chatId) {
+        throw new NotFoundError('Member not found')
+      }
+
+      if (!targetMember.chat.isGroup) {
+        throw new BadRequestError('Cannot update member roles in a direct chat');
+      }
+
+      if (targetMember.userId === currentUserId) {
+        throw new BadRequestError('You cannot update your own role');
+      }
+
+      if (targetMember.leftAt !== null) {
+        throw new BadRequestError('Member has left this chat');
+      }
+
+      if (targetMember.role === role) {
+        throw new BadRequestError('Member already has this role');
+      }
+
+      const updatedMember = await tx.chatMember.update({
+        where: {
+          id: memberId,
+        },
+        data: {
+          role,
+        },
+      });
+
+      await tx.chat.update({
+        where: { id: chatId },
+        data: { updatedAt: now },
+      });
+
+      return updatedMember;
+    });
+  },
 };

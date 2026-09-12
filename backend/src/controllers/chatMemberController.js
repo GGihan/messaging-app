@@ -44,3 +44,18 @@ export const removeChatMember = async (req, res) => {
     },
   });
 };
+
+export const updateChatMemberRole = async (req, res) => {
+  const currentUserId = req.user?.id;
+  const { chatId, memberId, role } = matchedData(req);
+
+  const member = await chatService.updateChatMemberRole(chatId, memberId, role, currentUserId);
+
+  return res.json({
+    success: true,
+    message: 'Member role updated',
+    data: {
+      member,
+    },
+  });
+};
