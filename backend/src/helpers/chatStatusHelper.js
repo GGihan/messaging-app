@@ -69,6 +69,55 @@ export const formatChatSummary = (chat, currentUserId) => {
     ...chat,
     isUnread,
     isLastMessageReadByAll,
-    totalMessages: chat._count?.messages ?? 0,
   };
+};
+
+/**
+ * Generates the Prisma 'where' condition for messages visible to a specific member.
+ */
+export function buildMessageVisibilityFilter(member) {
+  if (!member) return [];
+
+  // If they left and then deleted history, they see nothing
+  if (member.leftAt && member.deletedAt && member.deletedAt >= member.leftAt) {
+    return [];
+  }
+
+  const dateFilter = {};
+
+  if (member.deletedAt) {
+    dateFilter.gt = member.deletedAt;
+  }
+
+  if (member.leftAt) {
+    dateFilter.lte = member.leftAt;
+  }
+
+  // If both exist, verify lower bound is before upper bound
+  if (dateFilter.gt && dateFilter.lte && dateFilter.gt >= dateFilter.lte) {
+    return [];
+  }
+
+  return Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : {};
+};
+
+/**
+ * Determines if a chat should appear in the user's chat list overview.
+ */
+export function isChatVisibleToUser(chat, member) {
+  if (!member) return false;
+
+  if (!member.deletedAt) {
+    return true;
+  }
+
+  if (member.leftAt !== null) {
+    return false;
+  }
+
+  if (chat.lastMessageAt && new Date(chat.lastMessageAt) > new Date(member.deletedAt)) {
+    return true;
+  }
+
+  return false;
 };

@@ -1,7 +1,7 @@
 import { cloudinaryService } from "./cloudinaryService.js";
 import { prisma } from "../../lib/prisma.js";
 import { BadRequestError, NotFoundError } from "../errors/AppError.js";
-import { formatChatSummary, formatMessageStatus } from "../helpers/chatStatusHelper.js";
+import { buildMessageVisibilityFilter, formatChatSummary, formatMessageStatus, isChatVisibleToUser } from "../helpers/chatStatusHelper.js";
 
 const buildChatSearchFilter = (userId, search) => {
   if (!search) return {};
@@ -146,16 +146,12 @@ export const chatService = {
         members: {
           some: {
             userId,
-            deletedAt: null,
           },
         },
         ...buildChatSearchFilter(userId, search),
       },
       include: {
         members: {
-          where: {
-            leftAt: null,
-          },
           include: {
             user: {
               select: {
@@ -167,7 +163,7 @@ export const chatService = {
           },
         },
         messages: {
-          take: 1,
+          take: 5,
           orderBy: { createdAt: 'desc' },
           include: {
             sender: {
@@ -182,16 +178,32 @@ export const chatService = {
             },
           },
         },
-        _count: {
-          select: {
-            messages: true,
-          },
-        },
       },
       orderBy: { lastMessageAt: 'desc' }
     });
 
-    return chats.map((chat) => formatChatSummary(chat, userId));
+    return chats
+      .filter((chat) => {
+        const myMember = chat.members.find(m => m.userId === userId);
+        return isChatVisibleToUser(chat, myMember);
+      })
+      .map((chat) => {
+        const myMember = chat.members.find(m => m.userId === userId)
+        
+        const visibleMessages = chat.messages.filter((msg) => {
+          const afterDeleted = !myMember.deletedAt || msg.createdAt > myMember.deletedAt;
+          const beforeLeft = !myMember.leftAt || msg.createdAt <= myMember.leftAt;
+          return afterDeleted && beforeLeft;
+        });
+
+        const activeMembers = chat.members.filter((m) => m.leftAt === null);
+
+        return formatChatSummary({
+          ...chat,
+          members: activeMembers,
+          messages: visibleMessages.slice(0, 1),
+        }, userId);
+      });
   },
 
   async createGroupChat(currentUserId, { name, fileBuffer, memberIds = [] }) {
@@ -293,21 +305,6 @@ export const chatService = {
   },
 
   async getChatById(chatId, currentUserId, currentMember) {
-    const messageWhere = {
-      ...(currentMember.deletedAt && {
-        createdAt: { gt: currentMember.deletedAt },
-      }),
-
-      // If they left the chat, never show messages sent after their departure
-      ...(currentMember.leftAt && {
-        createdAt: {
-          // If clearedHistoryAt also exists, combine them via Prisma's AND/range
-          ...(currentMember.deletedAt ? { gt: currentMember.deletedAt } : {}),
-          lte: currentMember.leftAt,
-        },
-      }),
-    };
-
     const chat = await prisma.chat.findFirst({
       where: {
         id: chatId,
@@ -331,7 +328,7 @@ export const chatService = {
           },
         },
         messages: {
-          where: messageWhere,
+          where: buildMessageVisibilityFilter(currentMember),
           take: 30,
           orderBy: { createdAt: 'desc' },
           include: {

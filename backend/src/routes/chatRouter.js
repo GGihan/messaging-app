@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isChatAdmin, isChatMember, requireAuth, requireChatMembership } from "../middleware/authMiddleware.js";
+import { isChatAdmin, requireAuth, requireChatMembership } from "../middleware/authMiddleware.js";
 import {
   validateChatSearchQuery,
   validateCreateGroupChat,
