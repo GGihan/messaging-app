@@ -76,16 +76,10 @@ export const deleteGroupChat = async (req, res) => {
 
 export const getChatById = async (req, res) => {
   const currentUserId = req.user?.id;
+  const currentMember = req.chatMember;
   const { chatId } = matchedData(req);
 
-  const chat = await chatService.getChatById(chatId, currentUserId);
-
-  if (!chat) {
-    return res.status(404).json({
-      success: false,
-      message: 'Chat not found.',
-    });
-  }
+  const chat = await chatService.getChatById(chatId, currentUserId, currentMember);
 
   return res.json({
     success: true,
@@ -103,6 +97,7 @@ export const deleteChatHistory = async (req, res) => {
 
   return res.json({
     success: true,
+    message: 'Chat history has been deleted.',
     data: {
       chat: deletedChatHistory,
     },

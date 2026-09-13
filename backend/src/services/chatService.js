@@ -292,19 +292,21 @@ export const chatService = {
     return deletedChat;
   },
 
-  async getChatById(chatId, currentUserId) {
-    const currentMember = await prisma.chatMember.findUnique({
-      where: {
-        userId_chatId: {
-          userId: currentUserId,
-          chatId,
-        },
-      },
-    });
+  async getChatById(chatId, currentUserId, currentMember) {
+    const messageWhere = {
+      ...(currentMember.deletedAt && {
+        createdAt: { gt: currentMember.deletedAt },
+      }),
 
-    if (!currentMember || currentMember.leftAt !== null) {
-      return null;
-    }
+      // If they left the chat, never show messages sent after their departure
+      ...(currentMember.leftAt && {
+        createdAt: {
+          // If clearedHistoryAt also exists, combine them via Prisma's AND/range
+          ...(currentMember.deletedAt ? { gt: currentMember.deletedAt } : {}),
+          lte: currentMember.leftAt,
+        },
+      }),
+    };
 
     const chat = await prisma.chat.findFirst({
       where: {
@@ -329,9 +331,7 @@ export const chatService = {
           },
         },
         messages: {
-          where: {
-            ...(currentMember.deletedAt && { createdAt: { gt: currentMember.deletedAt } }),
-          },
+          where: messageWhere,
           take: 30,
           orderBy: { createdAt: 'desc' },
           include: {
@@ -350,7 +350,9 @@ export const chatService = {
       },
     });
 
-    if (!chat) return null;
+    if (!chat) {
+      throw new NotFoundError('Chat not found');
+    }
 
     // Reverse message order
     const chronologicalMessages = [...chat.messages].reverse();
@@ -413,12 +415,13 @@ export const chatService = {
         data: {
           leftAt: null,
           joinedAt: now,
+          deletedAt: now,
           role: 'MEMBER',
         },
       });
 
       // Insert any completely new members 
-      const memberData = userIds.map((userId) => ({
+      const memberData = targetUserIds.map((userId) => ({
         chatId,
         userId,
         role: 'MEMBER',

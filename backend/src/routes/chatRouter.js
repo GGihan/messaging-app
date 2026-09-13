@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isChatAdmin, requireAuth } from "../middleware/authMiddleware.js";
+import { isChatAdmin, isChatMember, requireAuth, requireChatMembership } from "../middleware/authMiddleware.js";
 import {
   validateChatSearchQuery,
   validateCreateGroupChat,
@@ -40,6 +40,7 @@ chatRouter.get('/',
 );
 
 chatRouter.get('/:chatId',
+  requireChatMembership,
   validateUuidParam('chatId'),
   handleValidation,
   getChatById
