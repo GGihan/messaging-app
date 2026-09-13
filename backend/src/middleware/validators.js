@@ -58,6 +58,12 @@ export const validateChatSearchQuery = [
     .isString().withMessage(`Chat query ${stringErr}`)
     .isLength({ max: 50 }).withMessage('Search query cannot exceed 50 characters.'),
 ];
+export const vailidateMessageCursorQuery = [
+  query('cursor')
+    .optional({ values: 'falsy' }) // Allows undefined, null, or empty string ""
+    .trim()
+    .isUUID().withMessage('Cursor must be a valid message UUID'),
+];
 
 export const validateFriendshipQuery = [
   query('status')

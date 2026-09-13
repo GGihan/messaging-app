@@ -21,3 +21,21 @@ export const createMessage = async (req, res) => {
     },
   });
 };
+
+export async function getChatMessages(req, res, next) {
+  const currentUserId = req.user?.id;
+  const currentMember = req.chatMember;
+  const { chatId, cursor } = matchedData(req);
+
+  const data = await messageService.getChatMessages({
+    chatId,
+    currentUserId,
+    currentMember,
+    cursor,
+  });
+
+  res.json({
+    success: true,
+    data,
+  });
+};

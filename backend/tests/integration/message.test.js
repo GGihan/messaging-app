@@ -220,4 +220,156 @@ describe("ChatMember Routes Integration Tests", () => {
       expect(res.status).toBe(403);
     });
   });
+
+  describe('GET /api/chats/:chatId/messages Integration Tests', () => {
+
+    it('should load initial messages via GET /api/chats/:chatId and paginate older messages', async () => {
+      const baseTime = new Date('2026-09-01T12:00:00.000Z').getTime();
+      const messageData = Array.from({ length: 45 }).map((_, index) => ({
+        chatId: directChat.id,
+        senderId: index % 2 === 0 ? currentUser.id : userBob.id,
+        text: `Message ${index + 1}`,
+        createdAt: new Date(baseTime + index * 1000),
+      }));
+
+      await prisma.message.createMany({ data: messageData });
+
+      const chatRes = await agentA.get(`/api/chats/${directChat.id}`);
+      expect(chatRes.status).toBe(200);
+
+      const initialChat = chatRes.body.data.chat;
+
+      expect(initialChat.messages).toHaveLength(30);
+      expect(initialChat.messages[0].text).toBe('Message 16');
+      expect(initialChat.messages[29].text).toBe('Message 45');
+
+      expect(initialChat.pagination).toBeDefined();
+      expect(initialChat.pagination.hasMore).toBe(true);
+
+      const scrollCursor = initialChat.pagination.nextCursor;
+      expect(scrollCursor).toBe(initialChat.messages[0].id);
+
+      const scrollRes = await agentA.get(
+        `/api/chats/${directChat.id}/messages?cursor=${scrollCursor}`
+      );
+      expect(scrollRes.status).toBe(200);
+
+      const olderBatch = scrollRes.body.data.messages;
+      const olderPagination = scrollRes.body.data.pagination;
+
+      expect(olderBatch).toHaveLength(15);
+      expect(olderBatch[0].text).toBe('Message 1');
+      expect(olderBatch[14].text).toBe('Message 15');
+
+      expect(olderPagination.hasMore).toBe(false);
+      expect(olderPagination.nextCursor).toBeNull();
+
+      const initialIds = new Set(initialChat.messages.map((m) => m.id));
+      const hasDuplicate = olderBatch.some((m) => initialIds.has(m.id));
+      expect(hasDuplicate).toBe(false);
+    });
+
+    it('should paginate backward using cursor and return the remaining older messages with hasMore: false', async () => {
+      const baseTime = new Date('2026-09-01T12:00:00.000Z').getTime();
+      const messageData = Array.from({ length: 35 }).map((_, index) => ({
+        chatId: directChat.id,
+        senderId: currentUser.id,
+        text: `Message ${index + 1}`,
+        createdAt: new Date(baseTime + index * 1000),
+      }));
+
+      await prisma.message.createMany({ data: messageData });
+
+      const page1Res = await agentA.get(`/api/chats/${directChat.id}/messages`);
+      expect(page1Res.status).toBe(200);
+      const cursor = page1Res.body.data.pagination.nextCursor;
+      expect(cursor).toBeDefined();
+
+      const page2Res = await agentA.get(`/api/chats/${directChat.id}/messages?cursor=${cursor}`);
+      expect(page2Res.status).toBe(200);
+
+      const { messages: olderMessages, pagination } = page2Res.body.data;
+
+      expect(olderMessages).toHaveLength(5);
+      expect(olderMessages[0].text).toBe('Message 1');
+      expect(olderMessages[4].text).toBe('Message 5');
+
+      expect(pagination.hasMore).toBe(false);
+      expect(pagination.nextCursor).toBeNull();
+
+      const page1Ids = new Set(page1Res.body.data.messages.map((m) => m.id));
+      const hasOverlap = olderMessages.some((m) => page1Ids.has(m.id));
+      expect(hasOverlap).toBe(false);
+    });
+
+    it('should exclude messages sent before a member deleted their chat history', async () => {
+      const t1 = new Date('2026-09-01T10:00:00.000Z');
+      const deleteTime = new Date('2026-09-01T11:00:00.000Z');
+      const t2 = new Date('2026-09-01T12:00:00.000Z');
+
+      await prisma.message.create({
+        data: {
+          chatId: directChat.id,
+          senderId: userBob.id,
+          text: 'Old message before deletion',
+          createdAt: t1,
+        },
+      });
+
+      await prisma.chatMember.updateMany({
+        where: { chatId: directChat.id, userId: currentUser.id },
+        data: { deletedAt: deleteTime },
+      });
+
+      await prisma.message.create({
+        data: {
+          chatId: directChat.id,
+          senderId: userBob.id,
+          text: 'Fresh message after deletion',
+          createdAt: t2,
+        },
+      });
+
+      const res = await agentA.get(`/api/chats/${directChat.id}/messages`);
+      expect(res.status).toBe(200);
+
+      const { messages, pagination } = res.body.data;
+      expect(messages).toHaveLength(1);
+      expect(messages[0].text).toBe('Fresh message after deletion');
+      expect(pagination.hasMore).toBe(false);
+      expect(pagination.nextCursor).toBeNull();
+    });
+
+    it('should return 404 if user is not a member of the chat', async () => {
+      const setupC = await createAuthenticatedAgent({}, { displayName: 'Charlie Test' });
+      const agentC = setupC.agent;
+
+      const res = await agentC.get(`/api/chats/${directChat.id}/messages`);
+      expect(res.status).toBe(404);
+    });
+
+    it('should return 400 when cursor is not a valid UUID format', async () => {
+      const nonValidCursor = 'non-valid-uuid';
+
+      const res = await agentA.get(`/api/chats/${directChat.id}/messages?cursor=${nonValidCursor}`);
+      expect(res.status).toBe(400);
+      expect(res.body.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            field: expect.stringMatching(/cursor/i),
+          }),
+        ])
+      );
+    });
+
+    it('should return empty list with hasMore: false when chat has no messages', async () => {
+      const res = await agentA.get(`/api/chats/${directChat.id}/messages`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.messages).toEqual([]);
+      expect(res.body.data.pagination).toEqual({
+        nextCursor: null,
+        hasMore: false,
+      });
+    });
+  });
 });

@@ -2,11 +2,10 @@ import { cloudinaryService } from "./cloudinaryService.js";
 import { prisma } from "../../lib/prisma.js";
 import { BadRequestError, NotFoundError } from "../errors/AppError.js";
 import {
-  buildMessageVisibilityFilter,
   formatChatSummary,
-  formatMessageStatus,
   isChatVisibleToUser
 } from "../helpers/chatStatusHelper.js";
+import { messageService } from "./messageService.js";
 
 const buildChatSearchFilter = (userId, search) => {
   if (!search) return {};
@@ -321,23 +320,6 @@ export const chatService = {
             },
           },
         },
-        messages: {
-          where: buildMessageVisibilityFilter(currentMember),
-          take: 30,
-          orderBy: { createdAt: 'desc' },
-          include: {
-            sender: {
-              select: {
-                id: true,
-                profile: {
-                  select: {
-                    displayName: true,
-                  },
-                },
-              },
-            },
-          },
-        },
       },
     });
 
@@ -345,16 +327,16 @@ export const chatService = {
       throw new NotFoundError('Chat not found');
     }
 
-    // Reverse message order
-    const chronologicalMessages = [...chat.messages].reverse();
-
-    const enrichedMessages = chronologicalMessages.map((msg) =>
-      formatMessageStatus(msg, currentUserId, chat.members)
-    );
+    const { messages, pagination } = await messageService.getChatMessages({
+      chatId,
+      currentUserId,
+      currentMember,
+    });
 
     return {
       ...chat,
-      messages: enrichedMessages,
+      messages,
+      pagination,
     };
   },
 
