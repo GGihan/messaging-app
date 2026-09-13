@@ -1,4 +1,5 @@
 import multer from "multer";
+import { BadRequestError } from "../errors/AppError.js";
 
 // Configure Multer to hold files in temporary RAM first
 const storage = multer.memoryStorage();
@@ -11,7 +12,7 @@ export const uploadImage = multer({
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error(`Only image files are allowed!`), false);
+      cb(new BadRequestError(`Only image files are allowed!`), false);
     }
   }
 });

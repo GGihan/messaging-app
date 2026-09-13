@@ -1,6 +1,6 @@
 import { matchedData } from "express-validator";
 import { chatService } from "../services/chatService.js";
-import { cloudinaryService } from "../../lib/cloudinary.js";
+import { cloudinaryService } from "../services/cloudinaryService.js";
 import { logger } from "../../lib/logger.js";
 
 export const createOrGetDirectChat = async (req, res) => {
@@ -42,31 +42,11 @@ export const getAllChats = async (req, res) => {
 
 export const createGroupChat = async (req, res) => {
   const currentUserId = req.user?.id;
+  const fileBuffer = req.file?.buffer;
   const { name, memberIds } = matchedData(req);
 
-  let currentAvatarUrl = null;
-  const chatId = crypto.randomUUID();
-
-  if (req.file) {
-    let uploadResult;
-    try {
-      uploadResult = await cloudinaryService.uploadChatAvatar(req.file.buffer, chatId);
-      currentAvatarUrl = uploadResult.secure_url;
-    } catch (uploadError) {
-      logger.error({
-        err: uploadError,
-        currentUserId,
-        context: 'chat_avatar_upload',
-      }, 'Failed to upload avatar to Cloudinary');
-      return res.status(502).json({
-        success: false,
-        message: 'Image upload failed. Please try again later.',
-      });
-    }
-  }
-
   const groupChat = await chatService.createGroupChat(
-    currentUserId, { id: chatId, name, avatarUrl: currentAvatarUrl, memberIds }
+    currentUserId, { name, fileBuffer, memberIds }
   );
 
   return res.status(201).json({
@@ -79,30 +59,10 @@ export const createGroupChat = async (req, res) => {
 };
 
 export const updateGroupChat = async (req, res) => {
-  const currentUserId = req.user?.id;
-  const { name, chatId } = matchedData(req);
+  const fileBuffer = req.file?.buffer;
+  const { chatId, name } = matchedData(req);
 
-  let avatarUrl;
-
-  if (req.file) {
-    let uploadResult;
-    try {
-      uploadResult = await cloudinaryService.uploadChatAvatar(req.file.buffer, chatId);
-      avatarUrl = uploadResult.secure_url;
-    } catch (uploadError) {
-      logger.error({
-        err: uploadError,
-        currentUserId,
-        context: 'chat_avatar_upload',
-      }, 'Failed to upload avatar to Cloudinary');
-      return res.status(502).json({
-        success: false,
-        message: 'Image upload failed. Please try again later.',
-      });
-    }
-  }
-
-  const updatedChat = await chatService.updateGroupChat({ id: chatId, name, avatarUrl});
+  const updatedChat = await chatService.updateGroupChat({ chatId, name, fileBuffer});
 
   return res.json({
     success: true,
@@ -114,10 +74,9 @@ export const updateGroupChat = async (req, res) => {
 };
 
 export const deleteGroupChat = async (req, res) => {
-  const currentUserId = req.user?.id;
   const { chatId } = matchedData(req);
 
-  await chatService.deleteGroupChat(chatId, currentUserId);
+  await chatService.deleteGroupChat(chatId);
   
   return res.json({
     success: true,

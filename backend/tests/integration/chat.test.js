@@ -1,7 +1,8 @@
-import { cloudinaryService } from "../../lib/cloudinary.js";
+import { cloudinaryService } from '../../src/services/cloudinaryService.js';
 import { beforeEach, expect, jest } from '@jest/globals';
 import { prisma } from "../../lib/prisma.js";
 import { createAuthenticatedAgent } from "../helpers/authHelper.js";
+import { BadGatewayError } from '../../src/errors/AppError.js';
 
 describe("Chat Routes Integration Tests", () => {
   let agentA;
@@ -442,7 +443,7 @@ describe("Chat Routes Integration Tests", () => {
       it('should return 502 if Cloudinary upload fails and not persist the chat', async () => {
         const uploadSpy = jest
           .spyOn(cloudinaryService, 'uploadChatAvatar')
-          .mockRejectedValueOnce(new Error('Cloudinary server unavailable'));
+          .mockRejectedValueOnce(new BadGatewayError('Image upload failed'));
 
         const dummyImageBuffer = Buffer.from('fake-group-avatar-bytes');
 
@@ -555,23 +556,6 @@ describe("Chat Routes Integration Tests", () => {
         expect(res.status).toBe(403);
         expect(res.body.success).toBe(false);
         expect(res.body.message).toMatch(/admin/i)
-      });
-
-      it('shouldnt update a group chat without a name', async () => {
-
-        const res = await agentA
-          .patch(`/api/chats/${testChat.id}`)
-
-        expect(res.status).toBe(400);
-        expect(res.body.success).toBe(false);
-        expect(res.body.errors).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              field: 'name',
-              message: expect.stringMatching(/empty/i),
-            }),
-          ]),
-        );
       });
     });
 

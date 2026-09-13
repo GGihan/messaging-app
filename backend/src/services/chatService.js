@@ -1,7 +1,6 @@
-import { cloudinaryService } from "../../lib/cloudinary.js";
-import { logger } from "../../lib/logger.js";
+import { cloudinaryService } from "./cloudinaryService.js";
 import { prisma } from "../../lib/prisma.js";
-import { BadRequestError, ForbiddenError, NotFoundError } from "../errors/AppError.js";
+import { BadRequestError, NotFoundError } from "../errors/AppError.js";
 import { formatChatSummary, formatMessageStatus } from "../helpers/chatStatusHelper.js";
 
 const buildChatSearchFilter = (userId, search) => {
@@ -189,7 +188,15 @@ export const chatService = {
     return chats.map((chat) => formatChatSummary(chat, userId));
   },
 
-  async createGroupChat(currentUserId, { id, name, avatarUrl = null, memberIds = [] }) {
+  async createGroupChat(currentUserId, { name, fileBuffer, memberIds = [] }) {
+    const chatId = crypto.randomUUID();
+    let avatarUrl = null;
+
+    if (fileBuffer) {
+      const uploadResult = await cloudinaryService.uploadChatAvatar(fileBuffer, chatId);
+      avatarUrl = uploadResult.secure_url;
+    }
+
     const distinctMemberIds = [
       ...new Set(memberIds.filter((id) => id !== currentUserId)),
     ];
@@ -204,7 +211,7 @@ export const chatService = {
 
     return await prisma.chat.create({
       data: {
-        ...(id && { id }),
+        id: chatId,
         isGroup: true,
         name,
         avatarUrl,
@@ -228,33 +235,51 @@ export const chatService = {
     });
   },
 
-  async updateGroupChat({ id, name, avatarUrl }) {
+  async updateGroupChat({ chatId, name, fileBuffer }) {
+    const updateData = {};
+
+    if (name !== undefined) {
+      updateData.name = name;
+    }
+
+    if (fileBuffer) {
+      const uploadResult = await cloudinaryService.uploadChatAvatar(fileBuffer, chatId);
+      updateData.avatarUrl = uploadResult.secure_url;
+    }
+
     return prisma.chat.update({
-      where: { id },
-      data: {
-        name,
-        avatarUrl,
-      },
+      where: { id: chatId },
+      data: updateData,
     });
   },
 
-  async deleteGroupChat(chatId, currentUserId) {
+  async deleteGroupChat(chatId) {
+    const chat = await prisma.chat.findUnique({
+      where: { id: chatId },
+      select: {
+        id: true,
+        isGroup: true,
+        avatarUrl: true,
+      },
+    });
+
+    if (!chat) {
+      throw new NotFoundError('Chat not found');
+    }
+
+    if (!chat.isGroup) {
+      throw new BadRequestError('Cannot delete a direct chat');
+    }
+
     const deletedChat = await prisma.chat.delete({
       where: { id: chatId },
     });
 
-    if (deletedChat.avatarUrl) {
-      const publicId = cloudinaryService.getPublicIdFromUrl(deletedChat.avatarUrl);
+    if (chat.avatarUrl) {
+      const publicId = cloudinaryService.getPublicIdFromUrl(chat.avatarUrl);
 
       if (publicId) {
-        try {
-          await cloudinaryService.deleteFromCloud(publicId);
-        } catch (cloudErr) {
-          logger.error(
-            { err: cloudErr, userId: currentUserId, publicId },
-            'Failed to delete asset from Cloudinary'
-          );
-        }
+        await cloudinaryService.deleteFromCloud(publicId).catch(() => null);
       }
     }
 

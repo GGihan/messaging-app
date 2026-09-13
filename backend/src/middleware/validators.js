@@ -22,7 +22,7 @@ export const validateRegister = [
     .custom(async (value) => {
       const user = await prisma.user.findUnique({ where: { username: value } });
       if (user) {
-        throw new Error('Username is already taken.');
+        throw new Error('Username is already taken');
       }
     }),
   body('password')
@@ -73,6 +73,7 @@ export const validateFriendshipQuery = [
 
 export const validateUpdateProfile = [
   body('displayName')
+    .optional()
     .trim()
     .notEmpty().withMessage(`Display name ${emptyErr}`)
     .bail()
@@ -82,6 +83,7 @@ export const validateUpdateProfile = [
     .optional()
     .trim()
     .notEmpty().withMessage(`Bio ${emptyErr}`)
+    .bail()
     .isLength({ max: 100 }).withMessage(`Bio cannot exceed 100 characters.`),
 ];
 
@@ -89,7 +91,7 @@ export const validateReceiverBody = [
   body('receiverId')
     .custom((value, { req }) => {
       if (value === req.user?.id) {
-        throw new Error('Receiver cannot be yourself.');
+        throw new Error('Receiver cannot be yourself');
       }
       return true;
     })
@@ -100,7 +102,7 @@ export const validateReceiverBody = [
       });
 
       if (!receiver) {
-        throw new Error('User not found.');
+        throw new Error('User not found');
       }
       return true;
     }),
@@ -110,7 +112,7 @@ export const validateReceiverParam = [
   param('receiverId')
     .custom((value, { req }) => {
       if (value === req.user?.id) {
-        throw new Error('Receiver cannot be yourself.');
+        throw new Error('Receiver cannot be yourself');
       }
       return true;
     })
@@ -121,7 +123,7 @@ export const validateReceiverParam = [
       });
 
       if (!receiver) {
-        throw new Error('User not found.');
+        throw new Error('User not found');
       }
       return true;
     }),
@@ -166,15 +168,36 @@ export const validateCreateGroupChat = [
     }),
   body('memberIds.*')
     .optional()
-    .isUUID().withMessage('Invalid member ID must be a valid UUID'),
+    .isUUID().withMessage('Invalid member ID must be a valid UUID.'),
 ];
 
 export const validateUpdateGroupChat = [
   body('name')
+    .optional()
     .trim()
     .notEmpty().withMessage(`Name ${emptyErr}`)
     .bail()
     .isLength({ min: 3, max: 50 }).withMessage(`Name ${groupNameLengthErr}`),
+];
+
+export const validateCreateMessage = [
+  body('text')
+    .optional()
+    .trim()
+    .notEmpty().withMessage(`Text ${emptyErr}`)
+    .bail()
+    .isLength({ max: 1000 }).withMessage(`Text cannot exceed 1000 characters.`),
+  // check if atleast text or image exists
+  body().custom((value, { req }) => {
+    const hasText = req.body.text && req.body.text.trim().length > 0;
+    const hasFile = Boolean(req.file);
+
+    if (!hasText && !hasFile) {
+      throw new Error('A message must contain either text or an attachment');
+    }
+
+    return true;
+  }),
 ];
 
 export const validateAddChatMember = [

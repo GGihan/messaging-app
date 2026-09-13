@@ -20,6 +20,7 @@ import {
 import { handleValidation } from "../middleware/handleValidation.js";
 import { uploadImage } from "../middleware/multerUpload.js";
 import chatMemberRouter from "./chatMemberRouter.js";
+import messageRouter from "./messageRouter.js";
 
 const chatRouter = Router();
 
@@ -75,6 +76,10 @@ chatRouter.delete('/:chatId/history',
 
 chatRouter.use('/:chatId/members',
   chatMemberRouter
+);
+
+chatRouter.use('/:chatId/messages',
+  messageRouter
 );
 
 export default chatRouter;

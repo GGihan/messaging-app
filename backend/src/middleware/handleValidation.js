@@ -2,7 +2,7 @@ import { validationResult } from 'express-validator';
 
 export const handleValidation = (req, res, next) => {
   const errors = validationResult(req).formatWith(({ path, msg }) => ({
-    field: path,
+    field: path || 'general',
     message: msg
   }));
   // Returns: { "field": "username", "message": "Too short" },

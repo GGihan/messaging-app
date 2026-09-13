@@ -1,9 +1,10 @@
 import { jest } from '@jest/globals';
 import { prisma } from "../../lib/prisma.js";
 import { createAuthenticatedAgent } from "../helpers/authHelper.js";
-import { cloudinaryService } from '../../lib/cloudinary.js';
+import { cloudinaryService } from '../../src/services/cloudinaryService.js';
 import request from 'supertest';
 import app from '../../src/app.js';
+import { BadGatewayError } from '../../src/errors/AppError.js';
 
 describe("Profile Routes Integration Tests", () => {
   let agent;
@@ -75,7 +76,7 @@ describe("Profile Routes Integration Tests", () => {
     it('should return 502 if Cloudinary upload fails and not alter database', async () => {
       jest
         .spyOn(cloudinaryService, 'uploadUserAvatar')
-        .mockRejectedValueOnce(new Error('Cloudinary network timeout'));
+        .mockRejectedValueOnce(new BadGatewayError('Image upload failed'));
 
       const dummyImageBuffer = Buffer.from('fake-image-bytes');
 
@@ -91,15 +92,6 @@ describe("Profile Routes Integration Tests", () => {
         where: { userId: currentUser.id },
       });
       expect(dbProfile.displayName).toBe(currentUser.profile.displayName);
-    });
-
-    it('should not allow profile update without displayName', async () => {
-      const res = await agent
-        .patch('/api/profile')
-        .field('bio', 'New Bio');
-
-      expect(res.status).toBe(400);
-      expect(res.body.success).toBe(false);
     });
   });
 
