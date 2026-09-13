@@ -62,13 +62,13 @@ async function handleAdminSuccession(tx, chatId, leavingUserId) {
 };
 
 export const chatService = {
-  async getDirectChat(userIdA, userIdB) {
-    const chat = await prisma.chat.findFirst({
+  async findDirectChat(userIdA, userIdB) {
+    return prisma.chat.findFirst({
       where: {
+        isGroup: false,
         AND: [
           { members: { some: { userId: userIdA } } },
           { members: { some: { userId: userIdB } } },
-          { isGroup: false },
         ],
       },
       include: {
@@ -83,61 +83,50 @@ export const chatService = {
             },
           },
         },
-        messages: {
-          take: 30,
-          orderBy: { createdAt: 'desc' },
-        },
       },
     });
-
-    if (!chat) return null;
-
-    // Reverse message order
-    const chronologicalMessages = [...chat.messages].reverse();
-
-    const enrichedMessages = chronologicalMessages.map((msg) =>
-      formatMessageStatus(msg, userIdA, chat.members)
-    );
-
-    return {
-      ...chat,
-      messages: enrichedMessages,
-    };
   },
 
   async getOrCreateDirectChat(userIdA, userIdB) {
-    const existingChat = await this.getDirectChat(userIdA, userIdB);
-    if (existingChat) {
-      return { chat: existingChat, created: false };
-    }
+    let chat = await this.findDirectChat(userIdA, userIdB);
+    let created = false;
 
-    const newChat = await prisma.chat.create({
-      data: {
-        isGroup: false,
-        members: {
-          create: [
-            { userId: userIdA, role: 'MEMBER' },
-            { userId: userIdB, role: 'MEMBER' },
-          ],
+    if (!chat) {
+      chat = await prisma.chat.create({
+        data: {
+          isGroup: false,
+          members: {
+            create: [
+              { userId: userIdA, role: 'MEMBER' },
+              { userId: userIdB, role: 'MEMBER' },
+            ],
+          },
         },
-      },
-      include: {
-        members: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                lastActiveAt: true,
-                profile: true,
+        include: {
+          members: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  lastActiveAt: true,
+                  profile: true,
+                },
               },
             },
           },
         },
-        messages: true,
-      },
-    });
+      });
+      created = true;
+    }
 
-    return { chat: newChat, created: true };
+    const currentMember = chat.members.find((m) => m.userId === userIdA);
+
+    const fullChat = await this.getChatById(chat.id, userIdA, currentMember);
+
+    return {
+      chat: fullChat,
+      created,
+    };
   },
 
   async getAllChats(userId, search) {
