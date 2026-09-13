@@ -111,6 +111,20 @@ describe("ChatMember Routes Integration Tests", () => {
       expect(savedMessage).not.toBeNull();
       expect(savedMessage.text).toBe(text);
       expect(savedMessage.imageUrl).toBe(fakeSecureUrl);
+
+      const updatedChat = await prisma.chat.findUnique({
+        where: { id: groupChat.id },
+      });
+      expect(new Date(updatedChat.lastMessageAt).getTime()).toBe(
+        new Date(savedMessage.createdAt).getTime()
+      );
+
+      const senderMember = await prisma.chatMember.findFirst({
+        where: { chatId: groupChat.id, userId: userBob.id },
+      });
+      expect(new Date(senderMember.lastReadAt).getTime()).toBe(
+        new Date(savedMessage.createdAt).getTime()
+      );
     });
 
     it('should create a text-only message in a group chat without invoking cloudinary', async () => {
@@ -179,6 +193,19 @@ describe("ChatMember Routes Integration Tests", () => {
       const res = await agentB
         .post(`/api/chats/${directChat.id}/messages`)
         .field('text', 'Intruder message');
+
+      expect(res.status).toBe(403);
+    });
+
+    it('should return 403 when a user who has left the chat tries to send a message', async () => {
+      await prisma.chatMember.updateMany({
+        where: { chatId: groupChat.id, userId: userBob.id },
+        data: { leftAt: new Date() },
+      });
+
+      const res = await agentB
+        .post(`/api/chats/${groupChat.id}/messages`)
+        .field('text', 'I should not be able to send this');
 
       expect(res.status).toBe(403);
     });

@@ -1,7 +1,12 @@
 import { cloudinaryService } from "./cloudinaryService.js";
 import { prisma } from "../../lib/prisma.js";
 import { BadRequestError, NotFoundError } from "../errors/AppError.js";
-import { buildMessageVisibilityFilter, formatChatSummary, formatMessageStatus, isChatVisibleToUser } from "../helpers/chatStatusHelper.js";
+import {
+  buildMessageVisibilityFilter,
+  formatChatSummary,
+  formatMessageStatus,
+  isChatVisibleToUser
+} from "../helpers/chatStatusHelper.js";
 
 const buildChatSearchFilter = (userId, search) => {
   if (!search) return {};
@@ -173,15 +178,15 @@ export const chatService = {
 
     return chats
       .filter((chat) => {
-        const myMember = chat.members.find(m => m.userId === userId);
-        return isChatVisibleToUser(chat, myMember);
+        const currentMember = chat.members.find(m => m.userId === userId);
+        return isChatVisibleToUser(chat, currentMember);
       })
       .map((chat) => {
-        const myMember = chat.members.find(m => m.userId === userId)
+        const currentMember = chat.members.find(m => m.userId === userId)
         
         const visibleMessages = chat.messages.filter((msg) => {
-          const afterDeleted = !myMember.deletedAt || msg.createdAt > myMember.deletedAt;
-          const beforeLeft = !myMember.leftAt || msg.createdAt <= myMember.leftAt;
+          const afterDeleted = !currentMember.deletedAt || msg.createdAt > currentMember.deletedAt;
+          const beforeLeft = !currentMember.leftAt || msg.createdAt <= currentMember.leftAt;
           return afterDeleted && beforeLeft;
         });
 
