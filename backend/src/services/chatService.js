@@ -105,14 +105,19 @@ export const chatService = {
     };
   },
 
-  async createDirectChat(userIdA, userIdB) {
+  async getOrCreateDirectChat(userIdA, userIdB) {
+    const existingChat = await this.getDirectChat(userIdA, userIdB);
+    if (existingChat) {
+      return { chat: existingChat, created: false };
+    }
+
     const newChat = await prisma.chat.create({
       data: {
         isGroup: false,
         members: {
           create: [
-            { userId: userIdA },
-            { userId: userIdB },
+            { userId: userIdA, role: 'MEMBER' },
+            { userId: userIdB, role: 'MEMBER' },
           ],
         },
       },
@@ -128,10 +133,11 @@ export const chatService = {
             },
           },
         },
+        messages: true,
       },
     });
 
-    return { ...newChat, messages: [] };
+    return { chat: newChat, created: true };
   },
 
   async getAllChats(userId, search) {

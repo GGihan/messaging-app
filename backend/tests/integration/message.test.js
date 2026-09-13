@@ -189,7 +189,6 @@ describe("ChatMember Routes Integration Tests", () => {
       const res = await agentA
         .post(`/api/chats/${nonExistentChatId}/messages`)
         .field('text', 'Hello void');
-      console.log(res.body)
 
       expect(res.status).toBe(403);
     });

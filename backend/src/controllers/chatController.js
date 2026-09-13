@@ -1,25 +1,15 @@
 import { matchedData } from "express-validator";
 import { chatService } from "../services/chatService.js";
-import { cloudinaryService } from "../services/cloudinaryService.js";
-import { logger } from "../../lib/logger.js";
 
-export const createOrGetDirectChat = async (req, res) => {
-  const currentUserId = req.user?.id;
+export const getOrCreateDirectChat = async (req, res) => {
+  const currentUserId = req.user.id;
   const { receiverId } = matchedData(req);
 
-  let chat = await chatService.getDirectChat(currentUserId, receiverId);
-  let statusCode = 200;
-  let message = 'Direct chat found.'
-  
-  if (!chat) {
-    chat = await chatService.createDirectChat(currentUserId, receiverId);
-    statusCode = 201;
-    message = 'Direct chat created.'
-  }
+  const { chat, created } = await chatService.getOrCreateDirectChat(currentUserId, receiverId);
 
-  return res.status(statusCode).json({
+  return res.status(created ? 201 : 200).json({
     success: true,
-    message,
+    message: created ? 'Direct chat created.' : 'Direct chat found.',
     data: {
       chat,
     },

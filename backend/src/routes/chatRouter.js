@@ -10,11 +10,11 @@ import {
 } from "../middleware/validators.js";
 import {
   createGroupChat,
-  createOrGetDirectChat,
   deleteChatHistory,
   deleteGroupChat,
   getAllChats,
   getChatById,
+  getOrCreateDirectChat,
   updateGroupChat
 } from "../controllers/chatController.js";
 import { handleValidation } from "../middleware/handleValidation.js";
@@ -30,7 +30,7 @@ chatRouter.post('/',
   validateUuidBody('receiverId'),
   validateReceiverBody,
   handleValidation,
-  createOrGetDirectChat
+  getOrCreateDirectChat
 );
 
 chatRouter.get('/',
