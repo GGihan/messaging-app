@@ -3,6 +3,8 @@ import { corsOptions } from '../config/cors.js';
 import { registerSocketAuth } from './middleware/auth.js';
 import { registerPresenceHandlers } from './handlers/presenceHandler.js';
 
+let io = null;
+
 export const initSocketServer = (server) => {
   const io = new Server(server, {
     cors: corsOptions,
@@ -14,8 +16,15 @@ export const initSocketServer = (server) => {
   // Bind handlers on successful connection
   io.on('connection', (socket) => {
     registerPresenceHandlers(io, socket);
-    // registerChatRoutes(io, socket);
+    // registerChatHandlers(io, socket);
   });
 
+  return io;
+};
+
+export const getIO = () => {
+  if (!io) {
+    throw new Error('Socket.io has not been initialized yet!');
+  }
   return io;
 };

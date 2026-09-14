@@ -8,9 +8,7 @@ const PORT = process.env.PORT || 8080;
 const server = createServer(app);
 
 // Initialize Socket.IO
-const io = initSocketServer(server);
-// Attach `io` to Express so your REST controllers can use req.app.get('io')
-app.set('io', io);
+initSocketServer(server);
 
 server.listen(PORT, (error) => {
   if (error) {
