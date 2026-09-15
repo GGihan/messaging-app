@@ -593,4 +593,24 @@ export const chatService = {
       return updatedMember;
     });
   },
+
+  async getMembership(chatId, userId, filters = {}) {
+    if (!chatId || !userId) return null;
+
+    return prisma.chatMember.findFirst({
+      where: {
+        chatId,
+        userId,
+        ...filters,
+      },
+    });
+  },
+
+  async getActiveMembership(chatId, userId) {
+    return this.getMembership(chatId, userId, { leftAt: null });
+  },
+
+  async getActiveAdminMembership(chatId, userId) {
+    return this.getMembership(chatId, userId, { leftAt: null, role: 'ADMIN' });
+  },
 };

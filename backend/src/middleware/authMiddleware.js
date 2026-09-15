@@ -1,5 +1,5 @@
-import { prisma } from "../../lib/prisma.js";
 import { ForbiddenError, NotFoundError, UnauthenticatedError } from "../errors/AppError.js";
+import { chatService } from "../services/chatService.js";
 
 export const requireAuth = (req, res, next) => {
   if (!req.isAuthenticated() || !req.user) {
@@ -9,15 +9,12 @@ export const requireAuth = (req, res, next) => {
 };
 
 export const isChatAdmin = async (req, res, next) => {
-  const membership = await prisma.chatMember.findUnique({
-    where: { 
-      userId_chatId: {
-        chatId: req.params.chatId, userId: req.user.id
-      },
-    },
-  });
+  const membership = await chatService.getActiveAdminMembership(
+    req.params.chatId,
+    req.user.id
+  );
 
-  if (!membership || membership.leftAt !== null || membership.role !== 'ADMIN') {
+  if (!membership) {
     throw new ForbiddenError('You must be an active admin of this chat to perform this action');
   }
 
@@ -27,15 +24,12 @@ export const isChatAdmin = async (req, res, next) => {
 };
 
 export const isChatMember = async (req, res, next) => {
-  const membership = await prisma.chatMember.findUnique({
-    where: { 
-      userId_chatId: {
-        chatId: req.params.chatId, userId: req.user.id
-      },
-    },
-  });
+  const membership = await chatService.getActiveMembership(
+    req.params.chatId,
+    req.user.id
+  );
 
-  if (!membership || membership.leftAt !== null) {
+  if (!membership) {
     throw new ForbiddenError('You must be an active member of this chat to perform this action');
   }
 
@@ -45,13 +39,10 @@ export const isChatMember = async (req, res, next) => {
 };
 
 export const requireChatMembership = async (req, res, next) => {
-  const membership = await prisma.chatMember.findUnique({
-    where: { 
-      userId_chatId: {
-        chatId: req.params.chatId, userId: req.user.id
-      },
-    },
-  });
+  const membership = await chatService.getMembership(
+    req.params.chatId,
+    req.user.id
+  );
 
   if (!membership) {
     throw new NotFoundError('Member not found');

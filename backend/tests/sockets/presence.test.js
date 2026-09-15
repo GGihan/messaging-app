@@ -1,20 +1,11 @@
 import { jest } from "@jest/globals";
-import EventEmitter from "node:events";
 import { createServer } from "node:http";
-import crypto from "node:crypto";
 import { prisma } from "../../lib/prisma.js";
 import { presenceService } from "../../src/services/presenceService.js";
-import { initSocketServer } from "../../src/sockets/index.js";
+import { initSocketServer } from "../../src/sockets/socket.js";
 import { registerPresenceHandlers } from "../../src/sockets/handlers/presenceHandler.js";
 import { createAuthenticatedAgent } from "../helpers/authHelper.js";
-
-const createMockSocket = (user) => {
-  const socket = new EventEmitter();
-  socket.id = `socket_${crypto.randomUUID()}`;
-  socket.user = user;
-  socket.join = jest.fn();
-  return socket;
-};
+import { createMockSocket } from "../helpers/createMockSocket.js";
 
 describe("Presence Socket Handler Integration Tests", () => {
   let server;
@@ -126,7 +117,7 @@ describe("Presence Socket Handler Integration Tests", () => {
     ioEmitSpy.mockClear();
 
     // Close only the first tab
-    tab1.emit("disconnect");
+    tab1.emitClientEvent("disconnect");
     await new Promise((resolve) => setTimeout(resolve, 50));
 
     // Alice must still be online via tab2
@@ -145,7 +136,7 @@ describe("Presence Socket Handler Integration Tests", () => {
     expect(userInDb.lastActiveAt).toEqual(initialUser.lastActiveAt);
 
     // Teardown remaining tab
-    tab2.emit("disconnect");
+    tab2.emitClientEvent("disconnect");
     await new Promise((resolve) => setTimeout(resolve, 50));
   });
 
@@ -157,7 +148,7 @@ describe("Presence Socket Handler Integration Tests", () => {
     ioToSpy.mockClear();
     ioEmitSpy.mockClear();
 
-    socketAlice.emit("disconnect");
+    socketAlice.emitClientEvent("disconnect");
     await new Promise((resolve) => setTimeout(resolve, 50));
 
     expect(presenceService.isUserOnline(userAlice.id)).toBe(false);
@@ -191,7 +182,7 @@ describe("Presence Socket Handler Integration Tests", () => {
       lastActiveAt: null,
     });
 
-    socketBob.emit("disconnect");
+    socketBob.emitClientEvent("disconnect");
     await new Promise((resolve) => setTimeout(resolve, 50));
   });
 });

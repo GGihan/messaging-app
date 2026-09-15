@@ -2,6 +2,7 @@ import { jest } from "@jest/globals";
 import { prisma } from "../../lib/prisma.js";
 import { createAuthenticatedAgent } from "../helpers/authHelper.js";
 import { cloudinaryService } from "../../src/services/cloudinaryService.js";
+import { mockIO } from "../setup.js";
 
 describe("ChatMember Routes Integration Tests", () => {
   let agentA;
@@ -64,7 +65,7 @@ describe("ChatMember Routes Integration Tests", () => {
         isGroup: false,
         members: {
           create: [
-            { userId: currentUser.id, role: 'ADMIN' },
+            { userId: currentUser.id, role: 'MEMBER'},
             { userId: userCharlie.id, role: 'MEMBER'},
           ],
         },
@@ -218,6 +219,21 @@ describe("ChatMember Routes Integration Tests", () => {
         .field('text', 'Hello void');
 
       expect(res.status).toBe(403);
+    });
+
+    it('should create a message and broadcast it via socket', async () => {
+      const res = await agentA
+        .post(`/api/chats/${directChat.id}/messages`)
+        .field('text', 'Hello world');
+
+      expect(res.status).toBe(201);
+
+      expect(mockIO.to).toHaveBeenCalledWith(`chat:${directChat.id}`);
+
+      expect(mockIO.emit).toHaveBeenCalledWith(
+        'chat_message',
+        expect.objectContaining({ text: 'Hello world' })
+      );
     });
   });
 

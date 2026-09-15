@@ -1,5 +1,6 @@
 import { matchedData } from "express-validator";
 import { messageService } from "../services/messageService.js";
+import { messageEmitter } from "../sockets/emitters/messageEmitter.js";
 
 export const createMessage = async (req, res) => {
   const currentUserId = req.user?.id;
@@ -12,6 +13,8 @@ export const createMessage = async (req, res) => {
     text,
     fileBuffer
   });
+
+  messageEmitter.newMessage(chatId, message);
 
   return res.status(201).json({
     success: true,
