@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma.js";
 import { buildMessageVisibilityFilter, formatMessageStatus } from "../helpers/chatStatusHelper.js";
-import { cloudinaryService } from "./cloudinaryService";
+import { cloudinaryService } from "./cloudinaryService.js";
+
 
 export const messageService = {
   async createMessage({ senderId, chatId, text, fileBuffer }) {

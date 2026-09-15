@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import app from "./app.js";
 import { createServer } from 'node:http';
-import { initSocketServer } from './sockets/index.js';
+import { initSocketServer } from './sockets/socket.js';
 
 const PORT = process.env.PORT || 8080;
 

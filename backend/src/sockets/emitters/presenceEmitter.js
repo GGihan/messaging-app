@@ -1,5 +1,5 @@
-import { getIO } from "..";
-import { findAllAcceptedFriendIds } from "../../services/friendshipService";
+import { getIO } from "../socket.js";
+import { findAllAcceptedFriendIds } from "../../services/friendshipService.js";
 
 export const emitPresenceToFriends = async (userId, status, lastActiveAt = null) => {
   try {

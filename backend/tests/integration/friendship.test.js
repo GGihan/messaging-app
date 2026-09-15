@@ -154,6 +154,17 @@ describe("Friendship Routes Integration Tests", () => {
         expect(friendships[0].id).toBe(pendingIncoming.id);
         expect(friendships[0].receiverId).toBe(currentUser.id);
       });
+
+      it('should include friend property with isOnline on accepted relationships', async () => {
+        const res = await agentA.get('/api/friendships?status=ACCEPTED');
+        const friendships = res.body.data.friendships;
+        const targetFriend = friendships[0].friend;
+
+        expect(res.status).toBe(200);
+
+        expect(typeof targetFriend.isOnline).toBe('boolean');
+        expect(targetFriend).toHaveProperty('lastActiveAt');
+      });
     });
 
     describe('Combined Filters', () => {

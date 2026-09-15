@@ -147,3 +147,4 @@ backend/generated/prisma
 
 # Test files
 *.http
+backend/scripts

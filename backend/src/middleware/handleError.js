@@ -1,5 +1,5 @@
 import { isProduction, isTest } from "../config/env.js";
-import { normalizeError } from "../errors";
+import { normalizeError } from "../errors/error.js";
 
 export const handleError = (err, req, res, next) => {
   const error = normalizeError(err);

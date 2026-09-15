@@ -1,4 +1,5 @@
 import { prisma } from "../../lib/prisma.js";
+import { presenceService } from "./presenceService.js";
 
 export const findExistingRelationship = async (userAId, userBId) => {
   return prisma.friendship.findFirst({
@@ -37,7 +38,7 @@ export const findAllRelationships = async (userId, status, type) => {
     profile: true,
   };
 
-  return prisma.friendship.findMany({
+  const friendships = await prisma.friendship.findMany({
     where,
     select: {
       id: true,
@@ -56,6 +57,25 @@ export const findAllRelationships = async (userId, status, type) => {
     orderBy: {
       updatedAt: 'desc',
     },
+  });
+
+  return friendships.map((friendship) => {
+    const isSender = friendship.senderId === userId;
+    const friend = isSender ? friendship.receiver : friendship.sender;
+    const isAccepted = friendship.status === 'ACCEPTED';
+    const isBlocked = friendship.status === 'BLOCKED';
+
+    const isOnline = isAccepted ? presenceService.isUserOnline(friend.id) : false;
+    const lastActiveAt = !isBlocked ? friend.lastActiveAt : null;
+
+    return {
+      ...friendship,
+      friend: {
+        ...friend,
+        isOnline,
+        lastActiveAt,
+      },
+    };
   });
 };
 
