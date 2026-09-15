@@ -6,7 +6,7 @@ import { registerPresenceHandlers } from './handlers/presenceHandler.js';
 let io = null;
 
 export const initSocketServer = (server) => {
-  const io = new Server(server, {
+  io = new Server(server, {
     cors: corsOptions,
   });
 
