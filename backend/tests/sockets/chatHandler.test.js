@@ -51,15 +51,26 @@ describe('Chat Socket Handlers', () => {
     await prisma.$disconnect();
   });
 
-  describe('open_chat', () => {
+  describe('chat_open', () => {
+    
     it('should join the chat room if user is an active member', async () => {
-      await mockSocketA.emitClientEvent('open_chat', directChat.id);
+      await mockSocketA.emitClientEvent('chat_open', directChat.id);
 
       expect(mockSocketA.join).toHaveBeenCalledWith(`chat:${directChat.id}`);
+
+      expect(mockSocketA.to).toHaveBeenCalledWith(`chat:${directChat.id}`);
+
+      expect(mockSocketA.toEmit).toHaveBeenCalledWith(
+        'chat_read',
+        expect.objectContaining({
+          chatId: directChat.id,
+          userId: currentUser.id,
+        })
+      );
     });
 
     it('should NOT join the room if user is not a member', async () => {
-      await mockSocketC.emitClientEvent('open_chat', directChat.id);
+      await mockSocketC.emitClientEvent('chat_open', directChat.id);
 
       expect(mockSocketC.join).not.toHaveBeenCalled();
     });
@@ -75,28 +86,28 @@ describe('Chat Socket Handlers', () => {
         data: { leftAt: new Date() },
       });
 
-      await mockSocketA.emitClientEvent('open_chat', directChat.id);
+      await mockSocketA.emitClientEvent('chat_open', directChat.id);
 
       expect(mockSocketA.join).not.toHaveBeenCalled();
     });
 
     it('should safely ignore falsy or missing chatId', async () => {
-      await mockSocketA.emitClientEvent('open_chat', null);
-      await mockSocketA.emitClientEvent('open_chat', undefined);
+      await mockSocketA.emitClientEvent('chat_open', null);
+      await mockSocketA.emitClientEvent('chat_open', undefined);
 
       expect(mockSocketA.join).not.toHaveBeenCalled();
     });
   });
 
-  describe('close_chat', () => {
-    it('should leave the chat room when close_chat is received', async () => {
-      await mockSocketA.emitClientEvent('close_chat', directChat.id);
+  describe('chat_close', () => {
+    it('should leave the chat room when chat_close is received', async () => {
+      await mockSocketA.emitClientEvent('chat_close', directChat.id);
 
       expect(mockSocketA.leave).toHaveBeenCalledWith(`chat:${directChat.id}`);
     });
 
-    it('should safely ignore falsy chatId on close_chat', async () => {
-      await mockSocketA.emitClientEvent('close_chat', null);
+    it('should safely ignore falsy chatId on chat_close', async () => {
+      await mockSocketA.emitClientEvent('chat_close', null);
 
       expect(mockSocketA.leave).not.toHaveBeenCalled();
     });

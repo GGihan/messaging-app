@@ -613,4 +613,29 @@ export const chatService = {
   async getActiveAdminMembership(chatId, userId) {
     return this.getMembership(chatId, userId, { leftAt: null, role: 'ADMIN' });
   },
+
+  async markChatAsRead (chatId, userId, timestamp = new Date()) {
+    return prisma.chatMember.update({
+      where: {
+        userId_chatId: { userId, chatId },
+      },
+      data: {
+        lastReadAt: timestamp,
+      },
+    });
+  },
+
+  async markChatAsReadForUsers (chatId, userIds, timestamp = new Date()) {
+    if (!userIds.length) return;
+
+    return prisma.chatMember.updateMany({
+      where: {
+        chatId,
+        userId: { in: userIds },
+      },
+      data: {
+        lastReadAt: timestamp,
+      },
+    });
+  },
 };
