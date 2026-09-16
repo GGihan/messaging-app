@@ -112,4 +112,55 @@ describe('Chat Socket Handlers', () => {
       expect(mockSocketA.leave).not.toHaveBeenCalled();
     });
   });
+
+  describe('chat_read', () => {
+    it('should update read status in DB and broadcast chat_read to the room if user is an active member', async () => {
+      await mockSocketA.emitClientEvent('chat_read', { chatId: directChat.id });
+
+      expect(mockSocketA.to).toHaveBeenCalledWith(`chat:${directChat.id}`);
+      expect(mockSocketA.toEmit).toHaveBeenCalledWith(
+        'chat_read',
+        expect.objectContaining({
+          chatId: directChat.id,
+          userId: currentUser.id,
+          lastReadAt: expect.any(String),
+        })
+      );
+
+      const member = await prisma.chatMember.findUnique({
+        where: {
+          userId_chatId: {
+            userId: currentUser.id,
+            chatId: directChat.id,
+          },
+        },
+      });
+
+      expect(member.lastReadAt).not.toBeNull();
+    });
+
+    it('should NOT update or broadcast if user is not a member', async () => {
+      await mockSocketC.emitClientEvent('chat_read', { chatId: directChat.id });
+
+      expect(mockSocketC.to).not.toHaveBeenCalled();
+      expect(mockSocketC.toEmit).not.toHaveBeenCalled();
+    });
+
+    it('should NOT update or broadcast if user has left the chat', async () => {
+      await prisma.chatMember.update({
+        where: {
+          userId_chatId: {
+            userId: currentUser.id,
+            chatId: directChat.id,
+          },
+        },
+        data: { leftAt: new Date() },
+      });
+
+      await mockSocketA.emitClientEvent('chat_read', { chatId: directChat.id });
+
+      expect(mockSocketA.to).not.toHaveBeenCalled();
+      expect(mockSocketA.toEmit).not.toHaveBeenCalled();
+    });
+  });
 });
