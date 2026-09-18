@@ -3,37 +3,8 @@ import { chatService } from "../../services/chatService.js";
 export const registerChatHandlers = (io, socket) => {
   const userId = socket.user.id;
 
-  socket.on('chat_open', async (chatId) => {
-    if (!chatId) return;
-
-    try {
-      const isActiveMember = await chatService.getActiveMembership(chatId, userId);
-      if (!isActiveMember) return;
-      
-      socket.join(`chat:${chatId}`);
-
-      // Update read status 
-      const now = new Date();
-      await chatService.markChatAsRead(chatId, userId, now);
-
-      // Notify the room that this user caught up
-      socket.to(`chat:${chatId}`).emit('chat_read', {
-        chatId,
-        userId,
-        lastReadAt: now.toISOString(),
-      });
-    } catch (error) {
-      console.error('Error opening chat:', error);
-    }
-  });
-
-  socket.on('chat_close', async (chatId) => {
-    if (!chatId) return;
-
-    socket.leave(`chat:${chatId}`);
-  });
-
-  socket.on('chat_read', async ({ chatId }) => {
+  socket.on('chat_read', async (payload) => {
+    const chatId = typeof payload === 'object' ? payload?.chatId : payload;
     if (!chatId) return;
 
     try {
@@ -43,7 +14,11 @@ export const registerChatHandlers = (io, socket) => {
       const now = new Date();
       await chatService.markChatAsRead(chatId, userId, now);
 
-      socket.to(`chat:${chatId}`).emit('chat_read', {
+      const receiverIds = await chatService.getReceiverMemberIds(chatId, userId);
+      if (!receiverIds.length) return;
+
+      const userRooms = receiverIds.map((id) => `user:${id}`);
+      io.to(userRooms).emit('chat_read', {
         chatId,
         userId,
         lastReadAt: now.toISOString(),

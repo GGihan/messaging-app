@@ -625,17 +625,18 @@ export const chatService = {
     });
   },
 
-  async markChatAsReadForUsers (chatId, userIds, timestamp = new Date()) {
-    if (!userIds.length) return;
-
-    return prisma.chatMember.updateMany({
+  async getReceiverMemberIds(chatId, senderId) {
+    const members = await prisma.chatMember.findMany({
       where: {
         chatId,
-        userId: { in: userIds },
+        userId: { not: senderId },
+        leftAt: null,
       },
-      data: {
-        lastReadAt: timestamp,
+      select: {
+        userId: true,
       },
     });
+
+    return members.map((m) => m.userId);
   },
 };

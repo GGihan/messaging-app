@@ -1,8 +1,13 @@
+import { chatService } from "../../services/chatService.js";
 import { getIO } from "../socket.js";
 
 export const messageEmitter = {
-  newMessage(chatId, message) {
-    const io = getIO();
-    io.to(`chat:${chatId}`).emit('chat_message', message);
+  async newMessage(chatId, senderId, message) {
+    const receiverIds = await chatService.getReceiverMemberIds(chatId, senderId);
+    if (!receiverIds.length) return;
+
+    const userRooms = receiverIds.map((id) => `user:${id}`);
+    
+    getIO().to(userRooms).emit('chat_message', message);
   },
 };
