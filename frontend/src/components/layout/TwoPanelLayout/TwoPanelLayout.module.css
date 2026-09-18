@@ -1,0 +1,20 @@
+.pageWrapper {
+  justify-content: center;
+  flex: 1;
+}
+
+.splitCard {
+  width: 100%;
+  max-width: 1300px;
+}
+
+.leftPanel,
+.rightPanel {
+  flex: 1;
+}
+
+@media (min-width: 1024px) {
+  .splitCard {
+    flex-direction: row;
+  }
+}

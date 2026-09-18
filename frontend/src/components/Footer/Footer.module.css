@@ -1,0 +1,30 @@
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-m);
+  font-family: var(--font-ui);
+  background-color: var(--color-gray-light);
+}
+
+.socialsList {
+  gap: var(--space-m)
+}
+
+.socialsIcon {
+  width: 24px;
+  height: 24px;
+  aspect-ratio: 1 / 1;
+}
+
+.socialsLink {
+  display: flex;
+  padding: var(--space-s);
+  border-radius: var(--space-s);
+}
+
+@media (hover: hover) {
+  .socialsLink:hover {
+    background-color: var(--color-gray-very-light);
+  }
+}

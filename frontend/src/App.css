@@ -1,0 +1,30 @@
+header {
+  grid-area: header;
+}
+
+.main-nav {
+  grid-area: nav;
+}
+
+main {
+  grid-area: main;
+  min-width: 0;
+  display: flex;
+  /* justify-content: center; */
+}
+
+footer {
+  grid-area: footer;
+}
+
+.app-container {
+  display: grid;
+  grid-template-areas: 
+    "header"
+    "nav"
+    "main"
+    "footer";
+  grid-template-rows: auto auto 1fr 52px;
+  min-height: 100vh;
+  /* background-color: rgba(242, 240, 240, 1); */
+}

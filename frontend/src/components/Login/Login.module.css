@@ -1,0 +1,28 @@
+.loginContainer {
+  justify-content: center;
+  flex: 1;
+  max-width: 700px;
+  padding: var(--space-m);
+  gap: var(--space-m);
+}
+
+.title {
+  margin-top: var(--space-xl);
+}
+
+.form {
+  gap: var(--space-m);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+
+@media (min-width: 1024px) {
+  .loginContainer {
+    min-height: 600px;
+    padding: var(--space-xxl);
+  }
+}

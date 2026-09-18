@@ -1,0 +1,8 @@
+.spinnerSlot,
+.contentSlot {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: inherit;
+}

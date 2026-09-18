@@ -1,0 +1,45 @@
+.formActions {
+  justify-content: space-between;
+  padding: var(--space-l) 0;
+}
+
+.returnLink,
+.submitButton {
+  width: 120px;
+  padding: var(--space-s) var(--space-m);
+  border-radius: var(--space-m);
+}
+
+.returnLink:active,
+.submitButton:active {
+  filter: brightness(0.9);
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+.returnLink {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-s);
+  background-color: var(--color-gray-very-light);
+}
+
+.returnImage {
+  width: 24px;
+  height: 24px;
+  aspect-ratio: 1 / 1;
+}
+
+.submitButton {
+  color: var(--color-white);
+  background-color: var(--color-submit);
+}
+
+@media (hover: hover) {
+  .returnLink:hover {
+    background-color: var(--color-gray-light);
+  }
+
+  .submitButton:hover {
+    background-color: var(--color-submit-hover);
+  }
+}

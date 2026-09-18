@@ -1,0 +1,9 @@
+.errorList {
+  gap: var(--space-s);
+}
+
+.errorItem {
+  padding: var(--space-s);
+  border: 1px solid red;
+  border-radius: var(--space-s);
+}

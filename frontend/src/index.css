@@ -1,0 +1,185 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-brand);
+  /* Forces numbers to be uniform height and equal width */
+  font-variant-numeric: lining-nums tabular-nums;
+  /* Fallback for older fonts/browsers */
+  font-feature-settings: "lnum" 1, "tnum" 1; 
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+}
+
+label,
+.error-message {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/assets/fonts/Inter-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Merienda';
+  src: url('/assets/fonts/Merienda-Variable.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 300 900;
+  font-display: swap;
+  /* size-adjust: 110%; */
+}
+
+:root {
+  /* Sizes */
+  --space-xs: 4px;
+  --space-s: 8px;
+  --space-m: 16px;
+  --space-l: 24px;
+  --space-xl: 32px;
+  --space-xxl: 64px;
+  /* Fonts */
+  --font-fallbacks: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-brand: 'Merienda', var(--font-fallbacks);
+  --font-ui: 'Inter', var(--font-fallbacks);
+  /* Colors */
+  /* UI */
+  --color-submit: #1946b1;
+  --color-submit-hover: #153a90;
+  --color-focus: #4b42c2;
+  /* Standard Gray */
+  --color-gray-alot-light: #f8f8f8;
+  --color-gray-very-light: #ebeced;
+  --color-gray-light: #c4c6ca;
+  --color-gray: #7e7f83;
+  --color-gray-dark: #6c6c6e;
+  /* Standard White and Black */
+  --color-white: #ffffff;
+  --color-black-light: #252525;
+  --color-black: #1e1e1e;
+  /* Confirmation */
+  --color-confirm: #36da7d;
+  --color-confirm-dark: #2bad63;
+  --color-deny: #e24848;
+  --color-deny-dark: #b73a3a;
+  /* Styles */
+  /* --color-red: #A62B2B; */
+  /* States */
+  --color-loading: #d8d9db;
+}
+
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: unset;
+  /* Removes blue rectangle when link is pressed */
+  -webkit-tap-highlight-color: transparent;
+  outline: 1px solid transparent;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.inline-flex-row {
+  display: inline-flex;
+  flex-direction: row;
+}
+
+.inline-flex-column {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.loading-container {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  display: inline-grid;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  /* Removes blue rectangle when button is pressed */
+  -webkit-tap-highlight-color: transparent;
+
+  padding: var(--space-s);
+  background-color: unset;
+  border: none;
+}
+
+select {
+  border: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-focus);
+}
+
+input,
+textarea {
+  padding: var(--space-s);
+  background-color: var(--color-gray-very-light);
+  border: none;
+  border-radius: 8px;
+}
+
+input:focus-visible,
+input:active,
+textarea:focus-visible,
+textarea:active {
+  outline: 2px solid var(--color-focus);
+}
+
+@media (hover: hover) {
+  button:hover {
+    background-color: var(--color-gray-very-light);
+  }
+
+  /* input:not(:disabled):not(:focus):not(:active):hover,
+  textarea:not(:disabled):not(:focus):not(:active):hover {
+    outline: 1px solid var(--color-gray-light);
+  } */
+}
+
+.error-message {
+  color: red;
+}
