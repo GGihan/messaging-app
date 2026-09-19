@@ -1,14 +1,14 @@
 import styles from "./Login.module.css";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { FormActions } from "../FormActions/FormActions";
 import { FormErrors } from "../ui/FormErrors/FormErrors";
 import { apiClient } from "@/config/api";
 import { handleApiFormErrors } from "@/utils/formErrors";
 import AuthLayout from "../layout/AuthLayout/AuthLayout";
-
+import Logo from "../ui/Logo/Logo";
 
 export default function Login() {
   const [serverErrors, setServerErrors] = useState([]);
@@ -21,12 +21,12 @@ export default function Login() {
 
   const onSubmit = async (formData) => {
     try {
-      const userData = await apiClient('/auth/login', {
+      const response = await apiClient('/auth/login', {
         method: 'POST',
         body: JSON.stringify(formData),
       });
 
-      login(userData);
+      login(response.data.user);
       navigate('/', { replace: true });
     } catch (error) {
       handleApiFormErrors(error, setServerErrors);
@@ -36,6 +36,9 @@ export default function Login() {
   return (
     <AuthLayout>
       <div className={`${styles.loginContainer} flex-column`}>
+        <div className={`${styles.header} flex-row`}>
+          <Logo />
+        </div>
         <h1 className={styles.title}>Login</h1>
         <FormErrors errors={serverErrors} />
         <form onSubmit={handleSubmit(onSubmit)} className={`${styles.form} flex-column`}>
@@ -60,6 +63,12 @@ export default function Login() {
           </div>
           <FormActions submitText="Login" isSubmitting={isSubmitting} />
         </form>
+        <div className={`${styles.authFooter} flex-row`}>
+          <p className={styles.prompt}>Don't have an account?</p>
+          <Link to="/register" className={styles.actionLink}>
+            Register here
+          </Link>
+        </div>
         <hr></hr>
       </div>
     </AuthLayout>

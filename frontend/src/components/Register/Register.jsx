@@ -1,12 +1,13 @@
 import styles from "./Register.module.css";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { apiClient } from "@/config/api.js";
 import { handleApiFormErrors } from "@/utils/formErrors.js";
 import AuthLayout from "../layout/AuthLayout/AuthLayout";
 import { FormActions } from "../FormActions/FormActions";
 import { FormErrors } from "../ui/FormErrors/FormErrors";
 import { useState } from "react";
+import Logo from "../ui/Logo/Logo";
 
 export default function Register() {
   const [serverErrors, setServerErrors] = useState([]);
@@ -35,6 +36,9 @@ export default function Register() {
       subtitle='Join the community and get connected!'
     >
       <div className={`${styles.registerContainer} flex-column`}>
+        <div className={`${styles.header} flex-row`}>
+          <Logo />
+        </div>
         <h1 className={styles.title}>Register</h1>
         <FormErrors errors={serverErrors} />
         <form onSubmit={handleSubmit(onSubmit)} className={`${styles.form} flex-column`}>
@@ -70,6 +74,12 @@ export default function Register() {
 
           <FormActions submitText="Register" isSubmitting={isSubmitting} />
         </form>
+        <div className={`${styles.authFooter} flex-row`}>
+          <p className={styles.prompt}>Already have an account?</p>
+          <Link to="/login" className={styles.actionLink}>
+            Login here
+          </Link>
+        </div>
         <hr></hr>
       </div>
     </AuthLayout>

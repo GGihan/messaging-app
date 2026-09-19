@@ -4,7 +4,7 @@ footer {
   justify-content: center;
   gap: var(--space-m);
   font-family: var(--font-ui);
-  background-color: var(--color-gray-light);
+  background-color: var(--color-primary);
 }
 
 .socialsList {

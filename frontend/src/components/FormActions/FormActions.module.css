@@ -1,5 +1,5 @@
 .formActions {
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: var(--space-l) 0;
 }
 

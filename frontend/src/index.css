@@ -27,6 +27,7 @@ label,
 .error-message {
   font-family: var(--font-ui);
   font-size: 0.85rem;
+  color: var(--color-white);
 }
 
 @font-face {
@@ -44,6 +45,8 @@ label,
   font-weight: 300 900;
   font-display: swap;
   /* size-adjust: 110%; */
+  /* adjustment for font vertical allignment */
+  ascent-override: 120%;
 }
 
 :root {
@@ -79,9 +82,16 @@ label,
   --color-deny: #e24848;
   --color-deny-dark: #b73a3a;
   /* Styles */
-  /* --color-red: #A62B2B; */
+  --color-primary: #c5cee7;
+  --color-secondary: #2e3034;
   /* States */
   --color-loading: #d8d9db;
+  /* Text */
+  --text-muted: #64748b;
+  --text-muted-light: #86a0c5;
+  /* Links */
+  --link: #275cd6;
+  --link-light: #749af1;
 }
 
 img, picture, video, canvas, svg {
@@ -181,5 +191,6 @@ textarea:active {
 }
 
 .error-message {
-  color: red;
+  color: var(--color-deny);
+  background-color: var(--color-gray-alot-light);
 }

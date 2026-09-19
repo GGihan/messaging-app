@@ -9,8 +9,8 @@ export default function AuthProvider({ children }) {
   useEffect(() => {
     async function verifySession() {
       try {
-        const data = await apiClient('/auth/me'); 
-        setUser(data.user);
+        const response = await apiClient('/auth/me'); 
+        setUser(response.data.user);
       } catch (error) {
         console.error("Failed to connect to authentication server:", error.message);
         setUser(null);
@@ -21,8 +21,8 @@ export default function AuthProvider({ children }) {
     verifySession();
   }, []);
 
-  const login = (userData) => {
-    setUser(userData.user);
+  const login = (user) => {
+    setUser(user);
   };
 
   const logout = async () => {

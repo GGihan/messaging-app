@@ -8,6 +8,7 @@
 
 .title {
   margin-top: var(--space-xl);
+  color: var(--color-white);
 }
 
 .form {
@@ -18,6 +19,27 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-s);
+}
+
+
+.authFooter {
+  justify-content: flex-end;
+  font-family: var(--font-ui);
+  gap: var(--space-s);
+}
+
+.prompt {
+  color: var(--text-muted-light);
+}
+
+.actionLink {
+  color: var(--link-light);
+}
+
+@media (hover: hover) {
+  .actionLink:hover {
+    color: var(--color-submit-hover);
+  }
 }
 
 @media (min-width: 1024px) {
