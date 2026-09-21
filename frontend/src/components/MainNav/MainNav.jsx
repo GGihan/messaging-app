@@ -23,13 +23,13 @@ export default function MainNav() {
   ];
 
   return (
-    <nav className={`main-nav ${styles.navContainer}`}>
-      <ul className={`${styles.menuList} flex-column`}>
+    <nav className={styles.navContainer}>
+      <ul className={styles.menuList}>
         {navLinks
           .filter((link) => link.show)
           .map((link) => (
             <li key={link.label} className={styles.menuItem}>
-              <NavLink to={link.to} className={`${styles.linkGroup} flex-row`}>
+              <NavLink to={link.to} className={styles.linkGroup}>
                 <img
                   className={styles.linkIcon}
                   src={link.icon}
@@ -46,8 +46,15 @@ export default function MainNav() {
         {user && (
           <li className={styles.menuItem}>
             <Button className={styles.logoutButton} onClick={handleLogout}>
-              <img className={styles.linkIcon} src={logoutIcon} alt="" width="24" height="24" aria-hidden="true" />
-              Logout
+              <img
+                className={styles.linkIcon}
+                src={logoutIcon}
+                alt=""
+                width="24"
+                height="24"
+                aria-hidden="true"
+              />
+              <p className={styles.linkText}>Logout</p>
             </Button>
           </li>
         )}

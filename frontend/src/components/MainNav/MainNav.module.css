@@ -1,30 +1,30 @@
 .navContainer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 280px;
-  height: 100vh;
-  z-index: 1000;
+  width: 100%;
   background-color: var(--color-primary);
-
-  display: flex;
-  flex-direction: column;
+  border-top: 2px solid black;
+  z-index: 100;
   font-family: var(--font-ui);
-  border-right: 2px solid black;
 }
 
 .menuList {
-  gap: var(--space-m);
-  overflow: auto;
-  padding: var(--space-m);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  padding: var(--space-s);
 }
 
 .linkGroup,
 .logoutButton {
+  --btn-direction: column;
+  --btn-gap: var(--space-xs);
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: var(--space-s) 0;
-  gap: var(--space-m);
-  font-size: 1.25rem;
+  justify-content: center;
+  padding: var(--space-xs);
+  gap: var(--space-xs);
+  font-size: 1rem;
   border-radius: var(--space-s);
 }
 
@@ -32,11 +32,6 @@
   width: 24px;
   height: 24px;
   aspect-ratio: 1 / 1;
-}
-
-.logoutButton {
-  width: 100%;
-  justify-content: flex-start;
 }
 
 @media (hover: hover) {
@@ -48,22 +43,26 @@
 
 @media (min-width: 1024px) {
   .navContainer {
-    position: static; 
-    width: auto;
-    height: auto;
-    transform: none;
-    transition: none;
-    border-right: unset;
+    width: 80px;
+    height: 100%;
+    border-top: none;
+    border-right: 1px solid black;
   }
 
   .menuList {
-    flex-direction: row;
+    flex-direction: column;
+    justify-content: flex-start;
     padding: var(--space-s);
+    gap: var(--space-m);
   }
 
-  .linkGroup,
-  .logoutButton {
-    font-size: 1rem;
-    gap: var(--space-s);
+  .menuItem {
+    width: 100%;
+  }
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .app-main {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
