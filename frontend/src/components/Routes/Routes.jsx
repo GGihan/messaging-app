@@ -5,6 +5,7 @@ import Register from "../Register/Register";
 import Login from "../Login/Login";
 import ProtectedLayout from "../layout/ProtectedLayout/ProtectedLayout";
 import PublicLayout from "../layout/PublicLayout/PublicLayout";
+import ChatsList from "../Chats/ChatsList";
 
 const routes = [
   {
@@ -24,12 +25,16 @@ const routes = [
         element: <App />,
         children: [
           {
-            index: true,
-            element: <Home />,
+            path: 'chats',
+            element: <ChatsList />,
           },
           // {
-          //   path: 'levels/:imageId/game',
-          //   element: <GameArea />,
+          //   path: 'friends',
+          //   element: <Friends />,
+          // },
+          // {
+          //   path: 'profile',
+          //   element: <Profile />,
           // },
         ],
       },

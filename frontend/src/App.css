@@ -30,7 +30,7 @@
 .app-main {
   grid-area: main;
   min-width: 0;
-  overflow-y: auto;
+  /* overflow-y: auto; */
 
   padding-top: env(safe-area-inset-top, 0px);
 }
