@@ -1,3 +1,4 @@
+import TopAppBar from "../TopAppBar/TopAppBar";
 import Button from "../ui/Button/Button";
 import styles from "./ChatsList.module.css";
 import chatAdd from "@/assets/icons/chat-add.svg";

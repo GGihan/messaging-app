@@ -49,6 +49,6 @@
   }
 
   .app-main {
-    padding: var(--space-l);
+    /* padding: var(--space-l); */
   }
 }

@@ -1,0 +1,29 @@
+.barWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-m);
+  height: 56px;
+  background-color: var(--color-primary);
+  color: var(--color-black);
+
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.leadingGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-m);
+}
+
+.leadingSlot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionsWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+}
