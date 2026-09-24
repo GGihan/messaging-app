@@ -1,0 +1,7 @@
+.actionButton {
+  border-radius: var(--space-s);
+}
+
+.actionButton[data-state="open"] {
+  background-color: var(--color-gray-very-light);
+}

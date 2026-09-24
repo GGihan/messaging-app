@@ -92,6 +92,24 @@ label,
   /* Links */
   --link: #275cd6;
   --link-light: #749af1;
+
+  /* Z-Index */
+  /* Negative / Base */
+  --z-negative: -1;
+  --z-base: 0;
+
+  /* Sticky /
+  --z-sticky: 10;     /* e.g., TopAppBar, sticky headers */
+
+  /* Transient overlays attached to page elements */
+  --z-dropdown: 20;   /* Dropdowns, Popovers, Select menus */
+  --z-drawer: 30;     /* Navigation rails, side drawers on mobile */
+
+  /* Global blocking elements */
+  --z-modal-backdrop: 40;
+  --z-modal: 50;      /* Dialogs, Confirm boxes */
+  --z-toast: 60;      /* Notification toasts (always visible on top) */
+  --z-tooltip: 70;    /* Tooltips (should sit above even open dialogs) */
 }
 
 img, picture, video, canvas, svg {
