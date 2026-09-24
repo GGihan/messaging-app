@@ -1,0 +1,9 @@
+.tabWrapper {
+  height: 100%;
+}
+
+.content {
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  font-family: var(--font-ui);
+}

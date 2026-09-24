@@ -1,7 +1,8 @@
 .app-shell {
-  display: flex;
-  flex-direction: column;
-  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
   background-color: var(--color-gray-alot-light);
   color: var(--color-black);
 }
@@ -13,10 +14,10 @@
 
 .app-body {
   display: grid;
-  flex: 1;
-  min-height: 0;
+  height: 100%;
+  overflow: hidden;
   
-  grid-template-rows: 1fr auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   grid-template-columns: 100%;
   grid-template-areas:
     "main"
@@ -25,30 +26,93 @@
 
 .app-nav {
   grid-area: nav;
+  min-height: 0;
+  
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .app-main {
   grid-area: main;
-  min-width: 0;
-  /* overflow-y: auto; */
+  min-height: 0;
+  overflow: hidden;
+  
+  container-type: inline-size;
+  container-name: viewport;
 
   padding-top: env(safe-area-inset-top, 0px);
 }
 
+.app-detail {
+  grid-area: detail;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  display: none;
+}
+
+.empty-chat-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+}
+
+@media (max-width: 1023px) {
+
+  /* routes where main nav should be hiden */
+  .app-body[data-hide-nav="true"] {
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: "main";
+  }
+  .app-body[data-hide-nav="true"] .app-nav {
+    display: none;
+  }
+
+  /* active chat open hide mobile main nav */
+  .app-body[data-chat-open="true"] {
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: "detail";
+  }
+
+  .app-body[data-chat-open="true"] .app-main,
+  .app-body[data-chat-open="true"] .app-nav {
+    display: none;
+  }
+
+  .app-body[data-chat-open="true"] .app-detail {
+    display: grid;
+  }
+}
+
 @media (min-width: 1024px) {
+  .app-shell {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
   .app-header,
   .app-footer {
     display: block;
   }
 
-  .app-body {
+  .app-body,
+  .app-body[data-chat-open="true"] {
     grid-template-rows: 100%;
-    grid-template-columns: auto 1fr;
-    grid-template-areas:
-      "nav main";
+    grid-template-columns: auto minmax(320px, 1.5fr) minmax(0, 3fr);
+    grid-template-areas: "nav main detail";
   }
 
   .app-main {
-    /* padding: var(--space-l); */
+    border-right: 1px solid var(--color-gray-light);
+    padding-top: 0;
+  }
+
+  .app-nav {
+    border-right: 1px solid var(--color-gray-light);
+    padding-bottom: 0;
+  }
+
+  .app-detail {
+    display: grid;
   }
 }

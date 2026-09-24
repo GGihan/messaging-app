@@ -3,11 +3,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--space-m);
-  height: 56px;
+  min-height: 56px;
   background-color: var(--color-primary);
   color: var(--color-black);
-
-  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .leadingGroup {

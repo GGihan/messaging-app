@@ -1,8 +1,8 @@
-import { NavLink, useNavigate } from "react-router";
+import { NavLink, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import Button from "../ui/Button/Button";
 import styles from "./MainNav.module.css";
-import home from "@/assets/icons/home.svg";
+import chat from "@/assets/icons/chat.svg";
 import register from "@/assets/icons/sign-up.svg";
 import login from "@/assets/icons/log-in.svg";
 import logoutIcon from "@/assets/icons/log-out.svg";
@@ -17,7 +17,7 @@ export default function MainNav() {
   }
 
   const navLinks = [
-    { to: "/", label: "Home", icon: home, show: true },
+    { to: "/chats", label: "Chats", icon: chat, show: true },
     { to: "/register", label: "Register", icon: register, show: !user },
     { to: "/login", label: "Login", icon: login, show: (!user) },
   ];

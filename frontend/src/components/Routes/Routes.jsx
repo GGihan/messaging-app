@@ -1,11 +1,12 @@
 import App from "@/App";
 import ErrorPage from "../ErrorPage/Errorpage";
-import Home from "../Home/Home";
 import Register from "../Register/Register";
 import Login from "../Login/Login";
 import ProtectedLayout from "../layout/ProtectedLayout/ProtectedLayout";
 import PublicLayout from "../layout/PublicLayout/PublicLayout";
-import ChatsList from "../Chats/ChatsList";
+import ChatsList from "../ChatsList/ChatsList";
+import ChatsLayout from "../layout/ChatsLayout/ChatsLayout";
+import NewChat from "../NewChat/NewChat";
 
 const routes = [
   {
@@ -26,7 +27,15 @@ const routes = [
         children: [
           {
             path: 'chats',
-            element: <ChatsList />,
+            element: <ChatsLayout />,
+            children: [
+              { index: true, element: <ChatsList /> },
+              {
+                path: "new",
+                element: <NewChat />,
+                handle: { hideMobileNav: true },
+              },
+            ],
           },
           // {
           //   path: 'friends',
