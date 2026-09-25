@@ -11,17 +11,28 @@
 .startGroup,
 .endGroup {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  min-width: 0;
   gap: var(--space-s);
+}
+
+.startGroup {
+  flex: 1;
+}
+
+.endGroup {
+  flex-shrink: 0;
 }
 
 .leading {
   display: flex;
   align-items: center;
   gap: var(--space-m);
+  flex-shrink: 0;
 }
 
 .avatarWrapper {
+  flex-shrink: 0;
   align-content: center;
   overflow: hidden;
   width: 50px;
@@ -35,11 +46,24 @@
   aspect-ratio: 1 / 1;
   width: 100%;
   object-fit: cover;
-  display: block;
+}
+
+.titleGroup {
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.title,
+.subtitle {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .title {
-  font-size: 1.25rem;
+  font-size: 1rem;
 }
 
 .subtitle {
@@ -50,4 +74,10 @@
   display: flex;
   align-items: center;
   gap: var(--space-s);
+}
+
+@media (min-width: 1024px) {
+  .title {
+    font-size: 1.25rem
+  }
 }

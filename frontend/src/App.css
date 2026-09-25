@@ -82,6 +82,7 @@
 
   .app-body[data-chat-open="true"] .app-detail {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

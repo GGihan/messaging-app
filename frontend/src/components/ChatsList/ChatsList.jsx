@@ -50,7 +50,7 @@ export default function ChatsList() {
             <p>message</p>
             <Button
               className={styles.backButton}
-              onClick={() => setActiveChat("09d317d3-5be4-4e4f-ac18-575052f806f6")}
+              onClick={() => setActiveChat("1d258110-e496-4dfd-9536-3b9d306f21c5")}
               aria-label="Back to chats"
             >
               <img

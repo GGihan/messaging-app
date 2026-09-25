@@ -35,6 +35,21 @@ export default function ChatWindow() {
     closeChat();
   };
 
+  const handleEditGroup = () => {
+    // Open Modal or similiar for Group Edit
+    console.log("Edit chat for chatId:", activeChatId);
+  };
+
+  const handleDeleteGroup = () => {
+    // delete request for group chat
+    closeChat();
+  };
+
+  const handleLeaveGroup = () => {
+    // delete member request for group chat
+     console.log("delete member for chatId:", activeChatId);
+  };
+
   const {
     data: chat,
     error: chatError,
@@ -64,6 +79,7 @@ export default function ChatWindow() {
   }
 
   const { avatarUrl, title, subtitle } = chatHelper.getChatBarInfo(chat, user.id);
+  const { isGroup, isMember, isAdmin } = chatHelper.getChatPermissions(chat, user.id);
 
   return (
     <div className={styles.windowWrapper}>
@@ -106,15 +122,47 @@ export default function ChatWindow() {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent>
-              <DropdownMenuItem onSelect={handleBlockUser}>
-                Block user
-              </DropdownMenuItem>
+              {isGroup ? (
+                <>
+                  {isMember && (
+                    <>
+                      {isAdmin && (
+                        <DropdownMenuItem onSelect={handleEditGroup}>
+                          Edit group
+                        </DropdownMenuItem>
+                      )}
 
-              <DropdownMenuSeparator />
+                      <DropdownMenuSeparator />
 
-              <DropdownMenuItem variant="danger" onSelect={handleRemoveChat}>
-                Remove chat
-              </DropdownMenuItem>
+                      {isAdmin && (
+                        <DropdownMenuItem variant="danger" onSelect={handleDeleteGroup}>
+                          Delete group
+                        </DropdownMenuItem>
+                      )}
+
+                      <DropdownMenuItem variant="danger" onSelect={handleLeaveGroup}>
+                        Leave group
+                      </DropdownMenuItem>
+                    </>
+                  )} 
+                  <DropdownMenuItem variant="danger" onSelect={handleRemoveChat}>
+                    Remove chat
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                // Direct chat
+                <>
+                  <DropdownMenuItem onSelect={handleBlockUser}>
+                    Block user
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem variant="danger" onSelect={handleRemoveChat}>
+                    Remove chat
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenuRoot>
         }

@@ -25,7 +25,23 @@ export const chatHelper = {
     };
   },
 
-  getChatBarActions(chat, currentUserId) {
-    // group and direct chat actions
+  getChatPermissions(chat, currentUserId) {
+    if (!chat || !currentUserId) {
+      return {
+        isGroup: false,
+        isMember: false,
+        isAdmin: false,
+      };
+    }
+
+    const currentMember = chat.members?.find(
+      (member) => (member.user?.id) === currentUserId
+    );
+
+    return {
+      isGroup: Boolean(chat.isGroup),
+      isMember: Boolean(currentMember && currentMember.leftAt === null),
+      isAdmin: currentMember?.role === "ADMIN",
+    };
   },
 };
