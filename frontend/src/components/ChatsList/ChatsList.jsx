@@ -21,17 +21,17 @@ export default function ChatsList() {
   return (
     <div className={`${styles.tabWrapper} flex-column`}>
       <TopAppBar 
-        title="Chats"
+        title={"Chats"}
         actions={
           <Link to="/chats/new" className={styles.addChat} aria-label="Add new chat">
             <img
-                className={styles.linkIcon}
-                src={chatAdd}
-                alt=""
-                width="24"
-                height="24"
-                aria-hidden="true"
-              />
+              className={styles.linkIcon}
+              src={chatAdd}
+              alt=""
+              width="24"
+              height="24"
+              aria-hidden="true"
+            />
           </Link>
         }
       />
@@ -50,7 +50,7 @@ export default function ChatsList() {
             <p>message</p>
             <Button
               className={styles.backButton}
-              onClick={() => setActiveChat(1)}
+              onClick={() => setActiveChat("09d317d3-5be4-4e4f-ac18-575052f806f6")}
               aria-label="Back to chats"
             >
               <img

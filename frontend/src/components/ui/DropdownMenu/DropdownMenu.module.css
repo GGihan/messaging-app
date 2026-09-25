@@ -6,7 +6,7 @@
   border-radius: 8px;
   padding: 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  z-index: var(--z-dropdown, 20);
+  z-index: var(--z-dropdown);
   display: flex;
   flex-direction: column;
   gap: 2px;
