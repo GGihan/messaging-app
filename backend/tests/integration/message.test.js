@@ -228,7 +228,7 @@ describe("ChatMember Routes Integration Tests", () => {
 
       expect(res.status).toBe(201);
 
-      expect(mockIO.to).toHaveBeenCalledWith(`chat:${directChat.id}`);
+      expect(mockIO.to).toHaveBeenCalledWith([`user:${userCharlie.id}`]);
 
       expect(mockIO.emit).toHaveBeenCalledWith(
         'chat_message',
