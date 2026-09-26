@@ -73,7 +73,7 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: var(--space-s);
+  gap: var(--space-xs);
 }
 
 @media (min-width: 1024px) {

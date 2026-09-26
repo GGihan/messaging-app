@@ -1,3 +1,7 @@
+.windowWrapper {
+  position: relative;
+}
+
 .actionButton {
   border-radius: var(--space-s);
 }

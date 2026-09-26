@@ -44,4 +44,12 @@ export const chatHelper = {
       isAdmin: currentMember?.role === "ADMIN",
     };
   },
+
+  determineUserAvatarUrl(avatarUrl) {
+    if (avatarUrl) {
+      return avatarUrl
+    } else {
+      return profileAvatarFiller
+    }
+  },
 };

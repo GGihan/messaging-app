@@ -2,6 +2,7 @@ import styles from "./ChatWindow.module.css";
 import TopAppBar from "../TopAppBar/TopAppBar";
 import Button from "../ui/Button/Button";
 import arrowLeft from "@/assets/icons/arrow-left.svg";
+import membersIcon from "@/assets/icons/members.svg";
 import moreVert from "@/assets/icons/more-vert.svg";
 import { useChatStore } from "@/store/useChatStore";
 import {
@@ -16,6 +17,8 @@ import useSWR from "swr";
 import { useAuth } from "@/hooks/useAuth";
 import { chatHelper } from "@/utils/chatHelpers";
 import LoadingSpinner from "../ui/LoadingSpinner/LoadingSpinner";
+import { useState } from "react";
+import MemberList from "../Member/MemberList/MemberList";
 
 const chatFetcher = (url) => apiClient(url).then(res => res.data.chat);
 
@@ -23,6 +26,7 @@ export default function ChatWindow() {
   const { user } = useAuth();
   const activeChatId = useChatStore((state) => state.activeChatId);
   const closeChat = useChatStore((state) => state.closeChat);
+  const [showMemberList, setShowMemberList] = useState(false);
 
   const handleBlockUser = () => {
     // post request for user block
@@ -104,67 +108,85 @@ export default function ChatWindow() {
         title={title}
         subtitle={subtitle}
         actions={
-          <DropdownMenuRoot>
-            <DropdownMenuTrigger asChild>
-              <Button
-                className={styles.actionButton}
-                aria-label="Chat options"
-              >
-                <img
-                  className={styles.buttonIcon}
-                  src={moreVert}
-                  alt=""
-                  width="24"
-                  height="24"
-                  aria-hidden="true"
-                />
-              </Button>
-            </DropdownMenuTrigger>
+          <>
+            <Button
+              className={styles.actionButton}
+              onClick={() => setShowMemberList(showMemberList ? false : true)}
+              aria-label="Show member list"
+            >
+              <img
+                className={styles.buttonIcon}
+                src={membersIcon}
+                alt=""
+                width="24"
+                height="24"
+                aria-hidden="true"
+              />
+            </Button>
 
-            <DropdownMenuContent>
-              {isGroup ? (
-                <>
-                  {isMember && (
-                    <>
-                      {isAdmin && (
-                        <DropdownMenuItem onSelect={handleEditGroup}>
-                          Edit group
+            <DropdownMenuRoot>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className={styles.actionButton}
+                  aria-label="Chat options"
+                >
+                  <img
+                    className={styles.buttonIcon}
+                    src={moreVert}
+                    alt=""
+                    width="24"
+                    height="24"
+                    aria-hidden="true"
+                  />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent>
+                {isGroup ? (
+                  // Group chat
+                  <>
+                    {isMember && (
+                      <>
+                        {isAdmin && (
+                          <>
+                            <DropdownMenuItem onSelect={handleEditGroup}>
+                              Edit group
+                            </DropdownMenuItem>
+
+                            <DropdownMenuSeparator />
+
+                            <DropdownMenuItem variant="danger" onSelect={handleDeleteGroup}>
+                              Delete group
+                            </DropdownMenuItem>
+                          </>
+                        )}
+
+                        <DropdownMenuItem variant="danger" onSelect={handleLeaveGroup}>
+                          Leave group
                         </DropdownMenuItem>
-                      )}
+                      </>
+                    )} 
+                    <DropdownMenuItem variant="danger" onSelect={handleRemoveChat}>
+                      Remove chat
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  // Direct chat
+                  <>
+                    <DropdownMenuItem onSelect={handleBlockUser}>
+                      Block user
+                    </DropdownMenuItem>
 
-                      <DropdownMenuSeparator />
+                    <DropdownMenuSeparator />
 
-                      {isAdmin && (
-                        <DropdownMenuItem variant="danger" onSelect={handleDeleteGroup}>
-                          Delete group
-                        </DropdownMenuItem>
-                      )}
-
-                      <DropdownMenuItem variant="danger" onSelect={handleLeaveGroup}>
-                        Leave group
-                      </DropdownMenuItem>
-                    </>
-                  )} 
-                  <DropdownMenuItem variant="danger" onSelect={handleRemoveChat}>
-                    Remove chat
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                // Direct chat
-                <>
-                  <DropdownMenuItem onSelect={handleBlockUser}>
-                    Block user
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem variant="danger" onSelect={handleRemoveChat}>
-                    Remove chat
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenuRoot>
+                    <DropdownMenuItem variant="danger" onSelect={handleRemoveChat}>
+                      Remove chat
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenuRoot>
+          </>
         }
       />
 
@@ -176,6 +198,12 @@ export default function ChatWindow() {
       <div className={styles.composer}>
         <input type="text" placeholder="Type a message..." />
       </div>
+
+      {/* MemberList */}
+      {showMemberList && (
+        <MemberList members={chat.members} onClose={() => setShowMemberList(false)} />
+      )}
+
     </div>
   );
 };

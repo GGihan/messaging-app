@@ -1,0 +1,64 @@
+.memberListWrapper {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  top: 60px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-window);
+
+  background-color: var(--color-gray-very-light);
+}
+
+.topBar {
+  border-top: 2px solid black;
+}
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.memberCard {
+  justify-content: space-between;
+  height: 80px;
+  padding: var(--space-s);
+  border: 1px solid black;
+}
+
+.startGroup,
+.endGroup {
+  align-items: center;
+  min-width: 0;
+  gap: var(--space-s);
+}
+
+.startGroup {
+  flex: 1;
+}
+
+.endGroup {
+  flex-shrink: 0;
+}
+
+.avatarWrapper {
+  flex-shrink: 0;
+  align-content: center;
+  overflow: hidden;
+  width: 65px;
+  height: 65px;
+  border: 1px solid var(--color-gray);
+  border-radius: var(--space-xl);
+  background-color: var(--color-gray-very-light);
+}
+
+.avatar {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  object-fit: cover;
+}
+
+.infoGroup {
+
+}

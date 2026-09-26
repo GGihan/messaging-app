@@ -6,10 +6,11 @@ export default function TopAppBar({
   title,
   subtitle,
   actions,
+  className = "",
 }) {
 
   return (
-    <header className={styles.barWrapper}>
+    <header className={`${styles.barWrapper} ${className}`}>
       <div className={styles.startGroup}>
         {leading && (
           <div className={styles.leading}>{leading}</div>
