@@ -109,20 +109,22 @@ export default function ChatWindow() {
         subtitle={subtitle}
         actions={
           <>
-            <Button
-              className={styles.actionButton}
-              onClick={() => setShowMemberList(showMemberList ? false : true)}
-              aria-label="Show member list"
-            >
-              <img
-                className={styles.buttonIcon}
-                src={membersIcon}
-                alt=""
-                width="24"
-                height="24"
-                aria-hidden="true"
-              />
-            </Button>
+            {isGroup && (
+              <Button
+                className={styles.actionButton}
+                onClick={() => setShowMemberList(showMemberList ? false : true)}
+                aria-label="Show member list"
+              >
+                <img
+                  className={styles.buttonIcon}
+                  src={membersIcon}
+                  alt=""
+                  width="24"
+                  height="24"
+                  aria-hidden="true"
+                />
+              </Button>
+            )}
 
             <DropdownMenuRoot>
               <DropdownMenuTrigger asChild>
