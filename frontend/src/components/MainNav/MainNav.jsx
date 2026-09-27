@@ -1,4 +1,4 @@
-import { NavLink, useNavigate, useSearchParams } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import Button from "../ui/Button/Button";
 import styles from "./MainNav.module.css";
@@ -6,13 +6,16 @@ import chat from "@/assets/icons/chat.svg";
 import register from "@/assets/icons/sign-up.svg";
 import login from "@/assets/icons/log-in.svg";
 import logoutIcon from "@/assets/icons/log-out.svg";
+import { useChatStore } from "@/store/useChatStore";
 
 export default function MainNav() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const closeChat = useChatStore((state) => state.closeChat);
 
   const handleLogout = () => {
     logout();
+    closeChat();
     navigate('/', { replace: true });
   }
 

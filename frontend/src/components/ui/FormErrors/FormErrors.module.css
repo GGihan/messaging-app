@@ -6,4 +6,5 @@
   padding: var(--space-s);
   border: 1px solid red;
   border-radius: var(--space-s);
+  background-color: var(--color-gray-alot-light);
 }

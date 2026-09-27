@@ -211,5 +211,16 @@ textarea:active {
 
 .error-message {
   color: var(--color-deny);
+  font-size: 0.75rem;
+  font-family: var(--font-ui);
+}
+
+.error-box {
+  color: var(--color-deny);
+  font-size: 0.75rem;
+  font-family: var(--font-ui);
+  padding: var(--space-s);
+  border: 1px solid red;
+  border-radius: var(--space-s);
   background-color: var(--color-gray-alot-light);
 }

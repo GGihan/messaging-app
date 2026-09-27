@@ -1,0 +1,16 @@
+.windowWrapper {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-window);
+
+  overflow-y: auto;
+  background-color: var(--color-gray-very-light);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}

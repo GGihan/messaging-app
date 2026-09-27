@@ -19,6 +19,7 @@ import { chatHelper } from "@/utils/chatHelpers";
 import LoadingSpinner from "../ui/LoadingSpinner/LoadingSpinner";
 import { useState } from "react";
 import MemberList from "../Member/MemberList/MemberList";
+import EditGroup from "../EditGroup/EditGroup";
 
 const chatFetcher = (url) => apiClient(url).then(res => res.data.chat);
 
@@ -27,6 +28,12 @@ export default function ChatWindow() {
   const activeChatId = useChatStore((state) => state.activeChatId);
   const closeChat = useChatStore((state) => state.closeChat);
   const [showMemberList, setShowMemberList] = useState(false);
+  const [showEditGroup, setShowEditGroup] = useState(false);
+
+  const handleShowMemberList = () => {
+    setShowMemberList(showMemberList ? false : true);
+    setShowEditGroup(false);
+  };
 
   const handleBlockUser = () => {
     // post request for user block
@@ -40,7 +47,8 @@ export default function ChatWindow() {
   };
 
   const handleEditGroup = () => {
-    // Open Modal or similiar for Group Edit
+    setShowEditGroup(showEditGroup ? false : true);
+    setShowMemberList(false);
     console.log("Edit chat for chatId:", activeChatId);
   };
 
@@ -58,6 +66,7 @@ export default function ChatWindow() {
     data: chat,
     error: chatError,
     isLoading: isLoadingChat,
+    mutate: refetchChat,
   } = useSWR(
     `/chats/${activeChatId}`,
     chatFetcher,
@@ -112,7 +121,7 @@ export default function ChatWindow() {
             {isGroup && (
               <Button
                 className={styles.actionButton}
-                onClick={() => setShowMemberList(showMemberList ? false : true)}
+                onClick={handleShowMemberList}
                 aria-label="Show member list"
               >
                 <img
@@ -205,7 +214,11 @@ export default function ChatWindow() {
       {showMemberList && (
         <MemberList members={chat.members} onClose={() => setShowMemberList(false)} />
       )}
-
+      {/* EditGroup */}
+      {showEditGroup && (
+        // maybe dont refetch chat manually, instead use sockets to update chat info
+        <EditGroup chat={chat} onClose={() => setShowEditGroup(false)} refetchChat={refetchChat} />
+      )}
     </div>
   );
 };
