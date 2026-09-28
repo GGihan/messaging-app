@@ -2,17 +2,21 @@ import { Link } from "react-router";
 import TopAppBar from "../TopAppBar/TopAppBar";
 import styles from "./ChatsList.module.css";
 import chatAdd from "@/assets/icons/chat-add.svg";
-import { useChatStore } from "@/store/useChatStore";
 import useSWR from "swr";
 import { apiClient } from "@/config/api";
 import LoadingSpinner from "../ui/LoadingSpinner/LoadingSpinner";
 import ChatCard from "../ChatCard/ChatCard";
+import SearchBar from "../ui/SearchBar/SearchBar";
+import { useState } from "react";
+import { chatHelper } from "@/utils/chatHelpers";
+import { useAuth } from "@/hooks/useAuth";
 
 const chatFetcher = (url) => apiClient(url).then(res => res.data.chats);
 
 export default function ChatsList() {
-  const activeChatId = useChatStore((state) => state.activeChatId);
-
+  const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
+  
   const {
     data: chats,
     error: chatsError,
@@ -26,13 +30,16 @@ export default function ChatsList() {
     }
   );
 
-  console.log(chats);
+  // Client-side filtering in memory:
+  const filteredChats = chats?.filter((chat) => {
+    const { name: chatName } = chatHelper.determineChatName(chat, user.id);
+    const name = chatName || "";
+    return name.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   const handleSearch = () => {
     // filter chats here
   };
-
-  // onClick={() => setActiveChat(chat.id)} for selecting chat
 
   if (chatsError) return <div>{chatsError.message || "Failed to load chats."}</div>;
     
@@ -67,15 +74,13 @@ export default function ChatsList() {
         }
       />
       <div className={`${styles.content} flex-column`}>
-        {/* <SearchBar
-          icon={search}
-        /> */}
-        {/* handleSearch */}
-        <div>
-          <p>SearchBar</p>
-        </div>
+        <SearchBar
+          placeholder="Filter your chats..."
+          onSearch={setSearchQuery}
+          debounceMs={0}
+        />
         <div className={`${styles.list} flex-column`}>
-          {chats.map((chat) => (
+          {filteredChats.map((chat) => (
             <ChatCard key={chat.id} chat={chat} />
           ))}
         </div>

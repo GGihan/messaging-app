@@ -53,6 +53,24 @@ export const chatHelper = {
     }
   },
 
+  determineChatName(chat, currentUserId) {
+    if (!chat) return null;
+
+    if (chat.isGroup) {
+      return {
+        name: chat?.name || "Group",
+      };
+    }
+
+    // Direct chat
+    const otherMember = chat.members.find((member) => member.user.id !== currentUserId);
+    const otherUser = otherMember?.user;
+
+    return {
+      name: otherUser?.profile?.displayName,
+    };
+  },
+
 
   // Add a check for isReadByAll and isUnread
   getChatCardInfo(chat, currentUserId) {

@@ -1,0 +1,44 @@
+.searchWrapper {
+  align-items: center;
+  gap: var(--space-xs);
+  height: 44px;
+  padding: 0 var(--space-xs);
+  background-color: var(--color-gray-very-light);
+  border-radius: var(--space-s);
+}
+
+.searchWrapper:focus-within {
+  outline: 2px solid var(--color-focus);
+}
+
+.searchIcon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: var(--space-s) 0;
+}
+
+.input:focus-visible,
+.input:active {
+  outline: none;
+}
+
+.clearButton {
+  padding: var(--space-xs);
+  border-radius: var(--space-s);
+}
+
+@media (hover: hover) {
+  .clearButton:hover {
+    background-color: var(--color-gray-light);
+  }
+}
