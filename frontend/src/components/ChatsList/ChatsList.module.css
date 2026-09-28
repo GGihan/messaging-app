@@ -7,3 +7,7 @@
   overscroll-behavior-y: contain;
   font-family: var(--font-ui);
 }
+
+.list {
+  gap: var(--space-s);
+}

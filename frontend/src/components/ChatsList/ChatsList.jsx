@@ -1,22 +1,53 @@
 import { Link } from "react-router";
 import TopAppBar from "../TopAppBar/TopAppBar";
-import Button from "../ui/Button/Button";
 import styles from "./ChatsList.module.css";
 import chatAdd from "@/assets/icons/chat-add.svg";
-import search from "@/assets/icons/search.svg";
 import { useChatStore } from "@/store/useChatStore";
+import useSWR from "swr";
+import { apiClient } from "@/config/api";
+import LoadingSpinner from "../ui/LoadingSpinner/LoadingSpinner";
+import ChatCard from "../ChatCard/ChatCard";
+
+const chatFetcher = (url) => apiClient(url).then(res => res.data.chats);
 
 export default function ChatsList() {
   const activeChatId = useChatStore((state) => state.activeChatId);
-  const setActiveChat = useChatStore((state) => state.setActiveChat);
 
-  // fetch chats here useSWR
+  const {
+    data: chats,
+    error: chatsError,
+    isLoading: isLoadingChats,
+    mutate: refetchChats,
+  } = useSWR(
+    `/chats`,
+    chatFetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
+
+  console.log(chats);
 
   const handleSearch = () => {
     // filter chats here
   };
 
   // onClick={() => setActiveChat(chat.id)} for selecting chat
+
+  if (chatsError) return <div>{chatsError.message || "Failed to load chats."}</div>;
+    
+  if (isLoadingChats) {
+    return (
+      <div 
+        className="loading-container"
+        style={{
+          height: "100%",
+        }}
+      >
+        <LoadingSpinner size={40} />
+      </div>
+    );
+  }
 
   return (
     <div className={`${styles.tabWrapper} flex-column`}>
@@ -43,86 +74,10 @@ export default function ChatsList() {
         <div>
           <p>SearchBar</p>
         </div>
-        <div className={styles.list}>
-          {/* chats.map(chat => <ChatCard key={chat.id} chat={chat} />) */}
-          <div>
-            <h2>some chat1</h2>
-            <p>message</p>
-            <Button
-              className={styles.backButton}
-              onClick={() => setActiveChat("1d258110-e496-4dfd-9536-3b9d306f21c5")}
-              aria-label="Back to chats"
-            >
-              <img
-                className={styles.buttonIcon}
-                src={search}
-                alt=""
-                width="24"
-                height="24"
-                aria-hidden="true"
-              />
-            </Button>
-          </div>
-          <div>
-            <h2>some chat2</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>some chat3</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>more chats</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>some chat</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>some chat</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>some chat</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>some chat</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>some chat</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>some chat</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>some chat</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>some chat</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>some chat</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>some chat</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>some chat</h2>
-            <p>message</p>
-          </div>
-          <div>
-            <h2>some chat</h2>
-            <p>message</p>
-          </div>
+        <div className={`${styles.list} flex-column`}>
+          {chats.map((chat) => (
+            <ChatCard key={chat.id} chat={chat} />
+          ))}
         </div>
       </div>
     </div>

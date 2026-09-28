@@ -1,0 +1,47 @@
+import { chatHelper } from "@/utils/chatHelpers";
+import styles from "./ChatCard.module.css";
+import { useAuth } from "@/hooks/useAuth";
+import Button from "../ui/Button/Button";
+import { useChatStore } from "@/store/useChatStore";
+
+export default function ChatCard({ chat }) {
+  const { user } = useAuth();
+  const setActiveChat = useChatStore((state) => state.setActiveChat);
+
+  const { avatarUrl, name, message, sender, date } = chatHelper.getChatCardInfo(chat, user.id);
+
+  return (
+    <div className={`${styles.cardWrapper} flex-row`}>
+      <div className={`${styles.startGroup} flex-row`}>
+        <div className={`${styles.avatarWrapper} flex-column`}>
+          <img
+            className={styles.avatar}
+            src={avatarUrl}
+            alt=""
+            aria-hidden="true"
+          />
+        </div>
+
+        <div className={`${styles.infoGroup} flex-column`}>
+          <p className={styles.name}>{name}</p>
+          <div className={`${styles.messageGroup} flex-row`}>
+            {sender &&
+              <p className={styles.sender}>{sender}:</p>
+            }
+            <p className={styles.message}>{message.text}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className={`${styles.endGroup} flex-column`}>
+        <p className={styles.date}>{date}</p>
+      </div>
+
+      <Button
+        className={styles.overlayButton}
+        onClick={() => setActiveChat(chat.id)}
+        aria-label={`Open chat with ${name}`}
+      />
+    </div>
+  );
+};
