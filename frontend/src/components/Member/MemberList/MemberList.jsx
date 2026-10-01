@@ -30,7 +30,6 @@ export default function MemberList({ members, onClose }) {
     // Remove member
   };
 
-
   return (
     <div className={styles.memberListWrapper}>
       <TopAppBar

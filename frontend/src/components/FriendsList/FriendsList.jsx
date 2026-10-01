@@ -8,6 +8,7 @@ import { Link } from "react-router";
 import SearchBar from "../ui/SearchBar/SearchBar";
 import { apiClient } from "@/config/api";
 import LoadingSpinner from "../ui/LoadingSpinner/LoadingSpinner";
+import FriendCard from "../FriendCard/FriendCard";
 
 const friendshipsFetcher = (url) => apiClient(url).then(res => res.data.friendships);
 
@@ -43,6 +44,8 @@ export default function FriendsList() {
       </div>
     );
   };
+
+  console.log(friendships);
 
   return (
     <div className={`${styles.tabWrapper} flex-column`}>
@@ -88,9 +91,9 @@ export default function FriendsList() {
           debounceMs={0}
         />
         <div className={`${styles.list} flex-column`}>
-          {/* {filteredFriendships.map((friendship) => (
-            <FriendCard key={friendship.id} friendship={friendship} />
-          ))} */}
+          {filteredFriendships.map((friendship) => (
+            <FriendCard key={friendship.id} friend={friendship.friend} />
+          ))}
         </div>
       </div>
     </div>
