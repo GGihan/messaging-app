@@ -3,8 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Button from "../ui/Button/Button";
 import styles from "./MainNav.module.css";
 import chat from "@/assets/icons/chat.svg";
-import register from "@/assets/icons/sign-up.svg";
-import login from "@/assets/icons/log-in.svg";
+import friends from "@/assets/icons/friends-list.svg";
 import logoutIcon from "@/assets/icons/log-out.svg";
 import { useChatStore } from "@/store/useChatStore";
 
@@ -21,8 +20,7 @@ export default function MainNav() {
 
   const navLinks = [
     { to: "/chats", label: "Chats", icon: chat, show: true },
-    { to: "/register", label: "Register", icon: register, show: !user },
-    { to: "/login", label: "Login", icon: login, show: (!user) },
+    { to: "/friends", label: "Friends", icon: friends, show: true },
   ];
 
   return (
@@ -47,7 +45,7 @@ export default function MainNav() {
           ))}
 
         {user && (
-          <li className={styles.menuItem}>
+          <li className={`${styles.menuItem} flex-row`}>
             <Button className={styles.logoutButton} onClick={handleLogout}>
               <img
                 className={styles.linkIcon}

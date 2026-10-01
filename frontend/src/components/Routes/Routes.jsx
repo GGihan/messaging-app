@@ -5,8 +5,8 @@ import Login from "../Login/Login";
 import ProtectedLayout from "../layout/ProtectedLayout/ProtectedLayout";
 import PublicLayout from "../layout/PublicLayout/PublicLayout";
 import ChatsList from "../ChatsList/ChatsList";
-import ChatsLayout from "../layout/ChatsLayout/ChatsLayout";
 import NewChat from "../NewChat/NewChat";
+import FriendsList from "../FriendsList/FriendsList";
 
 const routes = [
   {
@@ -27,19 +27,26 @@ const routes = [
         children: [
           {
             path: 'chats',
-            element: <ChatsLayout />,
-            children: [
-              { index: true, element: <ChatsList /> },
-              {
-                path: "new",
-                element: <NewChat />,
-                handle: { hideMobileNav: true },
-              },
-            ],
+            element: <ChatsList />,
+          },
+          {
+            path: "chats/new",
+            element: <NewChat />,
+            handle: { hideMobileNav: true },
+          },
+          {
+            path: 'friends',
+            element: <FriendsList />,
           },
           // {
-          //   path: 'friends',
-          //   element: <Friends />,
+          //   path: 'friends/new',
+          //   element: <AddFriend />,
+          //   handle: { hideMobileNav: true },
+          // },
+          // {
+          //   path: 'friends/requests',
+          //   element: <FriendRequests />,
+          //   handle: { hideMobileNav: true },
           // },
           // {
           //   path: 'profile',

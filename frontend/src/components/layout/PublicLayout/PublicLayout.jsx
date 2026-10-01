@@ -1,4 +1,3 @@
-import LoadingSpinner from "@/components/ui/LoadingSpinner/LoadingSpinner";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate, Outlet } from "react-router";
 
@@ -13,5 +12,7 @@ export default function PublicLayout() {
     return <Navigate to="/" replace />;
   }
 
-  return <Outlet />;
+  return (
+    <Outlet />
+  );
 };

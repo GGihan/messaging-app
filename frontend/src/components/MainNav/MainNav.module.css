@@ -2,7 +2,7 @@
   width: 100%;
   background-color: var(--color-primary);
   border-top: 2px solid black;
-  z-index: 100;
+  z-index: var(--z-drawer);
   font-family: var(--font-ui);
 }
 
@@ -43,7 +43,7 @@
 
 @media (min-width: 1024px) {
   .navContainer {
-    width: 80px;
+    width: 5rem;
     height: 100%;
     border-top: none;
     border-right: 1px solid black;
@@ -57,6 +57,7 @@
   }
 
   .menuItem {
+    justify-content: center;
     width: 100%;
   }
 }

@@ -21,7 +21,6 @@ export default function ChatsList() {
     data: chats,
     error: chatsError,
     isLoading: isLoadingChats,
-    mutate: refetchChats,
   } = useSWR(
     `/chats`,
     chatFetcher,
@@ -37,19 +36,12 @@ export default function ChatsList() {
     return name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const handleSearch = () => {
-    // filter chats here
-  };
-
   if (chatsError) return <div>{chatsError.message || "Failed to load chats."}</div>;
     
   if (isLoadingChats) {
     return (
       <div 
         className="loading-container"
-        style={{
-          height: "100%",
-        }}
       >
         <LoadingSpinner size={40} />
       </div>

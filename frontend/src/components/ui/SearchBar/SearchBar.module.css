@@ -1,7 +1,6 @@
 .searchWrapper {
   align-items: center;
   gap: var(--space-xs);
-  height: 44px;
   padding: 0 var(--space-xs);
   background-color: var(--color-gray-very-light);
   border-radius: var(--space-s);

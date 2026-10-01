@@ -99,7 +99,7 @@
   .app-body,
   .app-body[data-chat-open="true"] {
     grid-template-rows: 100%;
-    grid-template-columns: auto minmax(320px, 1.5fr) minmax(0, 3fr);
+    grid-template-columns: auto minmax(20rem, 1.5fr) minmax(0, 3fr);
     grid-template-areas: "nav main detail";
   }
 

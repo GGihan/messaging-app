@@ -7,7 +7,7 @@ export default function ProtectedLayout() {
 
   if (isLoadingAuth) {
     return (
-      <div className="loading-container">
+      <div className="loading-container" style={{height: "100dvh"}}>
         <LoadingSpinner size={40}/>
       </div>
     );

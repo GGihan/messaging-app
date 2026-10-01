@@ -49,7 +49,6 @@ export default function ChatWindow() {
   const handleEditGroup = () => {
     setShowEditGroup(showEditGroup ? false : true);
     setShowMemberList(false);
-    console.log("Edit chat for chatId:", activeChatId);
   };
 
   const handleDeleteGroup = () => {
@@ -82,9 +81,6 @@ export default function ChatWindow() {
     return (
       <div 
         className="loading-container"
-        style={{
-          height: "100%",
-        }}
       >
         <LoadingSpinner size={40} />
       </div>

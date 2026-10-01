@@ -1,6 +1,6 @@
 .fullDisplay {
   display: flex;
-  min-height: 100vh;
+  min-height: 100dvh;
   /* background-color: var(--color-black-light); */
   background-color: var(--color-secondary);
 }
