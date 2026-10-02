@@ -310,6 +310,10 @@ export const chatService = {
           where: {
             leftAt: null,
           },
+          orderBy: [
+            { joinedAt: 'asc' },
+            { id: 'asc' },
+          ],
           include: {
             user: {
               select: {

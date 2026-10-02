@@ -72,10 +72,20 @@ async function main() {
       plainPassword: "Password123!",
       bio: "DevOps & cloud engineering.",
     }),
+    createUser({
+      username: "david",
+      plainPassword: "Password123!",
+      bio: "Fullstack dev.",
+    }),
+    createUser({
+      username: "eve",
+      plainPassword: "Password123!",
+      bio: "",
+    }),
   ]);
 
   // 3. Insert users
-  const [alice, bob, charlie] = await Promise.all(
+  const [alice, bob, charlie, david, eve] = await Promise.all(
     userPayloads.map((data) =>
       prisma.user.create({
         data,
@@ -84,7 +94,7 @@ async function main() {
     )
   );
 
-  console.log(`Created 3 users: ${alice.username}, ${bob.username}, ${charlie.username}`);
+  console.log(`Created 5 users`);
 
   // 4. Create Friendships between users
   await prisma.friendship.createMany({
