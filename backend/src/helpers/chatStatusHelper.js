@@ -115,6 +115,10 @@ export function isChatVisibleToUser(chat, member) {
     return false;
   }
 
+  if (member.joinedAt && new Date(member.joinedAt) > new Date(member.deletedAt)) {
+    return true;
+  }
+
   if (chat.lastMessageAt && new Date(chat.lastMessageAt) > new Date(member.deletedAt)) {
     return true;
   }

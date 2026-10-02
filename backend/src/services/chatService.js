@@ -392,7 +392,6 @@ export const chatService = {
         data: {
           leftAt: null,
           joinedAt: now,
-          deletedAt: now,
           role: 'MEMBER',
         },
       });
