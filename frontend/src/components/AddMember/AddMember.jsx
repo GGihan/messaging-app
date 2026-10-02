@@ -15,7 +15,7 @@ import { FormErrors } from "../ui/FormErrors/FormErrors";
 const userSearchFetcher = (url) => apiClient(url).then((res) => res.data.users);
 
 export default function AddMember({ chat, onClose, refetchChat }) {
-  const [query, setQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedUsers, setSelectedUsers] = useState(new Map());
   const [serverErrors, setServerErrors] = useState([]);
 
@@ -24,7 +24,7 @@ export default function AddMember({ chat, onClose, refetchChat }) {
     error: usersError,
     // isValidating: isValidatingUsers,
   } = useSWR(
-    query.length >= 2 ? `/users?search=${encodeURIComponent(query)}` : null,
+    searchQuery.length >= 1 ? `/users?search=${encodeURIComponent(searchQuery)}` : null,
     userSearchFetcher,
     {
       revalidateOnFocus: false,
@@ -108,7 +108,7 @@ export default function AddMember({ chat, onClose, refetchChat }) {
       <div className={`${styles.content} flex-column`}>
         <SearchBar
           placeholder="Search users..."
-          onSearch={setQuery}
+          onSearch={setSearchQuery}
           debounceMs={300}
         />
 

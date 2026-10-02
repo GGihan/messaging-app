@@ -12,9 +12,17 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "../../ui/DropdownMenu/DropdownMenu";
+import { useState } from "react";
+import SearchBar from "@/components/ui/SearchBar/SearchBar";
+import { apiClient } from "@/config/api";
+import { handleApiFormErrors } from "@/utils/formErrors";
+import { FormErrors } from "@/components/ui/FormErrors/FormErrors";
 
-export default function MemberList({ members, onClose }) {
+export default function MemberList({ chat, onClose, refetchChat }) {
   const { user } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [serverErrors, setServerErrors] = useState([]);
+  const members = chat?.members;
   const currentMember = members?.find((member) => member.user.id === user.id);
   const isCurrentUserAdmin = currentMember.role === "ADMIN";
 
@@ -26,9 +34,23 @@ export default function MemberList({ members, onClose }) {
     // Promote member
   };
 
-  const handleRemoveMember = () => {
-    // Remove member
+  const handleRemoveMember = async (memberId) => {
+    try {
+      await apiClient(`/chats/${chat.id}/members/${memberId}`, {
+        method: 'DELETE',
+      });
+
+      refetchChat();
+    } catch (error) {
+      handleApiFormErrors(error, setServerErrors); 
+    }
   };
+
+  // Client-side filtering in memory:
+  const filteredMembers = members?.filter((member) => {
+    const name = member.user.profile.displayName || "";
+    return name.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   return (
     <div className={styles.memberListWrapper}>
@@ -55,12 +77,16 @@ export default function MemberList({ members, onClose }) {
 
       <div className={`${styles.content} flex-column`}>
         {/* Add search bar here */}
-        <div className={styles.searchBar}>
-          <p>SEARCH BAR</p>
-        </div>
+        <SearchBar
+          placeholder="Filter members..."
+          onSearch={setSearchQuery}
+          debounceMs={0}
+        />
+
+        <FormErrors errors={serverErrors} />
 
         <div className={styles.list}>
-          {members?.map((member) => (
+          {filteredMembers?.map((member) => (
             <div key={member.id} className={`${styles.memberCard} flex-row`}>
               <div className={`${styles.startGroup} flex-row`}>
                 <div className={styles.avatarWrapper}>
@@ -113,7 +139,7 @@ export default function MemberList({ members, onClose }) {
                         </>
                       )}
 
-                      <DropdownMenuItem variant="danger" onSelect={handleRemoveMember}>
+                      <DropdownMenuItem variant="danger" onSelect={() => handleRemoveMember(member.id)}>
                         Remove member
                       </DropdownMenuItem>
                     </DropdownMenuContent>

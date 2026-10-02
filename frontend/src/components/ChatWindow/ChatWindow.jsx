@@ -237,7 +237,7 @@ export default function ChatWindow() {
 
       {/* MemberList */}
       {showMemberList && (
-        <MemberList members={chat.members} onClose={() => setShowMemberList(false)} />
+        <MemberList chat={chat} onClose={() => setShowMemberList(false)} refetchChat={refetchChat} />
       )}
 
       {/* EditGroup */}

@@ -8,16 +8,18 @@
   left: 0;
   z-index: var(--z-window);
 
-  background-color: var(--color-gray-very-light);
+  background-color: var(--color-gray-alot-light);
 }
 
-.topBar {
-  border-top: 2px solid black;
-}
+/* .topBar {
+  border-top: 1px solid black;
+} */
 
 .content {
   min-height: 0;
   overflow-y: auto;
+  gap: var(--space-s);
+  padding: var(--space-s);
 }
 
 .list {
