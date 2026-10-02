@@ -46,7 +46,7 @@ export default function ChatsList() {
         <LoadingSpinner size={40} />
       </div>
     );
-  }
+  };
 
   return (
     <div className={`${styles.tabWrapper} flex-column`}>

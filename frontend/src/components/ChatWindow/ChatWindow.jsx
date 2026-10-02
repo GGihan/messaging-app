@@ -4,6 +4,7 @@ import Button from "../ui/Button/Button";
 import arrowLeft from "@/assets/icons/arrow-left.svg";
 import membersIcon from "@/assets/icons/members.svg";
 import moreVert from "@/assets/icons/more-vert.svg";
+import personAddIcon from "@/assets/icons/person-add.svg";
 import { useChatStore } from "@/store/useChatStore";
 import {
   DropdownMenuRoot,
@@ -20,6 +21,7 @@ import LoadingSpinner from "../ui/LoadingSpinner/LoadingSpinner";
 import { useState } from "react";
 import MemberList from "../Member/MemberList/MemberList";
 import EditGroup from "../EditGroup/EditGroup";
+import AddMember from "../AddMember/AddMember";
 
 const chatFetcher = (url) => apiClient(url).then(res => res.data.chat);
 
@@ -27,12 +29,26 @@ export default function ChatWindow() {
   const { user } = useAuth();
   const activeChatId = useChatStore((state) => state.activeChatId);
   const closeChat = useChatStore((state) => state.closeChat);
+  const [showAddMember, setShowAddMember] = useState(false);
   const [showMemberList, setShowMemberList] = useState(false);
   const [showEditGroup, setShowEditGroup] = useState(false);
 
+  const handleShowAddMember = () => {
+    setShowAddMember(showAddMember ? false : true);
+    setShowMemberList(false);
+    setShowEditGroup(false);
+  };
+
   const handleShowMemberList = () => {
     setShowMemberList(showMemberList ? false : true);
+    setShowAddMember(false);
     setShowEditGroup(false);
+  };
+
+  const handleEditGroup = () => {
+    setShowEditGroup(showEditGroup ? false : true);
+    setShowAddMember(false);
+    setShowMemberList(false);
   };
 
   const handleBlockUser = () => {
@@ -46,11 +62,6 @@ export default function ChatWindow() {
     closeChat();
   };
 
-  const handleEditGroup = () => {
-    setShowEditGroup(showEditGroup ? false : true);
-    setShowMemberList(false);
-  };
-
   const handleDeleteGroup = () => {
     // delete request for group chat
     closeChat();
@@ -58,7 +69,7 @@ export default function ChatWindow() {
 
   const handleLeaveGroup = () => {
     // delete member request for group chat
-     console.log("delete member for chatId:", activeChatId);
+    console.log("delete member for chatId:", activeChatId);
   };
 
   const {
@@ -93,6 +104,7 @@ export default function ChatWindow() {
   return (
     <div className={styles.windowWrapper}>
       <TopAppBar
+        className={styles.appBar}
         leading={
           <Button
             className={styles.actionButton}
@@ -114,7 +126,24 @@ export default function ChatWindow() {
         subtitle={subtitle}
         actions={
           <>
-            {isGroup && (
+            {isGroup && isMember && isAdmin && (
+              <Button
+                className={styles.actionButton}
+                onClick={handleShowAddMember}
+                aria-label="Show add member"
+              >
+                <img
+                  className={styles.buttonIcon}
+                  src={personAddIcon}
+                  alt=""
+                  width="24"
+                  height="24"
+                  aria-hidden="true"
+                />
+              </Button>
+            )}
+
+            {isGroup && isMember && (
               <Button
                 className={styles.actionButton}
                 onClick={handleShowMemberList}
@@ -210,10 +239,16 @@ export default function ChatWindow() {
       {showMemberList && (
         <MemberList members={chat.members} onClose={() => setShowMemberList(false)} />
       )}
+
       {/* EditGroup */}
       {showEditGroup && (
         // maybe dont refetch chat manually, instead use sockets to update chat info
         <EditGroup chat={chat} onClose={() => setShowEditGroup(false)} refetchChat={refetchChat} />
+      )}
+
+      {showAddMember && (
+        // maybe dont refetch chat manually, instead use sockets to update chat info
+        <AddMember chat={chat} onClose={() => setShowAddMember(false)} refetchChat={refetchChat} />
       )}
     </div>
   );

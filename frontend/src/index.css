@@ -92,6 +92,9 @@ label,
   /* Links */
   --link: #275cd6;
   --link-light: #749af1;
+  /* Hover */
+  --hover: #9f93ec48;
+  --selected: #6d64ac48;
 
   /* Z-Index */
   /* Negative / Base */

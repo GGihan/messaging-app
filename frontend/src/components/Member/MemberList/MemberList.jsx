@@ -53,74 +53,76 @@ export default function MemberList({ members, onClose }) {
         }
       />
 
-      {/* Add search bar here */}
-      <div className={styles.searchBar}>
-        <p>SEARCH BAR</p>
-      </div>
+      <div className={`${styles.content} flex-column`}>
+        {/* Add search bar here */}
+        <div className={styles.searchBar}>
+          <p>SEARCH BAR</p>
+        </div>
 
-      <div className={styles.list}>
-        {members?.map((member) => (
-          <div key={member.id} className={`${styles.memberCard} flex-row`}>
-            <div className={`${styles.startGroup} flex-row`}>
-              <div className={styles.avatarWrapper}>
-                <img
-                  className={styles.avatar}
-                  src={chatHelper.determineUserAvatarUrl(member.user.profile?.avatarUrl)}
-                  alt=""
-                  aria-hidden="true"
-                />
+        <div className={styles.list}>
+          {members?.map((member) => (
+            <div key={member.id} className={`${styles.memberCard} flex-row`}>
+              <div className={`${styles.startGroup} flex-row`}>
+                <div className={styles.avatarWrapper}>
+                  <img
+                    className={styles.avatar}
+                    src={chatHelper.determineUserAvatarUrl(member.user.profile?.avatarUrl)}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <div className={`${styles.infoGroup} flex-column`}>
+                  <p className={styles.name}>{member.user.profile?.displayName}</p>
+                  <p className={styles.role}>{member.role}</p>
+                </div>
               </div>
 
-              <div className={`${styles.infoGroup} flex-column`}>
-                <p className={styles.name}>{member.user.profile?.displayName}</p>
-                <p className={styles.role}>{member.role}</p>
-              </div>
-            </div>
-
-            <div className={`${styles.endGroup} flex-row`}>
-              {/* Check if member is not me and if I am admin */}
-              {(!(user.id === member.user.id) && isCurrentUserAdmin) && (
-                <DropdownMenuRoot>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      className={styles.actionButton}
-                      aria-label="Member options"
-                    >
-                      <img
-                        className={styles.buttonIcon}
-                        src={moreVert}
-                        alt=""
-                        width="24"
-                        height="24"
-                        aria-hidden="true"
-                      />
-                    </Button>
-                  </DropdownMenuTrigger>
-    
-                  <DropdownMenuContent>
-                    {member.role === "ADMIN" ? (
-                      <DropdownMenuItem variant="danger" onSelect={handleDemoteMember}>
-                        Demote member
-                      </DropdownMenuItem>
-                    ) : (
-                      <>
-                        <DropdownMenuItem onSelect={handlePromoteMember}>
-                          Promote member
+              <div className={`${styles.endGroup} flex-row`}>
+                {/* Check if member is not me and if I am admin */}
+                {(!(user.id === member.user.id) && isCurrentUserAdmin) && (
+                  <DropdownMenuRoot>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        className={styles.actionButton}
+                        aria-label="Member options"
+                      >
+                        <img
+                          className={styles.buttonIcon}
+                          src={moreVert}
+                          alt=""
+                          width="24"
+                          height="24"
+                          aria-hidden="true"
+                        />
+                      </Button>
+                    </DropdownMenuTrigger>
+      
+                    <DropdownMenuContent>
+                      {member.role === "ADMIN" ? (
+                        <DropdownMenuItem variant="danger" onSelect={handleDemoteMember}>
+                          Demote member
                         </DropdownMenuItem>
+                      ) : (
+                        <>
+                          <DropdownMenuItem onSelect={handlePromoteMember}>
+                            Promote member
+                          </DropdownMenuItem>
 
-                        <DropdownMenuSeparator />
-                      </>
-                    )}
+                          <DropdownMenuSeparator />
+                        </>
+                      )}
 
-                    <DropdownMenuItem variant="danger" onSelect={handleRemoveMember}>
-                      Remove member
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenuRoot>
-              )}
+                      <DropdownMenuItem variant="danger" onSelect={handleRemoveMember}>
+                        Remove member
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenuRoot>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

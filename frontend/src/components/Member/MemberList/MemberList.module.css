@@ -2,7 +2,7 @@
   position: absolute;
   display: flex;
   flex-direction: column;
-  top: 60px;
+  top: 3.75rem;
   right: 0;
   bottom: 0;
   left: 0;
@@ -13,6 +13,11 @@
 
 .topBar {
   border-top: 2px solid black;
+}
+
+.content {
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .list {
@@ -57,8 +62,4 @@
   aspect-ratio: 1 / 1;
   width: 100%;
   object-fit: cover;
-}
-
-.infoGroup {
-
 }

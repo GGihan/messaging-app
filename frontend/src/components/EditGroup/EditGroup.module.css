@@ -6,8 +6,11 @@
   left: 0;
   z-index: var(--z-window);
 
-  overflow-y: auto;
   background-color: var(--color-gray-very-light);
+}
+
+.formWrapper {
+  overflow-y: auto;
 }
 
 .formGroup {

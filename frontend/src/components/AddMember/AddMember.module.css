@@ -1,0 +1,131 @@
+.windowWrapper {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  top: 3.75rem;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-window);
+
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  background-color: var(--color-gray-alot-light);
+}
+
+.list {
+  overflow-y: auto;
+  gap: var(--space-xs);
+  min-height: 4rem;
+  max-height: 25rem;
+}
+
+.selectedTray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  overflow-y: auto;
+  min-height: 4rem;
+}
+
+.userChip {
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  border-radius: var(--space-s);
+  background-color: var(--color-gray-very-light);
+}
+
+.removeChipButton {
+  border-radius: var(--space-s);
+}
+
+.userCard {
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  border-radius: var(--space-s);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.userCard.selected {
+  background-color: var(--selected);
+}
+
+.avatarWrapper {
+  flex-shrink: 0;
+  align-content: center;
+  overflow: hidden;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--color-gray);
+  border-radius: var(--space-xl);
+  background-color: var(--color-gray-very-light);
+}
+
+.avatar {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  object-fit: cover;
+}
+
+.name {
+  flex: 1;
+  font-family: var(--font-ui);
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--color-gray-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.checkbox.checked {
+  background-color: var(--color-focus);
+  border-color: var(--color-black);
+}
+
+.footer {
+  justify-content: flex-end;
+}
+
+.addButton {
+  width: 8rem;
+  color: var(--color-white);
+  background-color: var(--color-submit);
+  border-radius: var(--space-m);
+}
+
+.addButton:disabled {
+  cursor: not-allowed;
+  color: var(--text-muted);
+  background-color: var(--color-gray-light);
+}
+
+@media (hover: hover) {
+  .removeChipButton:hover {
+    background-color: var(--color-gray-light);
+  }
+
+  .userCard:not(.selected):hover {
+    background-color: var(--hover);
+  }
+
+  .addButton:not(:disabled):hover {
+    background-color: var(--color-submit-hover);
+  }
+}

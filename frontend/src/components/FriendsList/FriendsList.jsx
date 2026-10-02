@@ -45,8 +45,6 @@ export default function FriendsList() {
     );
   };
 
-  console.log(friendships);
-
   return (
     <div className={`${styles.tabWrapper} flex-column`}>
       <TopAppBar 
