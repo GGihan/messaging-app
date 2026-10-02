@@ -26,12 +26,17 @@ export default function MemberList({ chat, onClose, refetchChat }) {
   const currentMember = members?.find((member) => member.user.id === user.id);
   const isCurrentUserAdmin = currentMember.role === "ADMIN";
 
-  const handleDemoteMember = () => {
-    // Demote member
-  };
+  const handleUpdateMemberRole = async (memberId, role) => {
+    try {
+      await apiClient(`/chats/${chat.id}/members/${memberId}/role`, {
+        method: 'PATCH',
+        body: JSON.stringify({role})
+      });
 
-  const handlePromoteMember = () => {
-    // Promote member
+      refetchChat();
+    } catch (error) {
+      handleApiFormErrors(error, setServerErrors); 
+    }
   };
 
   const handleRemoveMember = async (memberId) => {
@@ -126,12 +131,17 @@ export default function MemberList({ chat, onClose, refetchChat }) {
       
                     <DropdownMenuContent>
                       {member.role === "ADMIN" ? (
-                        <DropdownMenuItem variant="danger" onSelect={handleDemoteMember}>
+                        <DropdownMenuItem
+                          variant="danger"
+                          onSelect={() => handleUpdateMemberRole(member.id, "MEMBER")}
+                        >
                           Demote member
                         </DropdownMenuItem>
                       ) : (
                         <>
-                          <DropdownMenuItem onSelect={handlePromoteMember}>
+                          <DropdownMenuItem
+                            onSelect={() => handleUpdateMemberRole(member.id, "ADMIN")}
+                          >
                             Promote member
                           </DropdownMenuItem>
 
@@ -139,7 +149,10 @@ export default function MemberList({ chat, onClose, refetchChat }) {
                         </>
                       )}
 
-                      <DropdownMenuItem variant="danger" onSelect={() => handleRemoveMember(member.id)}>
+                      <DropdownMenuItem
+                        variant="danger"
+                        onSelect={() => handleRemoveMember(member.id)}
+                      >
                         Remove member
                       </DropdownMenuItem>
                     </DropdownMenuContent>
