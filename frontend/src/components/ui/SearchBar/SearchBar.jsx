@@ -26,7 +26,7 @@ export default function SearchBar({
   };
 
   return (
-    <label htmlFor="search-input" className={`${styles.searchWrapper} ${className} flex-row`}>
+    <label className={`${styles.searchWrapper} ${className} flex-row`}>
       <img
         src={searchIcon}
         alt=""
@@ -37,7 +37,6 @@ export default function SearchBar({
       />
       <input
         className={styles.input}
-        id="search-input"
         type="text"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}

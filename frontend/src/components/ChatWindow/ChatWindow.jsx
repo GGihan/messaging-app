@@ -29,26 +29,17 @@ export default function ChatWindow() {
   const { user } = useAuth();
   const activeChatId = useChatStore((state) => state.activeChatId);
   const closeChat = useChatStore((state) => state.closeChat);
-  const [showAddMember, setShowAddMember] = useState(false);
-  const [showMemberList, setShowMemberList] = useState(false);
-  const [showEditGroup, setShowEditGroup] = useState(false);
+  const [activePanel, setActivePanel] = useState(null);
 
-  const handleShowAddMember = () => {
-    setShowAddMember(showAddMember ? false : true);
-    setShowMemberList(false);
-    setShowEditGroup(false);
+  // Tracks previous chat ID to reset during render without an extra paint cycle
+  const [prevChatId, setPrevChatId] = useState(activeChatId);
+  if (activeChatId !== prevChatId) {
+    setPrevChatId(activeChatId);
+    setActivePanel(null);
   };
 
-  const handleShowMemberList = () => {
-    setShowMemberList(showMemberList ? false : true);
-    setShowAddMember(false);
-    setShowEditGroup(false);
-  };
-
-  const handleEditGroup = () => {
-    setShowEditGroup(showEditGroup ? false : true);
-    setShowAddMember(false);
-    setShowMemberList(false);
+  const togglePanel = (panelName) => {
+    setActivePanel((current) => (current === panelName ? null : panelName));
   };
 
   const handleBlockUser = () => {
@@ -129,7 +120,7 @@ export default function ChatWindow() {
             {isGroup && isMember && isAdmin && (
               <Button
                 className={styles.actionButton}
-                onClick={handleShowAddMember}
+                onClick={() => togglePanel("addMember")}
                 aria-label="Show add member"
               >
                 <img
@@ -146,7 +137,7 @@ export default function ChatWindow() {
             {isGroup && isMember && (
               <Button
                 className={styles.actionButton}
-                onClick={handleShowMemberList}
+                onClick={() => togglePanel("memberList")}
                 aria-label="Show member list"
               >
                 <img
@@ -185,7 +176,7 @@ export default function ChatWindow() {
                       <>
                         {isAdmin && (
                           <>
-                            <DropdownMenuItem onSelect={handleEditGroup}>
+                            <DropdownMenuItem onSelect={() => togglePanel("editGroup")}>
                               Edit group
                             </DropdownMenuItem>
 
@@ -236,19 +227,19 @@ export default function ChatWindow() {
       </div>
 
       {/* MemberList */}
-      {showMemberList && (
-        <MemberList chat={chat} onClose={() => setShowMemberList(false)} refetchChat={refetchChat} />
+      {activePanel === "memberList" && (
+        <MemberList chat={chat} onClose={() => setActivePanel(null)} refetchChat={refetchChat} />
       )}
 
       {/* EditGroup */}
-      {showEditGroup && (
+      {activePanel === "editGroup" && (
         // maybe dont refetch chat manually, instead use sockets to update chat info
-        <EditGroup chat={chat} onClose={() => setShowEditGroup(false)} refetchChat={refetchChat} />
+        <EditGroup chat={chat} onClose={() => setActivePanel(null)} refetchChat={refetchChat} />
       )}
 
-      {showAddMember && (
+      {activePanel === "addMember" && (
         // maybe dont refetch chat manually, instead use sockets to update chat info
-        <AddMember chat={chat} onClose={() => setShowAddMember(false)} refetchChat={refetchChat} />
+        <AddMember chat={chat} onClose={() => setActivePanel(null)} refetchChat={refetchChat} />
       )}
     </div>
   );

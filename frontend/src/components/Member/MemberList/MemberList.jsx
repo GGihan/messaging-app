@@ -81,7 +81,6 @@ export default function MemberList({ chat, onClose, refetchChat }) {
       />
 
       <div className={`${styles.content} flex-column`}>
-        {/* Add search bar here */}
         <SearchBar
           placeholder="Filter members..."
           onSearch={setSearchQuery}
