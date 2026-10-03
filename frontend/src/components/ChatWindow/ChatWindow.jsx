@@ -22,6 +22,8 @@ import { useState } from "react";
 import MemberList from "../Member/MemberList/MemberList";
 import EditGroup from "../EditGroup/EditGroup";
 import AddMember from "../AddMember/AddMember";
+import { mutate } from "swr";
+import toast from "react-hot-toast";
 
 const chatFetcher = (url) => apiClient(url).then(res => res.data.chat);
 
@@ -30,6 +32,19 @@ export default function ChatWindow() {
   const activeChatId = useChatStore((state) => state.activeChatId);
   const closeChat = useChatStore((state) => state.closeChat);
   const [activePanel, setActivePanel] = useState(null);
+
+  const {
+    data: chat,
+    error: chatError,
+    isLoading: isLoadingChat,
+    mutate: refetchChat,
+  } = useSWR(
+    `/chats/${activeChatId}`,
+    chatFetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
 
   // Tracks previous chat ID to reset during render without an extra paint cycle
   const [prevChatId, setPrevChatId] = useState(activeChatId);
@@ -47,34 +62,61 @@ export default function ChatWindow() {
     console.log("Block user for chatId:", activeChatId);
   };
 
-  const handleRemoveChat = () => {
-    // delete request for chat removal
-    console.log("Remove chat history for chatId:", activeChatId);
+  const handleDeleteGroup = async () => {
+    const targetId = chat?.id;
+
     closeChat();
-  };
 
-  const handleDeleteGroup = () => {
-    // delete request for group chat
-    closeChat();
-  };
+    mutate(
+      '/chats',
+      (chats = []) => chats.filter((chat) => chat.id !== targetId),
+      { revalidate: false } // dont refetch immediatlly
+    );
 
-  const handleLeaveGroup = () => {
-    // delete member request for group chat
-    console.log("delete member for chatId:", activeChatId);
-  };
-
-  const {
-    data: chat,
-    error: chatError,
-    isLoading: isLoadingChat,
-    mutate: refetchChat,
-  } = useSWR(
-    `/chats/${activeChatId}`,
-    chatFetcher,
-    {
-      revalidateOnFocus: false,
+    try {
+      await apiClient(`/chats/${targetId}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      mutate('/chats');
+      toast.error(error.message || 'Could not delete group');
     }
-  );
+  };
+
+  const handleLeaveGroup = async () => {
+    const targetId = chat?.id;
+
+    try {
+      await apiClient(`/chats/${targetId}/members/me`, {
+        method: 'DELETE',
+      });
+
+      refetchChat();
+    } catch (error) {
+      toast.error(error.message || 'Could not leave group');
+    }
+  };
+
+  const handleRemoveChat = async () => {
+    const targetId = chat?.id;
+
+    closeChat();
+
+    mutate(
+      '/chats',
+      (chats = []) => chats.filter((chat) => chat.id !== targetId),
+      { revalidate: false } // dont refetch immediatlly
+    );
+
+    try {
+      await apiClient(`/chats/${targetId}/history`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      mutate('/chats');
+      toast.error(error.message || 'Could not remove chat history');
+    }
+  };
 
   if (!activeChatId) return null;
   if (chatError) return <div>{chatError.message || "Failed to load chat."}</div>;
