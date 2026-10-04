@@ -10,15 +10,50 @@ import {
 } from "../ui/DropdownMenu/DropdownMenu";
 import moreVert from "@/assets/icons/more-vert.svg";
 import { formatLastActive } from "@/utils/formatDate";
+import { apiClient } from "@/config/api";
+import toast from "react-hot-toast";
+import { mutate } from "swr";
 
-export default function FriendCard({ friend }) {
+export default function FriendCard({ friendship }) {
+  const friend = friendship?.friend;
+  const friendshipId = friendship?.id;
 
-  const handleBlockUser = () => {
-    // Block user
+  const handleBlockUser = async () => {
+    const receiverId = friend?.id;
+
+    mutate(
+      `/friendships?status=ACCEPTED`,
+      (friendships = []) => friendships.filter((friendship) => friendship.id !== friendshipId),
+      { revalidate: false }
+    );
+
+    try {
+      await apiClient(`/friendships/block`, {
+        method: 'POST',
+        body: JSON.stringify({ receiverId })
+      });
+    } catch (error) {
+      mutate(`/friendships?status=ACCEPTED`);
+      toast.error(error.message || 'Could not block user');
+    }
   };
 
-  const handleRemoveFriend = () => {
-    // Remove friend
+  const handleRemoveFriend = async () => {
+    mutate(
+      `/friendships?status=ACCEPTED`,
+      (friendships = []) => friendships.filter((friendship) => friendship.id !== friendshipId),
+      { revalidate: false }
+    );
+
+    try {
+      await apiClient(`/friendships/${friendship.id}`, {
+        method: 'DELETE',
+        body: JSON.stringify({ friendshipId: friendship.id })
+      });
+    } catch (error) {
+      mutate(`/friendships?status=ACCEPTED`);
+      toast.error(error.message || 'Could not delete friendship');
+    }
   };
 
   return (

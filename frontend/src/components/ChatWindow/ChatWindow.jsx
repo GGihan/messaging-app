@@ -57,9 +57,20 @@ export default function ChatWindow() {
     setActivePanel((current) => (current === panelName ? null : panelName));
   };
 
-  const handleBlockUser = () => {
-    // post request for user block
-    console.log("Block user for chatId:", activeChatId);
+  const handleBlockUser = async () => {
+    const otherMember = chat?.members.find((member) => member.user.id !== user.id);
+    const otherUser = otherMember?.user;
+
+    closeChat();
+
+    try {
+      await apiClient(`/friendships/block`, {
+        method: 'POST',
+        body: JSON.stringify({ receiverId: otherUser.id})
+      });
+    } catch (error) {
+      toast.error(error.message || 'Could not block user');
+    }
   };
 
   const handleDeleteGroup = async () => {

@@ -90,7 +90,7 @@ export default function FriendsList() {
         />
         <div className={`${styles.list} flex-column`}>
           {filteredFriendships.map((friendship) => (
-            <FriendCard key={friendship.id} friend={friendship.friend} />
+            <FriendCard key={friendship.id} friendship={friendship} />
           ))}
         </div>
       </div>
