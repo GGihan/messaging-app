@@ -5,7 +5,6 @@ import styles from "./AddMember.module.css";
 import closeIcon from "@/assets/icons/close.svg";
 import useSWR from "swr";
 import { apiClient } from "@/config/api";
-import LoadingSpinner from "../ui/LoadingSpinner/LoadingSpinner";
 import SearchBar from "../ui/SearchBar/SearchBar";
 import { chatHelper } from "@/utils/chatHelpers";
 import checkIcon from "@/assets/icons/check.svg";

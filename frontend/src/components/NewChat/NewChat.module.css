@@ -1,0 +1,16 @@
+.tabWrapper {
+  position: relative;
+}
+
+.panel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  top: 3.75rem;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-window);
+
+  background-color: var(--color-gray-alot-light);
+}
