@@ -1,0 +1,148 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-black);
+  border-radius: var(--space-m);
+  padding: var(--space-s);
+  gap: 0.5rem;
+  width: 100%;
+  font-family: var(--font-ui);
+}
+
+.tray {
+  display: flex;
+  gap: var(--space-s);
+  overflow-x: auto;
+  padding-bottom: var(--space-xs);
+  scrollbar-width: thin;
+}
+
+.chip {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--space-s);
+  overflow: hidden;
+  border: 1px solid var(--color-black);
+  flex-shrink: 0;
+  background-color: var(--color-gray-light);
+}
+
+.chip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.removeBtn {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  background: rgba(0, 0, 0, 0.75);
+  color: var(--color-white);
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.bar {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-s);
+}
+
+.inputArea {
+  flex: 1;
+  resize: none;
+  background-color: var(--color-gray-very-light);
+  border: 1px solid var(--color-gray);
+  border-radius: var(--space-s);
+  font-family: inherit;
+  scrollbar-color: var(--color-gray) transparent;
+  scrollbar-gutter: stable;
+}
+
+.inputArea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.actionButton {
+  border-radius: var(--space-s);
+  flex-shrink: 0;
+}
+
+.actionButton:hover {
+  background-color: unset;
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sendButton {
+  background-color: var(--color-submit);
+  border-radius: var(--space-s);
+  min-width: 3rem;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease;
+}
+
+.sendButton:disabled {
+  background-color: var(--color-gray);
+  cursor: not-allowed;
+}
+
+.sendButton:disabled .buttonIcon {
+  filter: invert(1);
+}
+
+.popoverContainer {
+  z-index: var(--z-dropdown);
+  border-radius: var(--space-s);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+  animation: fadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Custom styling for the web component */
+.popoverContainer :global(emoji-picker) {
+  --num-columns: 8;
+  --category-emoji-size: 1.125rem;
+  --emoji-size: 1.25rem;
+  width: 330px;
+  height: 380px;
+  border: 1px solid var(--color-gray);
+  border-radius: var(--space-s);
+  overflow: hidden;
+}
+
+@media (hover: hover) {
+  .removeBtn:hover {
+    background-color: var(--color-deny);
+  }
+
+  .actionButton:hover:not(:disabled) {
+    color: #ffffff;
+    background-color: var(--color-gray-very-light);
+  }
+
+  .sendButton:hover:not(:disabled) {
+    background-color: var(--color-submit-hover);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -24,6 +24,7 @@ import EditGroup from "../EditGroup/EditGroup";
 import AddMember from "../AddMember/AddMember";
 import { mutate } from "swr";
 import toast from "react-hot-toast";
+import { ChatInput } from "../ui/ChatInput/ChatInput";
 
 const chatFetcher = (url) => apiClient(url).then(res => res.data.chat);
 
@@ -146,7 +147,7 @@ export default function ChatWindow() {
   const { isGroup, isMember, isAdmin } = chatHelper.getChatPermissions(chat, user.id);
 
   return (
-    <div className={styles.windowWrapper}>
+    <div className={`${styles.windowWrapper} flex-column`}>
       <TopAppBar
         className={styles.appBar}
         leading={
@@ -270,13 +271,16 @@ export default function ChatWindow() {
         }
       />
 
-      <div className={styles.messages}>
-        {/* add message component here */}
-        <p>Message component placeholder</p>
-      </div>
-      
-      <div className={styles.composer}>
-        <input type="text" placeholder="Type a message..." />
+      <div className={`${styles.content} flex-column`}>
+        <div className={styles.messagesContainer}>
+          {/* add message component here */}
+          <p>Message component placeholder</p>
+        </div>
+        
+        <div className={`${styles.composer} flex-row`}>
+          {/* Add onSendMessage={handleSendMessage} */}
+          <ChatInput disabled={!isMember}/>
+        </div>
       </div>
 
       {/* MemberList */}

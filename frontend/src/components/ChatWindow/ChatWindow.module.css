@@ -14,6 +14,17 @@
   background-color: var(--color-gray-very-light);
 }
 
-.messages {
+.content {
+  flex: 1;
   padding: var(--space-s);
+}
+
+.messagesContainer {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.composer {
+
 }
