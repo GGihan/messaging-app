@@ -53,7 +53,7 @@ export default function ChatsList() {
       <TopAppBar 
         title={"Chats"}
         actions={
-          <Link to="/chats/new" className={styles.addChat} aria-label="Add new chat">
+          <Link to="/chats/new" className={styles.linkButton} aria-label="Add new chat">
             <img
               className={styles.linkIcon}
               src={chatAdd}

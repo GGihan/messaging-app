@@ -4,6 +4,7 @@ import TopAppBar from "../TopAppBar/TopAppBar";
 import Button from "../ui/Button/Button";
 import styles from "./EditGroup.module.css";
 import closeIcon from "@/assets/icons/close.svg";
+import groupIcon from "@/assets/icons/group.svg";
 import { apiClient } from "@/config/api";
 import { useState } from "react";
 import { setFormApiErrors } from "@/utils/formErrors";
@@ -111,7 +112,7 @@ export default function EditGroup({ chat, onClose, refetchChat }) {
             <div className={styles.avatarWrapper}>
               <img
                 className={styles.previewAvatar}
-                src={previewUrl}
+                src={previewUrl || groupIcon}
                 alt=""
                 width="100"
                 height="100"

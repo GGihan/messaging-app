@@ -2,6 +2,7 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--space-xs);
   gap: var(--space-m);
   font-family: var(--font-ui);
   background-color: var(--color-primary);

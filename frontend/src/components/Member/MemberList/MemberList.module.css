@@ -11,20 +11,21 @@
   background-color: var(--color-gray-alot-light);
 }
 
-/* .topBar {
-  border-top: 1px solid black;
-} */
+.actionButton {
+  border-radius: var(--space-s);
+}
 
 .content {
   min-height: 0;
-  overflow-y: auto;
   gap: var(--space-s);
   padding: var(--space-s);
 }
 
 .list {
   flex: 1;
+  gap: var(--space-s);
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .memberCard {
@@ -32,6 +33,9 @@
   height: 80px;
   padding: var(--space-s);
   border: 1px solid black;
+  border-radius: var(--space-s);
+  background-color: var(--color-primary);
+  font-family: var(--font-ui);
 }
 
 .startGroup,

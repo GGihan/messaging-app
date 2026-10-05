@@ -1,5 +1,44 @@
 .tabWrapper {
   position: relative;
+  height: 100%;
+}
+
+.appBar {
+  border-bottom: 1px solid var(--color-gray);
+}
+
+.content {
+  flex: 1;
+  padding: var(--space-s);
+  border-bottom: 2px solid var(--color-gray-light);
+}
+
+.linkButton {
+  padding: var(--space-s);
+  border-radius: var(--space-s);
+}
+
+.chatButtons {
+  gap: var(--space-s);
+  font-size: 1.5rem;
+}
+
+.actionButton {
+  border-radius: var(--space-s);
+}
+
+.chatButtons .buttonIcon {
+  width: 35px;
+  height: 35px;
+}
+
+.chatButtons .actionButton {
+  width: 100%;
+  justify-content: center;
+  font-size: inherit;
+  border: 2px solid var(--color-black);
+  border-radius: var(--space-m);
+  background-color: var(--color-primary);
 }
 
 .panel {
@@ -13,4 +52,177 @@
   z-index: var(--z-window);
 
   background-color: var(--color-gray-alot-light);
+}
+
+.contentDirect,
+.contentGroup,
+.formWrapper {
+  padding: var(--space-s);
+  gap: var(--space-s);
+}
+
+.contentDirect {
+  min-height: 0;
+  flex: 1;
+}
+
+.contentDirect .list {
+  gap: var(--space-s);
+}
+
+.contentDirect .userCard {
+  width: 100%;
+  justify-content: flex-start;
+  border: 2px solid var(--color-black);
+  border-radius: var(--space-m);
+  background-color: var(--color-primary);
+}
+
+.avatarWrapper {
+  flex-shrink: 0;
+  align-content: center;
+  overflow: hidden;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--color-gray);
+  border-radius: var(--space-xl);
+  background-color: var(--color-gray-very-light);
+}
+
+.avatar {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+}
+
+.contentDirect .name {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.list {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  gap: var(--space-xs);
+  min-height: 4rem;
+  max-height: 25rem;
+}
+
+.selectedTray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  min-height: 4rem;
+}
+
+.userChip {
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  border-radius: var(--space-s);
+  background-color: var(--color-gray-very-light);
+}
+
+.removeChipButton {
+  border-radius: var(--space-s);
+}
+
+.userCard {
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  border-radius: var(--space-s);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.userCard.selected {
+  background-color: var(--selected);
+}
+
+.contentGroup .name {
+  flex: 1;
+  font-family: var(--font-ui);
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--color-gray-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.checkbox.checked {
+  background-color: var(--color-focus);
+  border-color: var(--color-black);
+}
+
+.footer {
+  justify-content: flex-end;
+}
+
+.confirmButton {
+  width: 8rem;
+  color: var(--color-white);
+  background-color: var(--color-submit);
+  border-radius: var(--space-m);
+}
+
+.confirmButton:disabled {
+  cursor: not-allowed;
+  color: var(--text-muted);
+  background-color: var(--color-gray-light);
+}
+
+.form {
+  gap: var(--space-m);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.formGroup label {
+  color: var(--color-black);
+}
+
+.preview .avatarWrapper {
+  width: 100px;
+  height: 100px;
+  border-radius: var(--space-l);
+}
+
+.previewAvatar {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  object-fit: cover;
+}
+
+@media (hover: hover) {
+  .chatButtons .actionButton:not(.selected):hover,
+  .userCard:not(.selected):hover {
+    background-color: var(--hover);
+  }
+
+  .removeChipButton:hover {
+    background-color: var(--color-gray-light);
+  }
+
+  .linkButton:hover {
+    background-color: var(--color-gray-very-light);
+  }
+
+  .confirmButton:not(:disabled):hover {
+    background-color: var(--color-submit-hover);
+  }
 }

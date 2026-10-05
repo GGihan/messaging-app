@@ -4,12 +4,24 @@
 
 .content {
   overflow-y: auto;
+  scrollbar-gutter: stable;
   overscroll-behavior-y: contain;
   font-family: var(--font-ui);
   padding: var(--space-s);
   gap: var(--space-s);
 }
 
+.linkButton {
+  padding: var(--space-s);
+  border-radius: var(--space-s);
+}
+
 .list {
   gap: var(--space-s);
+}
+
+@media (hover: hover) {
+  .linkButton:hover {
+    background-color: var(--color-gray-very-light);
+  }
 }

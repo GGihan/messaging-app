@@ -4,6 +4,7 @@
 
 .content {
   overflow-y: auto;
+  scrollbar-gutter: stable;
   overscroll-behavior-y: contain;
   font-family: var(--font-ui);
   padding: var(--space-s);

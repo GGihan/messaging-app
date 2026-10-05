@@ -89,7 +89,7 @@ export default function MemberList({ chat, onClose, refetchChat }) {
 
         <FormErrors errors={serverErrors} />
 
-        <div className={styles.list}>
+        <div className={`${styles.list} flex-column`}>
           {filteredMembers?.map((member) => (
             <div key={member.id} className={`${styles.memberCard} flex-row`}>
               <div className={`${styles.startGroup} flex-row`}>

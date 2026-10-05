@@ -125,6 +125,7 @@ export default function NewChat() {
   return (
     <div className={`${styles.tabWrapper} flex-column`}>
       <TopAppBar
+        className={styles.appBar}
         leading={
           <Link
             className={styles.linkButton}
@@ -141,46 +142,49 @@ export default function NewChat() {
             />
           </Link>
         }
-        title={"Choose chat type"}
+        title={"Create new chat"}
       />
 
       <div className={`${styles.content} flex-column`}>
-        <Button
-          className={styles.actionButton}
-          onClick={() => togglePanel("newDirectChat")}
-          aria-label="Show new direct chat"
-        >
-          <img
-            className={styles.buttonIcon}
-            src={personIcon}
-            alt=""
-            width="24"
-            height="24"
-            aria-hidden="true"
-          />
-          <p>New direct chat</p>
-        </Button>
+        <div className={`${styles.chatButtons} flex-column`}>
+          <Button
+            className={styles.actionButton}
+            onClick={() => togglePanel("newDirectChat")}
+            aria-label="Show new direct chat"
+          >
+            <img
+              className={styles.buttonIcon}
+              src={personIcon}
+              alt=""
+              width="24"
+              height="24"
+              aria-hidden="true"
+            />
+            <p>New direct chat</p>
+          </Button>
 
-        <Button
-          className={styles.actionButton}
-          onClick={() => togglePanel("newGroupChat")}
-          aria-label="Show new group chat"
-        >
-          <img
-            className={styles.buttonIcon}
-            src={groupIcon}
-            alt=""
-            width="24"
-            height="24"
-            aria-hidden="true"
-          />
-          <p>New group chat</p>
-        </Button>
+          <Button
+            className={styles.actionButton}
+            onClick={() => togglePanel("newGroupChat")}
+            aria-label="Show new group chat"
+          >
+            <img
+              className={styles.buttonIcon}
+              src={groupIcon}
+              alt=""
+              width="24"
+              height="24"
+              aria-hidden="true"
+            />
+            <p>New group chat</p>
+          </Button>
+        </div>
 
         {/* NewDirectChat */}
         {activePanel === "newDirectChat" && (
           <div className={styles.panel}>
             <TopAppBar
+              className={styles.appBar}
               title={"Select user"}
               actions={
                 <Button
@@ -200,7 +204,7 @@ export default function NewChat() {
               }
             />
 
-            <div className={styles.contentDirect}>
+            <div className={`${styles.contentDirect} flex-column`}>
               <SearchBar
                 placeholder="Search users..."
                 onSearch={setSearchQuery}
@@ -262,7 +266,7 @@ export default function NewChat() {
               }
             />
 
-            <div className={styles.contentGroup}>
+            <div className={`${styles.contentGroup} flex-column`}>
               <SearchBar
                 placeholder="Search users..."
                 onSearch={setSearchQuery}

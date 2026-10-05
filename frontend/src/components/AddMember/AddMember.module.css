@@ -10,9 +10,14 @@
 
 }
 
+.actionButton {
+  border-radius: var(--space-s);
+}
+
 .content {
   flex: 1;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   gap: var(--space-s);
   padding: var(--space-s);
   background-color: var(--color-gray-alot-light);
@@ -20,6 +25,7 @@
 
 .list {
   overflow-y: auto;
+  scrollbar-gutter: stable;
   gap: var(--space-xs);
   min-height: 4rem;
   max-height: 25rem;
@@ -30,6 +36,7 @@
   flex-wrap: wrap;
   gap: var(--space-xs);
   overflow-y: auto;
+  scrollbar-gutter: stable;
   min-height: 4rem;
 }
 
