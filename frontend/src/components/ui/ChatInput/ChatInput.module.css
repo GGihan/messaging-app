@@ -71,6 +71,10 @@
   cursor: not-allowed;
 }
 
+.inputArea:disabled:active {
+  outline: unset;
+}
+
 .actionButton {
   border-radius: var(--space-s);
   flex-shrink: 0;
