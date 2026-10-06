@@ -25,6 +25,7 @@ import AddMember from "../AddMember/AddMember";
 import { mutate } from "swr";
 import toast from "react-hot-toast";
 import { ChatInput } from "../ui/ChatInput/ChatInput";
+import MessageCard from "../MessageCard/MessageCard";
 
 const chatFetcher = (url) => apiClient(url).then(res => res.data.chat);
 
@@ -130,6 +131,10 @@ export default function ChatWindow() {
     }
   };
 
+  const handleSendMessage = async () => {
+    // POST request for new message
+  };
+
   if (!activeChatId) return null;
   if (chatError) return <div>{chatError.message || "Failed to load chat."}</div>;
   
@@ -145,6 +150,8 @@ export default function ChatWindow() {
 
   const { avatarUrl, title, subtitle } = chatHelper.getChatBarInfo(chat, user.id);
   const { isGroup, isMember, isAdmin } = chatHelper.getChatPermissions(chat, user.id);
+
+  console.log(chat);
 
   return (
     <div className={`${styles.windowWrapper} flex-column`}>
@@ -273,8 +280,9 @@ export default function ChatWindow() {
 
       <div className={`${styles.content} flex-column`}>
         <div className={styles.messagesContainer}>
-          {/* add message component here */}
-          <p>Message component placeholder</p>
+          {chat.messages.map((message) => (
+            <MessageCard message={message} isGroup={isGroup} />
+          ))}
         </div>
         
         <div className={`${styles.composer} flex-row`}>

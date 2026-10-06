@@ -1,6 +1,6 @@
 import groupAvatarFiller from "@/assets/icons/group.svg";
 import profileAvatarFiller from "@/assets/icons/person.svg";
-import { formatChatListDate, formatLastActive } from "./formatDate";
+import { formatChatListDate, formatLastActive, formatMessageTime } from "./formatDate";
 
 export const chatHelper = {
   getChatBarInfo(chat, currentUserId) {
@@ -71,7 +71,6 @@ export const chatHelper = {
     };
   },
 
-
   // Add a check for isReadByAll and isUnread
   getChatCardInfo(chat, currentUserId) {
     if (!chat) return null;
@@ -97,6 +96,16 @@ export const chatHelper = {
       name: otherUser?.profile?.displayName,
       message: chat.messages[0] || "",
       date: formatChatListDate(chat.lastMessageAt || chat.createdAt),
+    };
+  },
+
+  getMessageInfo(message) {
+    return {
+      avatarUrl: message.sender?.profile?.avatarUrl || profileAvatarFiller,
+      name: message.sender.profile.displayName,
+      imageUrl: message?.imageUrl,
+      text: message?.text,
+      time: formatMessageTime(message.createdAt),
     };
   },
 };
