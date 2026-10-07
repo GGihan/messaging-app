@@ -9,7 +9,7 @@ export default function MessageCard({ message, isGroup }) {
   const isSenderMe = message.sender.id === user.id
 
   return (
-    <div className={`${styles.cardWrapper} flex-row`}>
+    <div className={`${styles.cardWrapper} ${isSenderMe ? styles.isMe : ""} flex-row`}>
       {isGroup && !isSenderMe &&
         <div className={styles.avatarWrapper}>
           <img
@@ -23,7 +23,7 @@ export default function MessageCard({ message, isGroup }) {
         </div>
       }
 
-      <div className={`${styles.content} flex-column`}>
+      <div className={`${styles.content} ${isSenderMe ? styles.isMeContent : ""} flex-column`}>
         {isGroup && !isSenderMe &&
           <p className={styles.name}>{name}</p>
         }

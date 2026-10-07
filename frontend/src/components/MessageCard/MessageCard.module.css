@@ -1,4 +1,15 @@
+.cardWrapper {
+  align-self: flex-start;
+  gap: var(--space-xs);
+  /* background-color: var(--color-secondary);
+  color: var(--color-white); */
+  max-width: min(90%, 40rem);
+  font-family: var(--font-ui);
+}
 
+.isMe {
+  align-self: flex-end;
+}
 
 .avatarWrapper {
   flex-shrink: 0;
@@ -12,11 +23,26 @@
   background-color: var(--color-gray-very-light);
 }
 
-.avatar {
+.avatar,
+.image {
   aspect-ratio: 1 / 1;
-  width: auto;
-  height: auto;
+  width: 100%;
   object-fit: cover;
+}
+
+.content {
+  gap: var(--space-xs);
+  padding: var(--space-s);
+  border: 1px solid var(--color-gray);
+  border-radius: 0 var(--space-m) var(--space-m) var(--space-m);
+}
+
+.isMeContent {
+  border-radius: var(--space-m) 0 var(--space-m) var(--space-m);
+}
+
+.name {
+  font-weight: bold;
 }
 
 .imageWrapper {
@@ -24,16 +50,22 @@
   align-content: center;
   overflow: hidden;
   /* change width and height dynamically to cardWrapper */
-  width: 200px;
-  height: 200px;
+  max-width: min(100%, 40rem);
+  height: auto;
+  box-sizing: content-box;
   border: 1px solid var(--color-gray);
   border-radius: var(--space-m);
   background-color: var(--color-gray-very-light);
 }
 
-.image {
-  aspect-ratio: 1 / 1;
-  width: auto;
-  height: auto;
-  object-fit: cover;
+.text {
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.time {
+  align-self: flex-end;
+  color: var(--color-gray);
+  font-size: 0.75rem;
 }

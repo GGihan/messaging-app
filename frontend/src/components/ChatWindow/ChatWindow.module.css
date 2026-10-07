@@ -1,5 +1,6 @@
 .windowWrapper {
   position: relative;
+  min-height: 0;
 }
 
 .windowWrapper .appBar {
@@ -16,13 +17,19 @@
 
 .content {
   flex: 1;
+  min-height: 0;
   padding: var(--space-s);
 }
 
 .messagesContainer {
   flex: 1;
+  min-height: 0;
+  gap: var(--space-s);
+  padding-bottom: var(--space-s);
+  padding-right: var(--space-xs);
   overflow-y: auto;
   scrollbar-gutter: stable;
+  scrollbar-color: var(--color-primary) transparent;
 }
 
 .composer {

@@ -18,7 +18,7 @@ import useSWR from "swr";
 import { useAuth } from "@/hooks/useAuth";
 import { chatHelper } from "@/utils/chatHelpers";
 import LoadingSpinner from "../ui/LoadingSpinner/LoadingSpinner";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import MemberList from "../Member/MemberList/MemberList";
 import EditGroup from "../EditGroup/EditGroup";
 import AddMember from "../AddMember/AddMember";
@@ -34,6 +34,7 @@ export default function ChatWindow() {
   const activeChatId = useChatStore((state) => state.activeChatId);
   const closeChat = useChatStore((state) => state.closeChat);
   const [activePanel, setActivePanel] = useState(null);
+  const scrollAnchorRef = useRef(null);
 
   const {
     data: chat,
@@ -47,6 +48,16 @@ export default function ChatWindow() {
       revalidateOnFocus: false,
     }
   );
+
+  // Scroll to the bottom of the ChatWindow
+  useLayoutEffect(() => {
+    if (scrollAnchorRef.current) {
+      scrollAnchorRef.current.scrollIntoView({
+        behavior: 'instant',
+        block: 'end',
+      });
+    }
+  }, [activeChatId]);
 
   // Tracks previous chat ID to reset during render without an extra paint cycle
   const [prevChatId, setPrevChatId] = useState(activeChatId);
@@ -131,8 +142,34 @@ export default function ChatWindow() {
     }
   };
 
-  const handleSendMessage = async () => {
-    // POST request for new message
+  const handleSendMessage = async (data) => {
+    const targetId = chat?.id;
+    const text = data?.text;
+    // adjust for multiple images later
+    const file = data?.attachments[0];
+
+    const formData = new FormData();
+    if (text) {
+      formData.append('text', text);
+    }
+
+    // adjust for multiple images later
+    if (file) {
+      formData.append('image', file);
+    }
+
+    try {
+      await apiClient(`/chats/${targetId}/messages`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      // change later for socket update
+      mutate('/chats')
+      mutate(`/chats/${activeChatId}`)
+    } catch (error) {
+      toast.error(error.message || 'Could not send message');
+    }
   };
 
   if (!activeChatId) return null;
@@ -279,15 +316,17 @@ export default function ChatWindow() {
       />
 
       <div className={`${styles.content} flex-column`}>
-        <div className={styles.messagesContainer}>
+        <div className={`${styles.messagesContainer} flex-column`}>
           {chat.messages.map((message) => (
             <MessageCard message={message} isGroup={isGroup} />
           ))}
+
+          {/* Anchor for scroll tracking */}
+          <div ref={scrollAnchorRef} aria-hidden="true" className={styles.anchor} />
         </div>
         
         <div className={`${styles.composer} flex-row`}>
-          {/* Add onSendMessage={handleSendMessage} */}
-          <ChatInput disabled={!isMember}/>
+          <ChatInput disabled={!isMember} onSendMessage={handleSendMessage}/>
         </div>
       </div>
 
