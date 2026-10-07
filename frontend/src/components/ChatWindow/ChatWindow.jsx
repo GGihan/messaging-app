@@ -51,13 +51,15 @@ export default function ChatWindow() {
 
   // Scroll to the bottom of the ChatWindow
   useLayoutEffect(() => {
+    if (isLoadingChat) return;
+
     if (scrollAnchorRef.current) {
       scrollAnchorRef.current.scrollIntoView({
         behavior: 'instant',
         block: 'end',
       });
     }
-  }, [activeChatId]);
+  }, [activeChatId, isLoadingChat]);
 
   // Tracks previous chat ID to reset during render without an extra paint cycle
   const [prevChatId, setPrevChatId] = useState(activeChatId);
