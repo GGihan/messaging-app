@@ -28,6 +28,7 @@
   padding-bottom: var(--space-s);
   padding-right: var(--space-xs);
   overflow-y: auto;
+  overflow-anchor: auto;
   scrollbar-gutter: stable;
   scrollbar-color: var(--color-primary) transparent;
 }

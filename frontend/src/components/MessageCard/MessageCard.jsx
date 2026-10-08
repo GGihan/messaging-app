@@ -6,7 +6,7 @@ export default function MessageCard({ message, isGroup }) {
   const { user } = useAuth();
 
   const { avatarUrl, name, imageUrl, text, time } = chatHelper.getMessageInfo(message);
-  const isSenderMe = message.sender.id === user.id
+  const isSenderMe = message?.sender?.id === user.id
 
   return (
     <div className={`${styles.cardWrapper} ${isSenderMe ? styles.isMe : ""} flex-row`}>

@@ -6,6 +6,7 @@
   overflow-y: auto;
   scrollbar-gutter: stable;
   overscroll-behavior-y: contain;
+  scrollbar-color: var(--color-primary) transparent;
   font-family: var(--font-ui);
   padding: var(--space-s);
   gap: var(--space-s);

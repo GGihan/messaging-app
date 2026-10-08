@@ -102,7 +102,7 @@ export const chatHelper = {
   getMessageInfo(message) {
     return {
       avatarUrl: message.sender?.profile?.avatarUrl || profileAvatarFiller,
-      name: message.sender.profile.displayName,
+      name: message.sender?.profile?.displayName,
       imageUrl: message?.imageUrl,
       text: message?.text,
       time: formatMessageTime(message.createdAt),

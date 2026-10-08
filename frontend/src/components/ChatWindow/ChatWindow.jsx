@@ -18,7 +18,7 @@ import useSWR from "swr";
 import { useAuth } from "@/hooks/useAuth";
 import { chatHelper } from "@/utils/chatHelpers";
 import LoadingSpinner from "../ui/LoadingSpinner/LoadingSpinner";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import MemberList from "../Member/MemberList/MemberList";
 import EditGroup from "../EditGroup/EditGroup";
 import AddMember from "../AddMember/AddMember";
@@ -26,6 +26,7 @@ import { mutate } from "swr";
 import toast from "react-hot-toast";
 import { ChatInput } from "../ui/ChatInput/ChatInput";
 import MessageCard from "../MessageCard/MessageCard";
+import { useChatMessages } from "@/hooks/useChatMessages";
 
 const chatFetcher = (url) => apiClient(url).then(res => res.data.chat);
 
@@ -34,7 +35,11 @@ export default function ChatWindow() {
   const activeChatId = useChatStore((state) => state.activeChatId);
   const closeChat = useChatStore((state) => state.closeChat);
   const [activePanel, setActivePanel] = useState(null);
-  const scrollAnchorRef = useRef(null);
+  
+  const containerRef = useRef(null);
+  const bottomAnchorRef = useRef(null);
+  const prevScrollHeightRef = useRef(0);
+  const isInitialLoadRef = useRef(true);
 
   const {
     data: chat,
@@ -49,17 +54,54 @@ export default function ChatWindow() {
     }
   );
 
-  // Scroll to the bottom of the ChatWindow
-  useLayoutEffect(() => {
-    if (isLoadingChat) return;
+  const {
+    messages,
+    refetchMessages,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useChatMessages(activeChatId);
 
-    if (scrollAnchorRef.current) {
-      scrollAnchorRef.current.scrollIntoView({
-        behavior: 'instant',
-        block: 'end',
-      });
+  useEffect(() => {
+    isInitialLoadRef.current = true;
+    prevScrollHeightRef.current = 0;
+  }, [activeChatId]);
+
+  // Single layout effect handling all scroll adjustments
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container || messages.length === 0) return;
+
+    // Initial Load: scroll immediately to bottom anchor
+    if (isInitialLoadRef.current) {
+      if (bottomAnchorRef.current) {
+        bottomAnchorRef.current.scrollIntoView({ behavior: "instant", block: "end" });
+      } else {
+        container.scrollTop = container.scrollHeight;
+      }
+      isInitialLoadRef.current = false;
+      return;
     }
-  }, [activeChatId, isLoadingChat]);
+
+    // Prepend pagination: maintain viewport offset
+    if (prevScrollHeightRef.current > 0) {
+      const heightDifference = container.scrollHeight - prevScrollHeightRef.current;
+      container.scrollTop += heightDifference;
+      prevScrollHeightRef.current = 0;
+    }
+  }, [messages, activeChatId]);
+
+  // Handle upward infinite scrolling
+  const handleScroll = () => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Trigger loadMore within 80px from top
+    if (container.scrollTop <= 80 && hasMore && !isLoadingMore) {
+      prevScrollHeightRef.current = container.scrollHeight;
+      loadMore();
+    }
+  };
 
   // Tracks previous chat ID to reset during render without an extra paint cycle
   const [prevChatId, setPrevChatId] = useState(activeChatId);
@@ -167,8 +209,15 @@ export default function ChatWindow() {
       });
 
       // change later for socket update
-      mutate('/chats')
-      mutate(`/chats/${activeChatId}`)
+      mutate('/chats');
+      await refetchMessages();
+
+      // Scroll to bottom after sending
+      requestAnimationFrame(() => {
+        if (bottomAnchorRef.current) {
+          bottomAnchorRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+      });
     } catch (error) {
       toast.error(error.message || 'Could not send message');
     }
@@ -189,8 +238,6 @@ export default function ChatWindow() {
 
   const { avatarUrl, title, subtitle } = chatHelper.getChatBarInfo(chat, user.id);
   const { isGroup, isMember, isAdmin } = chatHelper.getChatPermissions(chat, user.id);
-
-  console.log(chat);
 
   return (
     <div className={`${styles.windowWrapper} flex-column`}>
@@ -318,13 +365,17 @@ export default function ChatWindow() {
       />
 
       <div className={`${styles.content} flex-column`}>
-        <div className={`${styles.messagesContainer} flex-column`}>
-          {chat.messages.map((message) => (
+        <div
+          className={`${styles.messagesContainer} flex-column`}
+          ref={containerRef}
+          onScroll={handleScroll}
+        >
+          {messages.map((message) => (
             <MessageCard message={message} isGroup={isGroup} />
           ))}
 
           {/* Anchor for scroll tracking */}
-          <div ref={scrollAnchorRef} aria-hidden="true" className={styles.anchor} />
+          <div ref={bottomAnchorRef} className={styles.bottomAnchor} aria-hidden="true" />
         </div>
         
         <div className={`${styles.composer} flex-row`}>
