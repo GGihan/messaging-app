@@ -184,7 +184,6 @@ export default function NewChat() {
         {activePanel === "newDirectChat" && (
           <div className={styles.panel}>
             <TopAppBar
-              className={styles.appBar}
               title={"Select user"}
               actions={
                 <Button

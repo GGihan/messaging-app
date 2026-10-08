@@ -5,6 +5,7 @@
 
 .windowWrapper .appBar {
   padding: 0 var(--space-s);
+  border-bottom: 2px solid var(--color-gray);
 }
 
 .actionButton {

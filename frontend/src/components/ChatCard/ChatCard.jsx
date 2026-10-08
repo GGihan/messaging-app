@@ -3,6 +3,7 @@ import styles from "./ChatCard.module.css";
 import { useAuth } from "@/hooks/useAuth";
 import Button from "../ui/Button/Button";
 import { useChatStore } from "@/store/useChatStore";
+import imageIcon from "@/assets/icons/image.svg";
 
 export default function ChatCard({ chat }) {
   const { user } = useAuth();
@@ -28,7 +29,21 @@ export default function ChatCard({ chat }) {
             {sender &&
               <p className={styles.sender}>{sender}:</p>
             }
-            <p className={styles.message}>{message.text}</p>
+            <div className={`${styles.message} flex-row`}>
+              {message?.imageUrl &&
+                <div className={`${styles.imageWrapper} flex-column`}>
+                  <img
+                    className={styles.image}
+                    src={imageIcon}
+                    width={20}
+                    height={20}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                </div>
+              }
+              <p className={styles.text}>{message.text}</p>
+            </div>
           </div>
         </div>
       </div>

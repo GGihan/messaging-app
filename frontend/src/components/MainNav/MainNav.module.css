@@ -1,7 +1,7 @@
 .navContainer {
   width: 100%;
   background-color: var(--color-primary);
-  border-top: 2px solid black;
+  border-top: 2px solid var(--color-gray);
   z-index: var(--z-drawer);
   font-family: var(--font-ui);
 }
@@ -46,7 +46,7 @@
     width: 5rem;
     height: 100%;
     border-top: none;
-    border-right: 1px solid black;
+    border-right: 2px solid var(--color-gray);
   }
 
   .menuList {

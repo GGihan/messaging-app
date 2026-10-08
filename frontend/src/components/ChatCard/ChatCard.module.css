@@ -4,12 +4,12 @@
   align-items: center;
   height: 80px;
   padding: var(--space-s);
-  border-top: 2px solid black;
   border-bottom: 2px solid black;
 }
 
 .startGroup,
-.endGroup {
+.endGroup,
+.message {
   min-width: 0;
 }
 
@@ -40,16 +40,23 @@
 }
 
 .infoGroup {
+  flex: 1;
   justify-content: space-between;
   min-width: 0;
 }
 
 .messageGroup {
+  flex: 1;
+  gap: var(--space-xs);
+}
+
+.message {
+  align-items: center;
   gap: var(--space-xs);
 }
 
 .name,
-.message {
+.text {
   width: 100%;
   white-space: nowrap;
   overflow: hidden;
@@ -59,6 +66,21 @@
 .name,
 .sender {
   font-weight: bold;
+}
+
+.sender {
+  align-self: center;
+}
+
+.imageWrapper {
+  min-width: 1.5rem;
+  justify-content: center;
+}
+
+.image {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  object-fit: cover;
 }
 
 .date {
