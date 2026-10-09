@@ -40,6 +40,10 @@
   align-self: flex-start;
 }
 
+.actionButton {
+  border-radius: var(--space-s);
+}
+
 .bioWrapper {
   padding-top: var(--space-xs);
 }

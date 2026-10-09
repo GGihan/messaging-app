@@ -7,6 +7,8 @@ import PublicLayout from "../layout/PublicLayout/PublicLayout";
 import ChatsList from "../ChatsList/ChatsList";
 import NewChat from "../NewChat/NewChat";
 import FriendsList from "../FriendsList/FriendsList";
+import { Navigate } from "react-router";
+import AddFriend from "../AddFriend/AddFriend";
 
 const routes = [
   {
@@ -26,6 +28,10 @@ const routes = [
         element: <App />,
         children: [
           {
+            index: true,
+            element: <Navigate to="/chats" replace />,
+          },
+          {
             path: 'chats',
             element: <ChatsList />,
           },
@@ -38,11 +44,11 @@ const routes = [
             path: 'friends',
             element: <FriendsList />,
           },
-          // {
-          //   path: 'friends/new',
-          //   element: <AddFriend />,
-          //   handle: { hideMobileNav: true },
-          // },
+          {
+            path: 'friends/new',
+            element: <AddFriend />,
+            handle: { hideMobileNav: true },
+          },
           // {
           //   path: 'friends/requests',
           //   element: <FriendRequests />,

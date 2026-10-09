@@ -22,7 +22,7 @@ export default function FriendCard({ friendship }) {
     const receiverId = friend?.id;
 
     mutate(
-      `/friendships?status=ACCEPTED`,
+      ['/friendships', { status: 'ACCEPTED' }],
       (friendships = []) => friendships.filter((friendship) => friendship.id !== friendshipId),
       { revalidate: false }
     );
@@ -33,14 +33,14 @@ export default function FriendCard({ friendship }) {
         body: JSON.stringify({ receiverId })
       });
     } catch (error) {
-      mutate(`/friendships?status=ACCEPTED`);
+      mutate(['/friendships', { status: 'ACCEPTED' }]);
       toast.error(error.message || 'Could not block user');
     }
   };
 
   const handleRemoveFriend = async () => {
     mutate(
-      `/friendships?status=ACCEPTED`,
+      ['/friendships', { status: 'ACCEPTED' }],
       (friendships = []) => friendships.filter((friendship) => friendship.id !== friendshipId),
       { revalidate: false }
     );
@@ -51,7 +51,7 @@ export default function FriendCard({ friendship }) {
         body: JSON.stringify({ friendshipId: friendship.id })
       });
     } catch (error) {
-      mutate(`/friendships?status=ACCEPTED`);
+      mutate(['/friendships', { status: 'ACCEPTED' }]);
       toast.error(error.message || 'Could not delete friendship');
     }
   };
