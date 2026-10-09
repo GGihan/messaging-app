@@ -62,7 +62,7 @@ export default function AddFriend() {
           <Link
             className={styles.linkButton}
             to="/friends"
-            aria-label="Back to chats"
+            aria-label="Back to friends"
           >
             <img
               className={styles.linkIcon}

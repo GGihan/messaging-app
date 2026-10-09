@@ -9,6 +9,7 @@ import NewChat from "../NewChat/NewChat";
 import FriendsList from "../FriendsList/FriendsList";
 import { Navigate } from "react-router";
 import AddFriend from "../AddFriend/AddFriend";
+import FriendRequests from "../FriendRequests/FriendRequests";
 
 const routes = [
   {
@@ -49,11 +50,11 @@ const routes = [
             element: <AddFriend />,
             handle: { hideMobileNav: true },
           },
-          // {
-          //   path: 'friends/requests',
-          //   element: <FriendRequests />,
-          //   handle: { hideMobileNav: true },
-          // },
+          {
+            path: 'friends/requests',
+            element: <FriendRequests />,
+            handle: { hideMobileNav: true },
+          },
           // {
           //   path: 'profile',
           //   element: <Profile />,
