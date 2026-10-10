@@ -74,7 +74,7 @@ export default function AddFriend() {
             />
           </Link>
         }
-        title={"Add new friend"}
+        title={"Add new friends"}
       />
 
       <div className={`${styles.content} flex-column`}>

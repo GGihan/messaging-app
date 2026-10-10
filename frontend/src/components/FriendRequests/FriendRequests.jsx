@@ -9,6 +9,8 @@ import { chatHelper } from "@/utils/chatHelpers";
 import mailAcceptIcon from "@/assets/icons/mail-mark.svg";
 import mailCancelIcon from "@/assets/icons/mail-cancel.svg";
 import unblockIcon from "@/assets/icons/unlock.svg";
+import toast from "react-hot-toast";
+import { apiClient } from "@/config/api";
 
 export default function FriendRequests() {
   const [activePanel, setActivePanel] = useState("incoming");
@@ -34,20 +36,65 @@ export default function FriendRequests() {
   }
     = useFriendships({ status: "BLOCKED", type: "outgoing" });
 
-  const handleAcceptRequest = async () => {
-    // continue
+  const handleRespondRequest = async (friendshipId, status) => {
+    try {
+      await refetchIncoming(
+        () => 
+          apiClient(`/friendships/${friendshipId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ status })
+          }),
+        {
+          optimisticData: (current = []) =>
+            current.filter((f) => f.id !== friendshipId),
+          populateCache: false,
+          rollbackOnError: true,
+          revalidate: true,
+        }
+      )
+    } catch (error) {
+      toast.error(error.message || 'Could not respond to request');
+    }
   };
 
-  const handleDeclineRequest = async () => {
-
+  const handleCancelRequest = async (friendshipId) => {
+    try {
+      await refetchOutgoing(
+        () => 
+          apiClient(`/friendships/${friendshipId}`, {
+            method: 'DELETE',
+          }),
+        {
+          optimisticData: (current = []) =>
+            current.filter((f) => f.id !== friendshipId),
+          populateCache: false,
+          rollbackOnError: true,
+          revalidate: true,
+        }
+      )
+    } catch (error) {
+      toast.error(error.message || 'Could not cancel to request');
+    }
   };
 
-  const handleCancelRequest = async () => {
-
-  };
-
-  const handleUnblockUser = async () => {
-
+  const handleUnblockUser = async (receiverId) => {
+    try {
+      await refetchBlocked(
+        () =>
+          apiClient(`/friendships/block/${receiverId}`, {
+            method: 'DELETE',
+          }),
+        {
+          optimisticData: (current = []) =>
+            current.filter((f) => f.receiverId !== receiverId),
+          populateCache: false,
+          rollbackOnError: true,
+          revalidate: true,
+        }
+      )
+    } catch (error) {
+      toast.error(error.message || 'Could not unblock user');
+    }
   };
 
   return (
@@ -131,7 +178,7 @@ export default function FriendRequests() {
                   <div className={`${styles.buttonGroup} flex-row`}>
                     <Button
                       className={styles.actionButton}
-                      onClick={() => handleAcceptRequest(sender.id)}
+                      onClick={() => handleRespondRequest(friendship.id, "ACCEPTED")}
                       aria-label="Accept request"
                       title="Accept"
                     >
@@ -147,7 +194,7 @@ export default function FriendRequests() {
 
                     <Button
                       className={styles.actionButton}
-                      onClick={() => handleDeclineRequest(sender.id)}
+                      onClick={() => handleRespondRequest(friendship.id, "DECLINED")}
                       aria-label="Decline request"
                       title="Decline"
                     >
@@ -195,7 +242,7 @@ export default function FriendRequests() {
                   <div className={`${styles.buttonGroup} flex-row`}>
                     <Button
                       className={styles.actionButton}
-                      onClick={() => handleCancelRequest(receiver.id)}
+                      onClick={() => handleCancelRequest(friendship.id)}
                       aria-label="Cancel request"
                       title="Cancel"
                     >
