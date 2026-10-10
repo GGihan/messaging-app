@@ -1,28 +1,30 @@
-import { useState, useEffect, } from "react";
+import useSWR from 'swr';
 import { AuthContext } from "@/hooks/useAuth";
 import { apiClient } from "@/config/api";
 
 export default function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-
-  useEffect(() => {
-    async function verifySession() {
-      try {
-        const response = await apiClient('/auth/me'); 
-        setUser(response.data.user);
-      } catch (error) {
-        console.error("Failed to connect to authentication server:", error.message);
-        setUser(null);
-      } finally {
-        setIsLoadingAuth(false);
-      }
+  const {
+    data: user,
+    error: authError,
+    isLoading: isLoadingAuth,
+    mutate: mutateUser,
+  } = useSWR(
+    '/auth/me',
+    async (url) => {
+      const response = await apiClient(url);
+      return response.data.user;
+    },
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
     }
-    verifySession();
-  }, []);
+  );
 
-  const login = (user) => {
-    setUser(user);
+  const login = async (newUser) => {
+    await mutateUser(
+      newUser,
+      { revalidate: false }
+    );
   };
 
   const logout = async () => {
@@ -33,12 +35,23 @@ export default function AuthProvider({ children }) {
     } catch (error) {
       console.error("Logout error on backend:", error.message);
     } finally {
-      setUser(null);
+      await mutateUser(
+        null,
+        { revalidate: false }
+      );
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoadingAuth, login, logout }}>
+    <AuthContext.Provider 
+      value={{
+        user: authError ? null : user,
+        isLoadingAuth,
+        mutateUser,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -10,6 +10,7 @@ import FriendsList from "../FriendsList/FriendsList";
 import { Navigate } from "react-router";
 import AddFriend from "../AddFriend/AddFriend";
 import FriendRequests from "../FriendRequests/FriendRequests";
+import Profile from "../Profile/Profile";
 
 const routes = [
   {
@@ -55,10 +56,10 @@ const routes = [
             element: <FriendRequests />,
             handle: { hideMobileNav: true },
           },
-          // {
-          //   path: 'profile',
-          //   element: <Profile />,
-          // },
+          {
+            path: 'profile',
+            element: <Profile />,
+          },
         ],
       },
     ]

@@ -101,7 +101,6 @@ export function ChatInput({
             <div key={`${file.name}-${idx}`} className={styles.chip}>
               <img src={URL.createObjectURL(file)} alt="" />
               <Button
-                type="button"
                 className={styles.removeBtn}
                 onClick={() => removeAttachment(idx)}
                 aria-label="Remove image"

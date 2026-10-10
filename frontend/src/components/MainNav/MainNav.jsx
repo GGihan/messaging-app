@@ -4,6 +4,7 @@ import Button from "../ui/Button/Button";
 import styles from "./MainNav.module.css";
 import chat from "@/assets/icons/chat.svg";
 import friends from "@/assets/icons/friends-list.svg";
+import profile from "@/assets/icons/profile.svg";
 import logoutIcon from "@/assets/icons/log-out.svg";
 import { useChatStore } from "@/store/useChatStore";
 
@@ -21,6 +22,7 @@ export default function MainNav() {
   const navLinks = [
     { to: "/chats", label: "Chats", icon: chat, show: true },
     { to: "/friends", label: "Friends", icon: friends, show: true },
+    { to: "/profile", label: "Profile", icon: profile, show: true },
   ];
 
   return (
