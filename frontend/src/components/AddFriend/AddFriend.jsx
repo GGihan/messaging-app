@@ -16,6 +16,7 @@ const userSearchFetcher = (url) => apiClient(url).then((res) => res.data.users);
 
 export default function AddFriend() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
 
   const {
     data: users = [],
@@ -40,16 +41,18 @@ export default function AddFriend() {
   }
 
   const handleSendRequest = async (receiverId) => {
+    setIsSubmittingRequest(true);
     try {
       await apiClient(`/friendships/requests`, {
         method: 'POST',
         body: JSON.stringify({ receiverId })
       });
 
-      // add optimistic fetching similiar to global mutate
-      refetchFriendships();
+      await refetchFriendships();
     } catch (error) {
       toast.error(error.message || 'Could not send request');
+    } finally {
+      setIsSubmittingRequest(false);
     }
   };
    
@@ -110,6 +113,7 @@ export default function AddFriend() {
                   className={styles.actionButton}
                   onClick={() => handleSendRequest(user.id)}
                   disabled={activeFriendUserIds.has(user.id)}
+                  isLoading={isSubmittingRequest}
                 >
                   <img
                     className={styles.buttonIcon}

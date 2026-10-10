@@ -125,6 +125,8 @@ export default function ChatWindow() {
         method: 'POST',
         body: JSON.stringify({ receiverId: otherUser.id})
       });
+
+      mutate(['/friendships', { status: 'ACCEPTED' }]);
     } catch (error) {
       toast.error(error.message || 'Could not block user');
     }
@@ -135,16 +137,22 @@ export default function ChatWindow() {
 
     closeChat();
 
-    mutate(
-      '/chats',
-      (chats = []) => chats.filter((chat) => chat.id !== targetId),
-      { revalidate: false } // dont refetch immediatlly
-    );
-
     try {
-      await apiClient(`/chats/${targetId}`, {
-        method: 'DELETE',
-      });
+      mutate(
+        '/chats',
+        () =>
+          apiClient(`/chats/${targetId}`, {
+            method: 'DELETE',
+          }),
+        {
+          optimisticData: (chats = []) =>
+            chats.filter((chat) => chat.id !== targetId),
+          populateCache: false,
+          rollbackOnError: true,
+          revalidate: true,
+        }
+      );
+      
     } catch (error) {
       mutate('/chats');
       toast.error(error.message || 'Could not delete group');
@@ -155,11 +163,25 @@ export default function ChatWindow() {
     const targetId = chat?.id;
 
     try {
-      await apiClient(`/chats/${targetId}/members/me`, {
-        method: 'DELETE',
-      });
-
-      refetchChat();
+      await refetchChat(
+        () =>
+          apiClient(`/chats/${targetId}/members/me`, {
+            method: 'DELETE',
+          }),
+        {
+          optimisticData: (current = {}) => {
+            return {
+              ...current,
+              members: (current.members).filter(
+                (member) => member.userId !== user.id
+              ),
+            };
+          },
+          populateCache: false,
+          rollbackOnError: true,
+          revalidate: true,
+        }
+      );
     } catch (error) {
       toast.error(error.message || 'Could not leave group');
     }
@@ -170,18 +192,22 @@ export default function ChatWindow() {
 
     closeChat();
 
-    mutate(
-      '/chats',
-      (chats = []) => chats.filter((chat) => chat.id !== targetId),
-      { revalidate: false } // dont refetch immediatlly
-    );
-
     try {
-      await apiClient(`/chats/${targetId}/history`, {
-        method: 'DELETE',
-      });
+      await mutate(
+        '/chats',
+        () => 
+          apiClient(`/chats/${targetId}/history`, {
+            method: 'DELETE',
+          }),
+        {
+          optimisticData: (chats = []) =>
+            chats.filter((chat) => chat.id !== targetId),
+          populateCache: false,
+          rollbackOnError: true,
+          revalidate: true,
+        }
+      );
     } catch (error) {
-      mutate('/chats');
       toast.error(error.message || 'Could not remove chat history');
     }
   };
@@ -193,14 +219,10 @@ export default function ChatWindow() {
     const file = data?.attachments[0];
 
     const formData = new FormData();
-    if (text) {
-      formData.append('text', text);
-    }
+    if (text) formData.append('text', text);
 
     // adjust for multiple images later
-    if (file) {
-      formData.append('image', file);
-    }
+    if (file) formData.append('image', file);
 
     try {
       await apiClient(`/chats/${targetId}/messages`, {
@@ -214,9 +236,7 @@ export default function ChatWindow() {
 
       // Scroll to bottom after sending
       requestAnimationFrame(() => {
-        if (bottomAnchorRef.current) {
-          bottomAnchorRef.current.scrollIntoView({ behavior: "smooth" });
-        }
+        bottomAnchorRef.current?.scrollIntoView({ behavior: "smooth" });
       });
     } catch (error) {
       toast.error(error.message || 'Could not send message');
@@ -371,7 +391,7 @@ export default function ChatWindow() {
           onScroll={handleScroll}
         >
           {messages.map((message) => (
-            <MessageCard message={message} isGroup={isGroup} />
+            <MessageCard key={message.id} message={message} isGroup={isGroup} />
           ))}
 
           {/* Anchor for scroll tracking */}

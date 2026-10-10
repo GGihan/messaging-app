@@ -21,37 +21,45 @@ export default function FriendCard({ friendship }) {
   const handleBlockUser = async () => {
     const receiverId = friend?.id;
 
-    mutate(
-      ['/friendships', { status: 'ACCEPTED' }],
-      (friendships = []) => friendships.filter((friendship) => friendship.id !== friendshipId),
-      { revalidate: false }
-    );
-
     try {
-      await apiClient(`/friendships/block`, {
-        method: 'POST',
-        body: JSON.stringify({ receiverId })
-      });
+      await mutate(
+        ['/friendships', { status: 'ACCEPTED' }],
+        () =>
+          apiClient(`/friendships/block`, {
+            method: 'POST',
+            body: JSON.stringify({ receiverId })
+          }),
+        {
+          optimisticData: (friendships = []) =>
+            friendships.filter((friendship) => friendship.id !== friendshipId),
+          populateCache: false,
+          rollbackOnError: true,
+          revalidate: true,
+        }
+      );
     } catch (error) {
-      mutate(['/friendships', { status: 'ACCEPTED' }]);
       toast.error(error.message || 'Could not block user');
     }
   };
 
   const handleRemoveFriend = async () => {
-    mutate(
-      ['/friendships', { status: 'ACCEPTED' }],
-      (friendships = []) => friendships.filter((friendship) => friendship.id !== friendshipId),
-      { revalidate: false }
-    );
-
     try {
-      await apiClient(`/friendships/${friendship.id}`, {
-        method: 'DELETE',
-        body: JSON.stringify({ friendshipId: friendship.id })
-      });
+      await mutate(
+        ['/friendships', { status: 'ACCEPTED' }],
+        () =>
+          apiClient(`/friendships/${friendship.id}`, {
+            method: 'DELETE',
+            body: JSON.stringify({ friendshipId: friendship.id })
+          }),
+        {
+          optimisticData: (friendships = []) =>
+            friendships.filter((friendship) => friendship.id !== friendshipId),
+          populateCache: false,
+          rollbackOnError: true,
+          revalidate: true,
+        }
+      );
     } catch (error) {
-      mutate(['/friendships', { status: 'ACCEPTED' }]);
       toast.error(error.message || 'Could not delete friendship');
     }
   };

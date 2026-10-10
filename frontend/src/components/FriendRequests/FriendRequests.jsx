@@ -51,7 +51,7 @@ export default function FriendRequests() {
           rollbackOnError: true,
           revalidate: true,
         }
-      )
+      );
     } catch (error) {
       toast.error(error.message || 'Could not respond to request');
     }
@@ -71,7 +71,7 @@ export default function FriendRequests() {
           rollbackOnError: true,
           revalidate: true,
         }
-      )
+      );
     } catch (error) {
       toast.error(error.message || 'Could not cancel to request');
     }
@@ -91,7 +91,7 @@ export default function FriendRequests() {
           rollbackOnError: true,
           revalidate: true,
         }
-      )
+      );
     } catch (error) {
       toast.error(error.message || 'Could not unblock user');
     }
