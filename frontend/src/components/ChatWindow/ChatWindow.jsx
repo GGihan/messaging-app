@@ -27,6 +27,8 @@ import toast from "react-hot-toast";
 import { ChatInput } from "../ui/ChatInput/ChatInput";
 import MessageCard from "../MessageCard/MessageCard";
 import { useChatMessages } from "@/hooks/useChatMessages";
+import { socket } from "@/config/socket";
+import { useSocketEvent } from "@/hooks/useSocketEvent";
 
 const chatFetcher = (url) => apiClient(url).then(res => res.data.chat);
 
@@ -65,7 +67,8 @@ export default function ChatWindow() {
   useEffect(() => {
     isInitialLoadRef.current = true;
     prevScrollHeightRef.current = 0;
-  }, [activeChatId]);
+    refetchMessages();
+  }, [activeChatId, refetchMessages]);
 
   // Single layout effect handling all scroll adjustments
   useLayoutEffect(() => {
@@ -207,6 +210,8 @@ export default function ChatWindow() {
           revalidate: true,
         }
       );
+
+      await refetchMessages();
     } catch (error) {
       toast.error(error.message || 'Could not remove chat history');
     }
@@ -242,6 +247,27 @@ export default function ChatWindow() {
       toast.error(error.message || 'Could not send message');
     }
   };
+
+  useSocketEvent(socket, 'chat_message', (incomingMessage) => {
+    if (incomingMessage.chatId !== activeChatId) return;
+
+    refetchMessages(
+      (pages = []) => {
+        if (!pages.length) return pages;
+
+        const [firstPage, ...restPages] = pages;
+
+        return [
+          {
+            ...firstPage,
+            messages: [...firstPage.messages, incomingMessage],
+          },
+          ...restPages,
+        ];
+      },
+      { revalidate: false }
+    );
+  });
 
   if (!activeChatId) return null;
   if (chatError) return <div>{chatError.message || "Failed to load chat."}</div>;

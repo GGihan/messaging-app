@@ -10,6 +10,8 @@ import SearchBar from "../ui/SearchBar/SearchBar";
 import { useState } from "react";
 import { chatHelper } from "@/utils/chatHelpers";
 import { useAuth } from "@/hooks/useAuth";
+import { socket } from "@/config/socket";
+import { useSocketEvent } from "@/hooks/useSocketEvent";
 
 const chatFetcher = (url) => apiClient(url).then(res => res.data.chats);
 
@@ -21,6 +23,7 @@ export default function ChatsList() {
     data: chats,
     error: chatsError,
     isLoading: isLoadingChats,
+    mutate: refetchChats,
   } = useSWR(
     `/chats`,
     chatFetcher,
@@ -28,6 +31,10 @@ export default function ChatsList() {
       revalidateOnFocus: false,
     }
   );
+
+  useSocketEvent(socket, 'chat_message', () => {
+    refetchChats();
+  });
 
   // Client-side filtering in memory:
   const filteredChats = chats?.filter((chat) => {

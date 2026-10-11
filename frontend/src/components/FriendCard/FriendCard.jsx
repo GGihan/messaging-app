@@ -17,6 +17,7 @@ import { mutate } from "swr";
 export default function FriendCard({ friendship }) {
   const friend = friendship?.friend;
   const friendshipId = friendship?.id;
+  console.log(friend)
 
   const handleBlockUser = async () => {
     const receiverId = friend?.id;
