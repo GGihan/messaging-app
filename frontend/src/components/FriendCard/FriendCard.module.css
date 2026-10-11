@@ -46,8 +46,10 @@
 
 .bioWrapper {
   padding-top: var(--space-xs);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
-.bioWrapper {
+.bio {
   font-size: 0.875rem;
 }
