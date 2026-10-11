@@ -56,6 +56,7 @@
 .contentDirect,
 .contentGroup,
 .formWrapper {
+  overflow-y: auto;
   padding: var(--space-s);
   gap: var(--space-s);
 }

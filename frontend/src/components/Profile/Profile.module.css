@@ -1,9 +1,28 @@
+.tabWrapper {
+  height: 100%;
+}
+
+.content {
+  flex: 1;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-color: var(--color-primary) transparent;
+}
+
+.avatarGroup {
+  align-items: center;
+  gap: var(--space-s);
+  border-bottom: 2px solid var(--color-black);
+}
+
 .avatarWrapper {
   flex-shrink: 0;
   overflow: hidden;
   width: 10rem;
   height: 10rem;
-  border: 1px solid var(--color-gray);
+  border: 2px solid var(--color-black);
   border-radius: var(--space-l);
   background-color: var(--color-gray-very-light);
 }
@@ -13,6 +32,31 @@
   aspect-ratio: 1 / 1;
   width: 100%;
   object-fit: cover;
+}
+
+.actionsGroup {
+  gap: var(--space-l);
+  padding-bottom: var(--space-xs);
+}
+
+.actionButton {
+  width: 3rem;
+  height: auto;
+  border-radius: var(--space-s);
+}
+
+.form {
+  gap: var(--space-m);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.formGroup label {
+  color: var(--color-black);
 }
 
 .bioLabel {

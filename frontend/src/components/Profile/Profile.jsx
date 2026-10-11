@@ -37,6 +37,7 @@ export default function Profile() {
         body: JSON.stringify(formData),
       });
 
+      toast.success('Profile updated');
       await mutateUser();
     } catch (error) {
       setFormApiErrors(error, setError);
