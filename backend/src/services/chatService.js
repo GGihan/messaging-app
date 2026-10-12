@@ -6,6 +6,7 @@ import {
   isChatVisibleToUser
 } from "../helpers/chatStatusHelper.js";
 import { messageService } from "./messageService.js";
+import { presenceService } from "./presenceService.js";
 
 const buildChatSearchFilter = (userId, search) => {
   if (!search) return {};
@@ -337,10 +338,23 @@ export const chatService = {
       currentMember,
     });
 
+    const members = chat.members.map((member) => {
+      const isOtherMember = !chat.isGroup && member.id !== currentMember.id;
+
+      return {
+        ...member,
+        isOnline: isOtherMember
+          ? presenceService.isUserOnline(member.userId)
+          : null,
+      };
+    });
+    
+
     return {
       ...chat,
       messages,
       pagination,
+      members,
     };
   },
 

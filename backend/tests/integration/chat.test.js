@@ -3,6 +3,7 @@ import { beforeEach, expect, jest } from '@jest/globals';
 import { prisma } from "../../lib/prisma.js";
 import { createAuthenticatedAgent } from "../helpers/authHelper.js";
 import { BadGatewayError } from '../../src/errors/AppError.js';
+import { presenceService } from '../../src/services/presenceService.js';
 
 describe("Chat Routes Integration Tests", () => {
   let agentA;
@@ -761,11 +762,38 @@ describe("Chat Routes Integration Tests", () => {
 
       expect(res.status).toBe(200);
 
-      const chat = res.body.data.chat ?? res.body.data;
+      const chat = res.body.data.chat;
       const returnedMessages = chat.messages;
 
       expect(returnedMessages).toHaveLength(1);
       expect(returnedMessages[0].text).toBe('Second message (newer)',);
+    });
+
+    it('should return isOnline for the other member in a direct chat', async () => {
+      const isOnlineSpy = jest
+        .spyOn(presenceService, 'isUserOnline')
+        .mockReturnValue(true);
+
+      const res = await agentA.get(`/api/chats/${sharedChat.id}`);
+
+      expect(res.status).toBe(200);
+
+      const chat = res.body.data.chat;
+
+      const bobMember = chat.members.find(
+        (member) => member.userId === userBob.id
+      );
+      const currentMember = chat.members.find(
+        (member) => member.userId !== userBob.id
+      );
+
+      expect(bobMember).toBeDefined();
+      expect(bobMember.isOnline).toBe(true);
+
+      expect(isOnlineSpy).toHaveBeenCalledWith(userBob.id);
+
+      expect(currentMember.isOnline).toBeFalsy();
+      
     });
   });
 
