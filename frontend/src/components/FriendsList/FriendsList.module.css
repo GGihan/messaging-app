@@ -12,8 +12,22 @@
 }
 
 .linkButton {
+  position: relative;
   padding: var(--space-s);
   border-radius: var(--space-s);
+}
+
+.badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+
+  font-size: 0.8rem;
+  padding: 0 0.4rem;
+  color: red;
+  border-radius: var(--space-l);
+  opacity: 0.8;
+  background-color: var(--color-black);
 }
 
 .list {

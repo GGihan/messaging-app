@@ -1,6 +1,7 @@
 import { matchedData } from "express-validator";
 import { findAllRelationships, findExistingRelationship } from "../services/friendshipService.js";
 import { prisma } from "../../lib/prisma.js";
+import { friendshipEmitter } from "../sockets/emitters/friendshipEmitter.js";
 
 export const getFriendships = async (req, res) => {
   const currentUserId = req.user?.id;
@@ -50,7 +51,16 @@ export const sendFriendRequest = async (req, res) => {
             receiverId,
             status: 'PENDING',
           },
+          include: {
+            sender: {
+              include: {
+                profile: true
+              },
+            },
+          },
         });
+
+        friendshipEmitter.emitFriendshipRequested(receiverId, refreshedFriendship);
 
         return res.json({
           success: true,
@@ -70,7 +80,16 @@ export const sendFriendRequest = async (req, res) => {
       receiverId,
       status: 'PENDING',
     },
+    include: {
+      sender: {
+        include: {
+          profile: true
+        },
+      },
+    },
   });
+
+  friendshipEmitter.emitFriendshipRequested(receiverId, friendship);
 
   return res.status(201).json({
     success: true,

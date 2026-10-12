@@ -14,7 +14,7 @@ export const createMessage = async (req, res) => {
     fileBuffer
   });
 
-  await messageEmitter.newMessage(chatId, currentUserId, message,);
+  await messageEmitter.newMessage(chatId, currentUserId, message);
 
   return res.status(201).json({
     success: true,

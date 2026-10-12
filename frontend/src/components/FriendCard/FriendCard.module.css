@@ -36,6 +36,10 @@
   font-weight: bold;
 }
 
+.status {
+  font-size: 0.875rem;
+}
+
 .dropdown {
   align-self: flex-start;
 }

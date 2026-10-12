@@ -9,15 +9,17 @@ import LoadingSpinner from "../ui/LoadingSpinner/LoadingSpinner";
 import FriendCard from "../FriendCard/FriendCard";
 import { useFriendships } from "@/hooks/useFriendships";
 
-
 export default function FriendsList() {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { friendships, friendshipsError, isLoadingFriendships } 
+  const { friendships: activeFriendships, friendshipsError, isLoadingFriendships } 
     = useFriendships({ status: 'ACCEPTED'});
 
+  const { friendships: pendingFriendships } 
+    = useFriendships({ status: 'PENDING', type: 'incoming'});
+
   // Client-side filtering in memory:
-  const filteredFriendships = friendships?.filter((friendship) => {
+  const filteredFriendships = activeFriendships?.filter((friendship) => {
     const name = friendship.friend.profile.displayName || "";
     return name.toLowerCase().includes(searchQuery.toLowerCase());
   });
@@ -53,6 +55,9 @@ export default function FriendsList() {
                 height="24"
                 aria-hidden="true"
               />
+              {pendingFriendships.length >= 1 &&
+                <span className={styles.badge}>{pendingFriendships.length}</span>
+              }
             </Link>
             <Link
               to="/friends/new"

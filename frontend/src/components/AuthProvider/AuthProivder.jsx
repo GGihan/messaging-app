@@ -44,6 +44,7 @@ export default function AuthProvider({ children }) {
     }
   };
 
+  // Remove if not using sockets
   // Only connect socket once user has authenticated
   useEffect(() => {
     if (user) {
@@ -51,7 +52,7 @@ export default function AuthProvider({ children }) {
       socket.connect();
 
       socket.on('connect', () => {
-        console.log('Socket connected with ID:', socket.id);
+        // console.log('Socket connected with ID:', socket.id);
       });
 
       socket.on('connect_error', (err) => {
