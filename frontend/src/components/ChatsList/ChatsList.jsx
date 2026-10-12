@@ -10,8 +10,8 @@ import SearchBar from "../ui/SearchBar/SearchBar";
 import { useState } from "react";
 import { chatHelper } from "@/utils/chatHelpers";
 import { useAuth } from "@/hooks/useAuth";
-import { socket } from "@/config/socket";
-import { useSocketEvent } from "@/hooks/useSocketEvent";
+import { socket } from "@/socket/config/socket";
+import { useSocketEvent } from "@/socket/useSocketEvent";
 
 const chatFetcher = (url) => apiClient(url).then(res => res.data.chats);
 

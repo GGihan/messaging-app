@@ -8,4 +8,12 @@ export const friendshipEmitter = {
     
     getIO().to(userRoom).emit('friend_request:received', friendship);
   },
+
+  emitFriendshipAccepted(friendship) {
+    if (!friendship) return;
+
+    const userRoom = `user:${friendship.senderId}`;
+    
+    getIO().to(userRoom).emit('friend_request:accepted', friendship);
+  },
 };

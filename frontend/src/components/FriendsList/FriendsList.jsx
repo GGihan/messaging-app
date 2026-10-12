@@ -55,8 +55,8 @@ export default function FriendsList() {
                 height="24"
                 aria-hidden="true"
               />
-              {pendingFriendships.length >= 1 &&
-                <span className={styles.badge}>{pendingFriendships.length}</span>
+              {pendingFriendships?.length >= 1 &&
+                <span className={styles.badge}>{pendingFriendships?.length}</span>
               }
             </Link>
             <Link

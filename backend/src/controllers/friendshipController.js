@@ -130,7 +130,18 @@ export const updateFriendship = async (req, res) => {
   const updatedFriendship = await prisma.friendship.update({
     where: { id: friendshipId },
     data: { status },
+    include: {
+      receiver: {
+        include: {
+          profile: true
+        },
+      },
+    },
   });
+
+  if (status === 'ACCEPTED') {
+    friendshipEmitter.emitFriendshipAccepted(updatedFriendship);
+  }
 
   return res.json({
     success: true,

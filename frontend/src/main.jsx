@@ -6,17 +6,17 @@ import routes from './components/Routes/Routes';
 import AuthProvider from './components/AuthProvider/AuthProivder';
 import { Toaster } from 'react-hot-toast';
 import { toastConfig } from './config/toastConfig';
-import { SocketNotificationProvider } from './components/SocketNotificationProvider/SocketNotificationProvider';
+import { SocketSubscriptionProvider } from './socket/SocketSubscriptionProvider';
 
 const router = createBrowserRouter(routes);
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
-      <SocketNotificationProvider>
+      <SocketSubscriptionProvider>
         <RouterProvider router={router} />
         <Toaster {...toastConfig} />
-      </SocketNotificationProvider>
+      </SocketSubscriptionProvider>
     </AuthProvider>
   </StrictMode>
 );
