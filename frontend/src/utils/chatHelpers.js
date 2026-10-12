@@ -21,7 +21,9 @@ export const chatHelper = {
     return {
       avatarUrl: otherUser?.profile?.avatarUrl || profileAvatarFiller,
       title: otherUser?.profile?.displayName,
-      subtitle: formatLastActive(otherUser?.lastActiveAt),
+      subtitle: otherMember.isOnline
+        ? "Online"
+        : formatLastActive(otherUser?.lastActiveAt),
     };
   },
 
