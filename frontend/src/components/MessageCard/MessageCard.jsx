@@ -1,11 +1,12 @@
 import { useAuth } from "@/hooks/useAuth";
 import styles from "./MessageCard.module.css";
 import { chatHelper } from "@/utils/chatHelpers";
+import doubleCheckIcon from "@/assets/icons/double-check.svg";
 
 export default function MessageCard({ message, isGroup }) {
   const { user } = useAuth();
 
-  const { avatarUrl, name, imageUrl, text, time } = chatHelper.getMessageInfo(message);
+  const { avatarUrl, name, imageUrl, text, time, isRead } = chatHelper.getMessageInfo(message);
   const isSenderMe = message?.sender?.id === user.id
 
   return (
@@ -43,7 +44,19 @@ export default function MessageCard({ message, isGroup }) {
 
         <p className={styles.text}>{text}</p>
 
-        <p className={styles.time}>{time}</p>
+        <div className={`${styles.footer} flex-row`}>
+          <p className={styles.time}>{time}</p>
+          {isSenderMe &&
+            <img
+              className={`${styles.icon} ${isRead ? styles.blueCheckmark : ""}`}
+              src={doubleCheckIcon}
+              alt=""
+              width="18"
+              height="18"
+              aria-hidden="true"
+            />
+          }
+        </div>
       </div>
     </div>
   );

@@ -108,6 +108,7 @@ export const chatHelper = {
       imageUrl: message?.imageUrl,
       text: message?.text,
       time: formatMessageTime(message.createdAt),
+      isRead: message?.isReadByAll,
     };
   },
 };

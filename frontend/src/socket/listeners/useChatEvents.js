@@ -7,23 +7,23 @@ export default function useChatEvents(socket) {
   const { refetchMessages } = useChatMessages(activeChatId);
   
   useSocketEvent(socket, 'chat_message', (incomingMessage) => {
-      if (incomingMessage.chatId !== activeChatId) return;
-  
-      refetchMessages(
-        (pages = []) => {
-          if (!pages.length) return pages;
-  
-          const [firstPage, ...restPages] = pages;
-  
-          return [
-            {
-              ...firstPage,
-              messages: [...firstPage.messages, incomingMessage],
-            },
-            ...restPages,
-          ];
-        },
-        { revalidate: false }
-      );
-    });
-}
+    if (incomingMessage.chatId !== activeChatId) return;
+
+    refetchMessages(
+      (pages = []) => {
+        if (!pages.length) return pages;
+
+        const [firstPage, ...restPages] = pages;
+
+        return [
+          {
+            ...firstPage,
+            messages: [...firstPage.messages, incomingMessage],
+          },
+          ...restPages,
+        ];
+      },
+      { revalidate: false }
+    );
+  });
+};

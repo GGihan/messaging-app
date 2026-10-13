@@ -27,6 +27,8 @@ import toast from "react-hot-toast";
 import { ChatInput } from "../ui/ChatInput/ChatInput";
 import MessageCard from "../MessageCard/MessageCard";
 import { useChatMessages } from "@/hooks/useChatMessages";
+import { socket } from "@/socket/config/socket";
+import { useSocketEvent } from "@/socket/useSocketEvent";
 
 const chatFetcher = (url) => apiClient(url).then(res => res.data.chat);
 
@@ -65,8 +67,49 @@ export default function ChatWindow() {
   useEffect(() => {
     isInitialLoadRef.current = true;
     prevScrollHeightRef.current = 0;
-    refetchMessages();
-  }, [activeChatId, refetchMessages]);
+  }, [activeChatId]);
+
+  useEffect(() => {
+    socket.emit('chat_read', { chatId: activeChatId });
+  }, [activeChatId]);
+
+  useSocketEvent(socket, 'chat_read', ({ chatId, userId, lastReadAt }) => {
+    if (chatId !== activeChatId) return;
+    if (isGroup) return;
+
+    const readTimestamp = new Date(lastReadAt).getTime();
+
+    refetchMessages(
+      (pages = []) => {
+        if (!pages || !pages.length) return pages;
+
+        return pages.map((page) => {
+          if (!page?.messages) return page;
+
+          let hasChanges = false;
+
+          const updatedMessages = page.messages.map((msg) => {
+           
+            const isMyMessage = msg.senderId === user.id;
+            const isBeforeOrAtRead = new Date(msg.createdAt).getTime() <= readTimestamp;
+
+            if (isMyMessage && isBeforeOrAtRead && !msg.isReadByAll) {
+              hasChanges = true;
+              return {
+                ...msg,
+                isReadByAll: true,
+              };
+            }
+
+            return msg;
+          });
+
+          return hasChanges ? { ...page, messages: updatedMessages } : page;
+        });
+      },
+      { revalidate: false }
+    );
+  });
 
   // Single layout effect handling all scroll adjustments
   useLayoutEffect(() => {

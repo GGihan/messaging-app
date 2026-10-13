@@ -4,8 +4,8 @@ import { mutate } from "swr";
 
 export function useFriendshipEvents(socket) {
   useSocketEvent(socket, 'friend_request:received', (friendship) => {
-    toast.success(`Friend request from ${friendship?.sender?.profile?.displayName}!`);
-
+    toast(`Friend request from ${friendship?.sender?.profile?.displayName}!`);
+    
     mutate(['/friendships', {status: 'PENDING', type: 'incoming'}]);
   });
 

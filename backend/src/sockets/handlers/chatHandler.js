@@ -6,11 +6,11 @@ export const registerChatHandlers = (io, socket) => {
   socket.on('chat_read', async (payload) => {
     const chatId = typeof payload === 'object' ? payload?.chatId : payload;
     if (!chatId) return;
-
+    
     try {
       const isActiveMember = await chatService.getActiveMembership(chatId, userId);
       if (!isActiveMember) return;
-
+      
       const now = new Date();
       await chatService.markChatAsRead(chatId, userId, now);
 

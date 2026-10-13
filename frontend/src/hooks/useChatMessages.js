@@ -25,7 +25,9 @@ export function useChatMessages(chatId) {
     getKey,
     chatMessagesFetcher,
     {
-      revalidateFirstPage: false,
+      revalidateFirstPage: true,
+      revalidateIfStale: true,
+      revalidateOnMount: true,
       revalidateOnFocus: false,
     }
   );

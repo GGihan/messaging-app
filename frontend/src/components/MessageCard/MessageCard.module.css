@@ -64,8 +64,20 @@
   word-break: break-word;
 }
 
-.time {
+.footer {
   align-self: flex-end;
+  gap: var(--space-xs);
+}
+
+.time {
   color: var(--color-gray);
   font-size: 0.75rem;
+}
+
+.icon {
+  aspect-ratio: 1 / 1;
+}
+
+.blueCheckmark {
+  filter: invert(34%) sepia(94%) saturate(2324%) hue-rotate(212deg) brightness(97%) contrast(96%);
 }
