@@ -4,12 +4,13 @@ import { useAuth } from "@/hooks/useAuth";
 import Button from "../ui/Button/Button";
 import { useChatStore } from "@/store/useChatStore";
 import imageIcon from "@/assets/icons/image.svg";
+import doubleCheckIcon from "@/assets/icons/double-check.svg";
 
 export default function ChatCard({ chat }) {
   const { user } = useAuth();
   const setActiveChat = useChatStore((state) => state.setActiveChat);
 
-  const { avatarUrl, name, message, sender, date } = chatHelper.getChatCardInfo(chat, user.id);
+  const { avatarUrl, name, message, sender, date, isRead, isSenderMe } = chatHelper.getChatCardInfo(chat, user.id);
 
   return (
     <div className={`${styles.cardWrapper} flex-row`}>
@@ -28,6 +29,16 @@ export default function ChatCard({ chat }) {
           <div className={`${styles.messageGroup} flex-row`}>
             {sender &&
               <p className={styles.sender}>{sender}:</p>
+            }
+            {isSenderMe &&
+              <img
+                className={`${styles.icon} ${isRead ? styles.blueCheckmark : ""}`}
+                src={doubleCheckIcon}
+                alt=""
+                width="18"
+                height="18"
+                aria-hidden="true"
+              />
             }
             <div className={`${styles.message} flex-row`}>
               {message?.imageUrl &&

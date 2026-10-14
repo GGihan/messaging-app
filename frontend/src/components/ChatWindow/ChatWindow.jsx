@@ -294,8 +294,7 @@ export default function ChatWindow() {
         { revalidate: false }
       );
 
-      // change later for socket update
-      mutate('/chats');
+      mutate('/chats')
 
       // Scroll to bottom after sending
       requestAnimationFrame(() => {

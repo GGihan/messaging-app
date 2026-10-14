@@ -76,6 +76,7 @@ export const chatHelper = {
   // Add a check for isReadByAll and isUnread
   getChatCardInfo(chat, currentUserId) {
     if (!chat) return null;
+    console.log(chat)
 
     const isSenderMe = chat?.messages[0]?.sender?.id === currentUserId;
 
@@ -86,6 +87,8 @@ export const chatHelper = {
         message: chat.messages[0] || "",
         sender: !isSenderMe ? chat.messages[0]?.sender?.profile?.displayName : "Me",
         date: formatChatListDate(chat.lastMessageAt || chat.createdAt),
+        isRead: chat?.isLastMessageReadByAll || false,
+        isSenderMe,
       };
     }
 
@@ -98,6 +101,8 @@ export const chatHelper = {
       name: otherUser?.profile?.displayName,
       message: chat.messages[0] || "",
       date: formatChatListDate(chat.lastMessageAt || chat.createdAt),
+      isRead: chat?.isLastMessageReadByAll || false,
+      isSenderMe,
     };
   },
 

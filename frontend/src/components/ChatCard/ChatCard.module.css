@@ -87,6 +87,18 @@
   font-size: 0.85rem;
 }
 
+.info {
+  gap: var(--space-xs);
+}
+
+.icon {
+  aspect-ratio: 1 / 1;
+}
+
+.blueCheckmark {
+  filter: invert(34%) sepia(94%) saturate(2324%) hue-rotate(212deg) brightness(97%) contrast(96%);
+}
+
 .overlayButton {
   position: absolute;
   top: 0;
