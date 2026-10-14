@@ -35,7 +35,7 @@ export default function App() {
         </main>
         <section className="app-detail">
           {isChatOpen ? (
-            <ChatWindow />
+            <ChatWindow key={activeChatId} />
           ) : (
             <div className="empty-chat-state">
               <p>Select a chat to begin messaging</p>

@@ -29,6 +29,7 @@ import MessageCard from "../MessageCard/MessageCard";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { socket } from "@/socket/config/socket";
 import { useSocketEvent } from "@/socket/useSocketEvent";
+import { useFriendships } from "@/hooks/useFriendships";
 
 const chatFetcher = (url) => apiClient(url).then(res => res.data.chat);
 
@@ -63,6 +64,8 @@ export default function ChatWindow() {
     hasMore,
     loadMore,
   } = useChatMessages(activeChatId);
+
+  const { friendships: blockedFriendships } = useFriendships({status: "BLOCKED"});
 
   useEffect(() => {
     isInitialLoadRef.current = true;
@@ -320,6 +323,7 @@ export default function ChatWindow() {
 
   const { avatarUrl, title, subtitle } = chatHelper.getChatBarInfo(chat, user.id);
   const { isGroup, isMember, isAdmin } = chatHelper.getChatPermissions(chat, user.id);
+  const isDirectChatBlocked = chatHelper.getIsDirectChatBlocked(chat, user.id, blockedFriendships);
 
   return (
     <div className={`${styles.windowWrapper} flex-column`}>
@@ -429,11 +433,15 @@ export default function ChatWindow() {
                 ) : (
                   // Direct chat
                   <>
-                    <DropdownMenuItem onSelect={handleBlockUser}>
-                      Block user
-                    </DropdownMenuItem>
+                    {!isDirectChatBlocked &&
+                      <>
+                        <DropdownMenuItem onSelect={handleBlockUser}>
+                          Block user
+                        </DropdownMenuItem>
 
-                    <DropdownMenuSeparator />
+                        <DropdownMenuSeparator />
+                      </>
+                    }
 
                     <DropdownMenuItem variant="danger" onSelect={handleRemoveChat}>
                       Remove chat
@@ -461,7 +469,7 @@ export default function ChatWindow() {
         </div>
         
         <div className={`${styles.composer} flex-row`}>
-          <ChatInput disabled={!isMember} onSendMessage={handleSendMessage}/>
+          <ChatInput disabled={!isMember || isDirectChatBlocked} onSendMessage={handleSendMessage}/>
         </div>
       </div>
 
