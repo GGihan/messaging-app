@@ -1,5 +1,5 @@
 .logo {
-  background-color: var(--color-white);
+  background-color: var(--color-primary);
   border-radius: var(--space-m);
   padding: var(--space-xs) var(--space-s) var(--space-xs) var(--space-s);
 }

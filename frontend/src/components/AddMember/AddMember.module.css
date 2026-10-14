@@ -62,7 +62,7 @@
 }
 
 .userCard.selected {
-  background-color: var(--selected);
+  background-color: var(--color-primary-selected);
 }
 
 .avatarWrapper {
@@ -106,6 +106,10 @@
   border-color: var(--color-black);
 }
 
+.checkbox.checked img {
+  filter: invert(1);
+}
+
 .footer {
   justify-content: flex-end;
 }
@@ -129,7 +133,7 @@
   }
 
   .userCard:not(.selected):hover {
-    background-color: var(--hover);
+    background-color: var(--color-primary-hover);
   }
 
   .addButton:not(:disabled):hover {

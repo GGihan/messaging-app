@@ -139,7 +139,7 @@
 }
 
 .userCard.selected {
-  background-color: var(--selected);
+  background-color: var(--color-primary-selected);
 }
 
 .contentGroup .name {
@@ -164,6 +164,10 @@
 .checkbox.checked {
   background-color: var(--color-focus);
   border-color: var(--color-black);
+}
+
+.checkbox.checked img {
+  filter: invert(1);
 }
 
 .footer {
@@ -212,7 +216,7 @@
 @media (hover: hover) {
   .chatButtons .actionButton:not(.selected):hover,
   .userCard:not(.selected):hover {
-    background-color: var(--hover);
+    background-color: var(--color-primary-hover);
   }
 
   .removeChipButton:hover {

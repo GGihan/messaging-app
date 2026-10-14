@@ -24,7 +24,7 @@ export default function MemberList({ chat, onClose, refetchChat }) {
   const [serverErrors, setServerErrors] = useState([]);
   const members = chat?.members;
   const currentMember = members?.find((member) => member.user.id === user.id);
-  const isCurrentUserAdmin = currentMember.role === "ADMIN";
+  const isCurrentUserAdmin = currentMember?.role === "ADMIN";
 
   const handleUpdateMemberRole = async (memberId, role) => {
     try {
@@ -103,8 +103,8 @@ export default function MemberList({ chat, onClose, refetchChat }) {
                 </div>
 
                 <div className={`${styles.infoGroup} flex-column`}>
-                  <p className={styles.name}>{member.user.profile?.displayName}</p>
-                  <p className={styles.role}>{member.role}</p>
+                  <p className={styles.name}>{member?.user?.profile?.displayName}</p>
+                  <p className={styles.role}>{member?.role}</p>
                 </div>
               </div>
 
@@ -129,7 +129,7 @@ export default function MemberList({ chat, onClose, refetchChat }) {
                     </DropdownMenuTrigger>
       
                     <DropdownMenuContent>
-                      {member.role === "ADMIN" ? (
+                      {member?.role === "ADMIN" ? (
                         <DropdownMenuItem
                           variant="danger"
                           onSelect={() => handleUpdateMemberRole(member.id, "MEMBER")}

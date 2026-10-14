@@ -73,4 +73,8 @@
   .linkButton:hover {
     background-color: var(--color-gray-very-light);
   }
+
+  .actionButton:hover {
+    background-color: var(--color-primary-hover);
+  }
 }

@@ -24,7 +24,7 @@
   height: 10rem;
   border: 2px solid var(--color-black);
   border-radius: var(--space-l);
-  background-color: var(--color-gray-very-light);
+  background-color: var(--color-primary);
 }
 
 .avatar,

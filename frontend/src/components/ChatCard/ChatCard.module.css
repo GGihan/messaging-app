@@ -4,7 +4,7 @@
   align-items: center;
   height: 80px;
   padding: var(--space-s);
-  border-bottom: 2px solid black;
+  border-bottom: 1px solid var(--border-secondary);
 }
 
 .startGroup,
@@ -30,7 +30,7 @@
   height: 50px;
   border: 1px solid var(--color-gray);
   border-radius: var(--space-xl);
-  background-color: var(--color-gray-very-light);
+  background-color: var(--color-primary);
 }
 
 .avatar {
@@ -109,8 +109,15 @@
   height: 100%;
 
   cursor: pointer;
+  border-radius: var(--space-s);
 }
 
-.overlayButton:hover {
-  background-color: var(--hover);
+.selectedChat {
+  background-color: var(--color-primary-hover);
+}
+
+@media (hover: hover) {
+  .overlayButton:hover {
+    background-color: var(--color-primary-hover);
+  }
 }

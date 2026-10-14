@@ -8,7 +8,7 @@
 
 .title {
   margin-top: var(--space-xl);
-  color: var(--color-white);
+  color: var(--color-black);
 }
 
 .form {
@@ -21,6 +21,9 @@
   gap: var(--space-s);
 }
 
+.formGroup label {
+  color: var(--color-black);
+}
 
 .authFooter {
   justify-content: flex-end;
@@ -29,16 +32,16 @@
 }
 
 .prompt {
-  color: var(--text-muted-light);
+  color: var(--color-white);
 }
 
 .actionLink {
-  color: var(--link-light);
+  color: var(--link-dark);
 }
 
 @media (hover: hover) {
   .actionLink:hover {
-    color: var(--color-submit-hover);
+    color: var(--link-hover-light);
   }
 }
 

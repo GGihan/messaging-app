@@ -1,8 +1,7 @@
 .cardWrapper {
   align-self: flex-start;
   gap: var(--space-xs);
-  /* background-color: var(--color-secondary);
-  color: var(--color-white); */
+  color: var(--chat-bubble-text);
   max-width: min(90%, 40rem);
   font-family: var(--font-ui);
 }
@@ -15,7 +14,7 @@
   flex-shrink: 0;
   align-content: center;
   overflow: hidden;
-  /* change width and height dynamically to cardWrapper */
+
   width: 40px;
   height: 40px;
   border: 1px solid var(--color-gray);
@@ -35,10 +34,12 @@
   padding: var(--space-s);
   border: 1px solid var(--color-gray);
   border-radius: 0 var(--space-m) var(--space-m) var(--space-m);
+  background-color: var(--chat-bubble-incoming-bg);
 }
 
 .isMeContent {
   border-radius: var(--space-m) 0 var(--space-m) var(--space-m);
+  background-color: var(--chat-bubble-outgoing-bg);
 }
 
 .name {
@@ -71,7 +72,7 @@
 }
 
 .time {
-  color: var(--color-gray);
+  color: var(--color-gray-dark);
   font-size: 0.75rem;
 }
 

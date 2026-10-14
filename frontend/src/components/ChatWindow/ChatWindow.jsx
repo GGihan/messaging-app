@@ -484,22 +484,27 @@ export default function ChatWindow() {
       />
 
       <div className={`${styles.content} flex-column`}>
-        <div
-          className={`${styles.messagesContainer} flex-column`}
-          ref={containerRef}
-          onScroll={handleScroll}
-        >
-          {messages.map((message) => (
-            <MessageCard key={message.id} message={message} isGroup={isGroup} />
-          ))}
+        {activePanel === null &&
+          <>
+            <div
+              className={`${styles.messagesContainer} flex-column`}
+              ref={containerRef}
+              onScroll={handleScroll}
+            >
+              {messages.map((message) => (
+                <MessageCard key={message.id} message={message} isGroup={isGroup} />
+              ))}
 
-          {/* Anchor for scroll tracking */}
-          <div ref={bottomAnchorRef} className={styles.bottomAnchor} aria-hidden="true" />
-        </div>
-        
-        <div className={`${styles.composer} flex-row`}>
-          <ChatInput disabled={!isMember || isDirectChatBlocked} onSendMessage={handleSendMessage}/>
-        </div>
+              {/* Anchor for scroll tracking */}
+              <div ref={bottomAnchorRef} className={styles.bottomAnchor} aria-hidden="true" />
+            </div>
+          
+          
+            <div className={`${styles.composer} flex-row`}>
+              <ChatInput disabled={!isMember || isDirectChatBlocked} onSendMessage={handleSendMessage}/>
+            </div>
+          </>
+        }
       </div>
 
       {/* MemberList */}

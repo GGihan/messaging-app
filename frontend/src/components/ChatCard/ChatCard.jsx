@@ -9,8 +9,10 @@ import doubleCheckIcon from "@/assets/icons/double-check.svg";
 export default function ChatCard({ chat }) {
   const { user } = useAuth();
   const setActiveChat = useChatStore((state) => state.setActiveChat);
+  const activeChatId = useChatStore((state) => state.activeChatId);
 
   const { avatarUrl, name, message, sender, date, isRead, isSenderMe } = chatHelper.getChatCardInfo(chat, user.id);
+  const isActiveChat = chat?.id === activeChatId;
 
   return (
     <div className={`${styles.cardWrapper} flex-row`}>
@@ -64,7 +66,7 @@ export default function ChatCard({ chat }) {
       </div>
 
       <Button
-        className={styles.overlayButton}
+        className={`${styles.overlayButton} ${isActiveChat ? styles.selectedChat : ""}`}
         onClick={() => setActiveChat(chat.id)}
         aria-label={`Open chat with ${name}`}
       />

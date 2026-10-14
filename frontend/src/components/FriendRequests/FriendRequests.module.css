@@ -12,7 +12,7 @@
 }
 
 .tabActions {
-  background-color: var(--color-primary);
+  background-color: var(--color-secondary);
   border-bottom: 2px solid var(--color-gray);
 }
 
@@ -30,7 +30,7 @@
 
 .tabActions .actionButton:disabled {
   cursor: unset;
-  background-color: var(--selected);
+  background-color: var(--color-gray-very-light);
   box-shadow: 
     inset 0 2px 4px rgba(0, 0, 0, 0.08),
     inset 0 -1px 2px rgba(0, 0, 0, 0.04);
@@ -99,7 +99,11 @@
     background-color: var(--color-gray-very-light);
   }
 
-  .actionButton:hover {
-    background-color: var(--hover);
+  .userCard .actionButton:hover {
+    background-color: var(--color-primary-hover);
+  }
+
+  .tabActions .actionButton:not(:disabled):hover {
+    background-color: var(--color-secondary-hover);
   }
 }

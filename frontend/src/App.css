@@ -10,6 +10,11 @@
 .app-header,
 .app-footer {
   display: none;
+  background-color: var(--color-tertiary);
+}
+
+.app-footer {
+  border-top: 2px solid var(--border-primary);
 }
 
 .app-body {
@@ -22,12 +27,14 @@
   grid-template-areas:
     "main"
     "nav";
+  background-color: var(--surface-stage);
 }
 
 .app-nav {
   grid-area: nav;
   min-height: 0;
   
+  border-top: 1px solid var(--border-primary);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -102,15 +109,17 @@
     grid-template-columns: auto minmax(20rem, 1.5fr) minmax(0, 3fr);
     grid-template-areas: "nav main detail";
 
-    border-top: 2px solid var(--color-gray);
+    border-top: 2px solid var(--border-primary);
   }
 
   .app-main {
-    border-right: 2px solid var(--color-gray);
+    border-right: 2px solid var(--border-primary);
     padding-top: 0;
   }
 
   .app-nav {
+    border-top: none;
+    border-right: 2px solid var(--border-primary);
     padding-bottom: 0;
   }
 

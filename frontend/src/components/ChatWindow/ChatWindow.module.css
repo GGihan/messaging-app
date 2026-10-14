@@ -1,6 +1,7 @@
 .windowWrapper {
   position: relative;
   min-height: 0;
+  background-color: var(--surface-stage);
 }
 
 .windowWrapper .appBar {

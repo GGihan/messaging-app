@@ -5,8 +5,6 @@ footer {
   padding: var(--space-xs);
   gap: var(--space-m);
   font-family: var(--font-ui);
-  background-color: var(--color-primary);
-  border-top: 2px solid var(--color-gray);
 }
 
 .socialsList {
