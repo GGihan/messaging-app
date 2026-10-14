@@ -297,7 +297,36 @@ export default function ChatWindow() {
         { revalidate: false }
       );
 
-      mutate('/chats')
+      
+      mutate(
+        '/chats',
+        (cachedChats = []) => {
+          if (!Array.isArray(cachedChats)) return cachedChats;
+
+          const targetChat = cachedChats.find((c) => c.id === targetId);
+          if (!targetChat) return cachedChats;
+
+          const prevMessages = targetChat.messages || [];
+
+          const alreadyHasMessage = prevMessages.some((m) => m.id === newMessage.id);
+          const nextMessages = alreadyHasMessage
+            ? prevMessages
+            : [newMessage, ...prevMessages];
+
+          const updatedChat = {
+            ...targetChat,
+            messages: nextMessages,
+            lastMessage: newMessage,
+            lastMessageAt: newMessage.createdAt,
+            isLastMessageReadByAll: false,
+            updatedAt: newMessage.createdAt,
+          };
+
+          const otherChats = cachedChats.filter((c) => c.id !== targetId);
+          return [updatedChat, ...otherChats];
+        },
+        { revalidate: false }
+      );
 
       // Scroll to bottom after sending
       requestAnimationFrame(() => {

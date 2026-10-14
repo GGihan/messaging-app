@@ -1,6 +1,7 @@
 import useSWR from 'swr';
 import { AuthContext } from "@/hooks/useAuth";
 import { apiClient } from "@/config/api";
+import LoadingSpinner from '../ui/LoadingSpinner/LoadingSpinner';
 
 export default function AuthProvider({ children }) {
   const {
@@ -52,7 +53,13 @@ export default function AuthProvider({ children }) {
         logout,
       }}
     >
-      {children}
+      {isLoadingAuth ? (
+        <div className="loading-container">
+          <LoadingSpinner size={40} />
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };
