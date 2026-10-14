@@ -25,5 +25,7 @@ export default function useChatEvents(socket) {
       },
       { revalidate: false }
     );
+
+    socket.emit('chat_read', { chatId: activeChatId });
   });
 };

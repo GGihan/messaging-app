@@ -271,14 +271,31 @@ export default function ChatWindow() {
     if (file) formData.append('image', file);
 
     try {
-      await apiClient(`/chats/${targetId}/messages`, {
+      const response = await apiClient(`/chats/${targetId}/messages`, {
         method: 'POST',
         body: formData,
       });
 
+      const newMessage = response.data.message;
+
+      refetchMessages(
+        (pages = []) => {
+          if (!pages.length) return pages;
+          const [firstPage, ...restPages] = pages;
+
+          return [
+            {
+              ...firstPage,
+              messages: [...firstPage.messages, newMessage],
+            },
+            ...restPages,
+          ];
+        },
+        { revalidate: false }
+      );
+
       // change later for socket update
       mutate('/chats');
-      await refetchMessages();
 
       // Scroll to bottom after sending
       requestAnimationFrame(() => {

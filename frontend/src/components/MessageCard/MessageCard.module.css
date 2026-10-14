@@ -60,6 +60,7 @@
 
 .text {
   font-size: 0.875rem;
+  white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
