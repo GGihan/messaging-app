@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const BACKEND_URL = import.meta.env.VITE_BASE_API_URL || 'http://localhost:8080';
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 export const socket = io(BACKEND_URL, {
   // If you use cookie-based auth (httpOnly cookies), this allows cookies to travel with the socket handshake:
