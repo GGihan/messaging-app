@@ -19,5 +19,7 @@ export const sessionMiddleware = session({
     httpOnly: true,
     sameSite: isProduction ? 'none' : 'lax',
     secure: isProduction,
+    // enable to keep cookie-based sessions functional across Incognito
+    partitioned: isProduction,
   },
 });
