@@ -17,7 +17,7 @@ export const apiClient = async (endpoint, options = {}) => {
   }
 
   // Construct the absolute path dynamically
-  const url = `${BASE_URL}${endpoint}`;
+  const url = `${BASE_URL}/api${endpoint}`;
 
   const response = await fetch(url, {
     method: 'GET',
