@@ -51,16 +51,14 @@ export const chatHelper = {
     if (chat.isGroup) return false;
     if (blockedFriendships?.length === 0) return false;
 
-    const otherMember = chat.members?.find(
+    const otherMember = chat?.members?.find(
       (member) => (member.user?.id) !== currentUserId
     );
-    console.log(blockedFriendships)
     
-    const existingBlockedFriendship = blockedFriendships.find(
+    const existingBlockedFriendship = blockedFriendships?.find(
       (friendship) => friendship.senderId === otherMember.userId
       || friendship.receiverId === otherMember.userId
     );
-    console.log(existingBlockedFriendship)
 
     if (!existingBlockedFriendship) return false;
     return true;
