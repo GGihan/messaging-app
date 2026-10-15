@@ -9,6 +9,7 @@ let io = null;
 export const initSocketServer = (server) => {
   io = new Server(server, {
     cors: corsOptions,
+    transports: ['websocket'],
   });
 
   // Attach handshake authentication
